@@ -900,6 +900,7 @@ LOCALIZED_COMMANDS = {
         "list_rss": "📜 List your RSS subscriptions",
         "remove_rss": "🗑 Remove an RSS feed",
         "menu": "⚙️ Open the main Control Panel",
+        "sync_strava": "🔄 Sync Strava activities & gear manually",
     },
     'zh': {
         "start": "🚀 显示欢迎信息",
@@ -922,6 +923,7 @@ LOCALIZED_COMMANDS = {
         "list_rss": "📜 查看已订阅的 RSS",
         "remove_rss": "🗑 删除 RSS 订阅",
         "menu": "⚙️ 打开主控制面板",
+        "sync_strava": "🔄 手动同步 Strava 活动与器材",
     },
     'es': {
         "start": "🚀 Mostrar mensaje de bienvenida",
