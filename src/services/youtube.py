@@ -2,7 +2,8 @@ import os
 import logging
 import feedparser
 import asyncio
-from src.config import YOUTUBE_CHANNEL_RSS_URL, LATEST_VIDEO_ID_FILE, TELEGRAM_CHAT_ID, LOCALIZATION
+from src.config import YOUTUBE_CHANNEL_RSS_URL, LATEST_VIDEO_ID_FILE, TELEGRAM_CHAT_ID
+from src.locales import LOCALIZATION
 from telegram.ext import ContextTypes
 
 logger = logging.getLogger(__name__)
