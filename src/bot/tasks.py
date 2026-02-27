@@ -36,7 +36,7 @@ async def check_strava_activities(context: ContextTypes.DEFAULT_TYPE):
                                (activity.id, telegram_user_id, activity.start_date.timestamp(), activity.distance.to('km').magnitude, activity.moving_time.total_seconds(), activity.total_elevation_gain.to('m').magnitude))
                 conn.commit()
                 await check_and_grant_achievements(telegram_user_id, activity, context)
-                activity_type_emoji = {"Ride": "🚴", "Run": "🏃", "Swim": "🏊", "Walk": "🚶", "Hike": "⛰️", "AlpineSki": "⛷️", "Workout": "💪", "Yoga": "🧘", "VirtualRide": "💻🚴"}.get(activity.type, "🏆")
+                activity_type_emoji = {"Ride": "🚴", "Run": "🏃", "Swim": "🏊", "Walk": "🚶", "Hike": "⛰️", "AlpineSki": "⛷️", "Workout": "💪", "Yoga": "🧘", "VirtualRide": "💻🚴"}.get(str(activity.type), "🏆")
                 
                 message_lines = [f"{activity_type_emoji} **{athlete.firstname} {athlete.lastname}** has completed a new activity!\n", f"**{activity.name}**"]
                 message_lines.extend(format_activity_details(activity, telegram_user_id))

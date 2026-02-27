@@ -74,7 +74,7 @@ async def get_last_activity(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=user_id, text=_(user_id, "last_activity_not_found"))
         else:
             activity = activities[0]
-            activity_type_emoji = {"Ride": "🚴", "Run": "🏃", "Swim": "🏊", "Walk": "🚶", "Hike": "⛰️", "AlpineSki": "⛷️", "Workout": "💪", "Yoga": "🧘", "VirtualRide": "💻🚴"}.get(activity.type, "🏆")
+            activity_type_emoji = {"Ride": "🚴", "Run": "🏃", "Swim": "🏊", "Walk": "🚶", "Hike": "⛰️", "AlpineSki": "⛷️", "Workout": "💪", "Yoga": "🧘", "VirtualRide": "💻🚴"}.get(str(activity.type), "🏆")
             message_lines = [_(user_id, "your_last_activity_is"), f"{activity_type_emoji} **{activity.name}**"]
             message_lines.extend(format_activity_details(activity, user_id))
             message_lines.append(f"\n🔗 [{_(user_id, 'activity_view_on_strava')}](https://www.strava.com/activities/{activity.id})")

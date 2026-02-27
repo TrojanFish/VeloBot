@@ -15,7 +15,7 @@ def format_activity_details(activity, user_id):
         elif score > 150: details.append(_(user_id, "activity_suffer_high"))
         elif score > 50: details.append(_(user_id, "activity_suffer_medium"))
         else: details.append(_(user_id, "activity_suffer_easy"))
-    if activity.type == 'Ride':
+    if str(activity.type) == 'Ride':
         dist_km, elev_m = activity.distance.to('km').magnitude, activity.total_elevation_gain.to('m').magnitude
         if dist_km > 0:
             ratio = elev_m / dist_km
