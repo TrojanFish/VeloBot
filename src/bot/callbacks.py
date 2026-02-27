@@ -79,7 +79,6 @@ async def language_button_callback(update: Update, context: ContextTypes.DEFAULT
         'it': 'Italiano'
     }
     lang_name = names.get(lang_code, lang_code)
-    lang_name = names.get(lang_code, lang_code)
     await query.edit_message_text(text=_(user_id, "language_set").format(lang=lang_name))
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
