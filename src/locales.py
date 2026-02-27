@@ -941,6 +941,7 @@ LOCALIZED_COMMANDS = {
         "route": "🗺️ Buscar rutas",
         "language": "🌐 Cambiar idioma",
         "menu": "⚙️ Abrir el Panel de Control",
+        "sync_strava": "🔄 Sincronizar Strava manualmente",
     },
     'de': {
         "start": "🚀 Willkommensnachricht anzeigen",
@@ -958,6 +959,7 @@ LOCALIZED_COMMANDS = {
         "route": "🗺️ Routen suchen",
         "language": "🌐 Sprache ändern",
         "menu": "⚙️ Haupt-Kontrollzentrum öffnen",
+        "sync_strava": "🔄 Strava manuell synchronisieren",
     },
     'fr': {
         "start": "🚀 Afficher le message de bienvenue",
@@ -975,6 +977,7 @@ LOCALIZED_COMMANDS = {
         "route": "🗺️ Chercher des routes",
         "language": "🌐 Changer la langue",
         "menu": "⚙️ Ouvrir le Tableau de Bord",
+        "sync_strava": "🔄 Synchroniser Strava manuellement",
     },
     'it': {
         "start": "🚀 Mostra messaggio di benvenuto",
@@ -992,5 +995,6 @@ LOCALIZED_COMMANDS = {
         "route": "🗺️ Cerca percorsi",
         "language": "🌐 Cambia lingua",
         "menu": "⚙️ Apri il Pannello di Controllo",
+        "sync_strava": "🔄 Sincronizza Strava manualmente",
     }
 }
