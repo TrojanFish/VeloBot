@@ -1,0 +1,9 @@
+python-telegram-bot[ext]
+feedparser
+stravalib
+Flask
+requests
+apscheduler
+httpx
+pytz
+python-dotenv

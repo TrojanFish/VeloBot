@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: yolocycling-community-bot
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./data:/app/data
+    env_file:
+      - .env
+    # Ensure the database directory exists and has correct permissions
+    user: "1000:1000"
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/strava_auth" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s

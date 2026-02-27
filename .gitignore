@@ -1,0 +1,24 @@
+# Secrets
+.env
+*.bak
+
+# Database
+data/
+*.db
+*.sqlite
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+env/
+venv/
+.python-version
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+# Docker
+.dockerignore
