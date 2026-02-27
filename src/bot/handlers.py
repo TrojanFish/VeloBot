@@ -432,3 +432,28 @@ async def remove_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.commit()
     conn.close()
     await update.message.reply_text("🗑 RSS 订阅已删除。")
+
+async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    text = f"⚙️ **VeloBot {_(user_id, 'menu_title')}**\n\n{_(user_id, 'menu_subtitle')}"
+    
+    keyboard = [
+        [
+            InlineKeyboardButton(f"🚴 {_(user_id, 'menu_activity')}", callback_data="menu_activity"),
+            InlineKeyboardButton(f"🏆 {_(user_id, 'menu_stats')}", callback_data="menu_stats")
+        ],
+        [
+            InlineKeyboardButton(f"🔧 {_(user_id, 'menu_gear')}", callback_data="menu_gear"),
+            InlineKeyboardButton(f"🏅 {_(user_id, 'menu_awards')}", callback_data="menu_awards")
+        ],
+        [
+            InlineKeyboardButton(f"🌍 {_(user_id, 'menu_tools')}", callback_data="menu_tools"),
+            InlineKeyboardButton(f"⚙️ {_(user_id, 'menu_settings')}", callback_data="menu_settings")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    
+    if update.callback_query:
+        await update.callback_query.edit_message_text(text, reply_markup=reply_markup, parse_mode='Markdown')
+    else:
+        await update.message.reply_text(text, reply_markup=reply_markup, parse_mode='Markdown')

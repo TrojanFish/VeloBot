@@ -15,10 +15,10 @@ from src.bot.handlers import (
     get_last_activity, get_last_video, get_report, get_leaderboard,
     my_rides, my_achievements, weather, route, language_command,
     welcome, location_handler, maintenance_command, units_command, set_unit,
-    add_rss, list_rss, remove_rss
+    add_rss, list_rss, remove_rss, menu_command
 )
 from src.bot.callbacks import (
-    ride_button_callback, location_button_callback, language_button_callback
+    ride_button_callback, location_button_callback, language_button_callback, menu_callback
 )
 from src.bot.conversations import (
     create_ride, ride_title, ride_time, ride_route, ride_desc, 
@@ -79,6 +79,7 @@ def main():
     application.add_handler(CallbackQueryHandler(location_button_callback, pattern='^loc_'))
     application.add_handler(CallbackQueryHandler(language_button_callback, pattern='^set_lang_'))
     application.add_handler(CallbackQueryHandler(set_unit, pattern='^set_unit_'))
+    application.add_handler(CallbackQueryHandler(menu_callback, pattern='^menu_|^cmd_'))
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
@@ -98,6 +99,7 @@ def main():
     application.add_handler(CommandHandler("add_rss", add_rss))
     application.add_handler(CommandHandler("list_rss", list_rss))
     application.add_handler(CommandHandler("remove_rss", remove_rss))
+    application.add_handler(CommandHandler("menu", menu_command))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
     application.add_handler(MessageHandler(filters.LOCATION, location_handler))
     
