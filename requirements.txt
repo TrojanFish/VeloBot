@@ -7,3 +7,5 @@ apscheduler
 httpx
 pytz
 python-dotenv
+matplotlib
+polyline

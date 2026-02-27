@@ -673,6 +673,10 @@ LOCALIZED_ACHIEVEMENTS = {
         'total_dist_1000k': {'name': '🌍 A Thousand Miles', 'desc': 'Total cycling distance reached 1000km'},
         'total_dist_5000k': {'name': '🚴‍♂️ Knight of Ten Thousand Miles', 'desc': 'Total cycling distance reached 5000km'},
         'max_speed_70k': {'name': '⚡️ Speed Legend', 'desc': 'First time reaching a max speed over 70km/h'},
+        'elev_2000m': {'name': '🏔 King of the Hill', 'desc': 'First time reaching over 2000m of elevation gain in a single ride'},
+        'total_dist_10000k': {'name': '👑 Titan of 10,000k', 'desc': 'Total cycling distance reached 10,000km'},
+        'month_dist_500k': {'name': '📅 Monthly Century', 'desc': 'Rode over 500km in a single month'},
+        'year_dist_10000k': {'name': '🏆 Legend of the Year', 'desc': 'Rode over 10,000km in a single year'},
     },
     'zh-hans': {
         'dist_100k': {'name': '💯 百公里认证', 'desc': '首次完成单次超过100公里的骑行'},
@@ -680,6 +684,10 @@ LOCALIZED_ACHIEVEMENTS = {
         'total_dist_1000k': {'name': '🌍 千里之行', 'desc': '累计骑行总距离达到1000公里'},
         'total_dist_5000k': {'name': '🚴‍♂️ 万里骑士', 'desc': '累计骑行总距离达到5000公里'},
         'max_speed_70k': {'name': '⚡️ 极速传说', 'desc': '首次最高时速超过70km/h'},
+        'elev_2000m': {'name': '🏔 巅峰之王', 'desc': '首次完成单次爬升超过2000米的活动'},
+        'total_dist_10000k': {'name': '👑 万里征程', 'desc': '累计骑行总距离达到10000公里'},
+        'month_dist_500k': {'name': '📅 月度劳模', 'desc': '单月骑行距离突破500公里'},
+        'year_dist_10000k': {'name': '🏆 年度传奇', 'desc': '年度骑行距离突破10000公里'},
     },
     'zh-hant': {
         'dist_100k': {'name': '💯 百公里認證', 'desc': '首次完成單次超過100公里的騎行'},

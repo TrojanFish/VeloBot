@@ -79,12 +79,27 @@ async def check_and_grant_achievements(user_id, activity, context: ContextTypes.
     if 'dist_100k' not in unlocked_ids and float(activity.distance) / 1000 >= 100: newly_unlocked.append('dist_100k')
     if 'elev_1000m' not in unlocked_ids and float(activity.total_elevation_gain) >= 1000: newly_unlocked.append('elev_1000m')
     if 'max_speed_70k' not in unlocked_ids and float(activity.max_speed) * 3.6 >= 70: newly_unlocked.append('max_speed_70k')
-    
-    # 累积成就
+    if 'elev_2000m' not in unlocked_ids and float(activity.total_elevation_gain) >= 2000: newly_unlocked.append('elev_2000m')
+
+    # 累积成就 (所有时间)
     cursor.execute("SELECT SUM(distance) FROM activities WHERE telegram_user_id = ?", (user_id,))
     total_distance = (cursor.fetchone()[0] or 0)
     if 'total_dist_1000k' not in unlocked_ids and total_distance >= 1000: newly_unlocked.append('total_dist_1000k')
     if 'total_dist_5000k' not in unlocked_ids and total_distance >= 5000: newly_unlocked.append('total_dist_5000k')
+    if 'total_dist_10000k' not in unlocked_ids and total_distance >= 10000: newly_unlocked.append('total_dist_10000k')
+    
+    # 周期成就 (月度/年度)
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp()
+    year_start = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=0).timestamp()
+    
+    cursor.execute("SELECT SUM(distance) FROM activities WHERE telegram_user_id = ? AND start_date >= ?", (user_id, month_start))
+    month_dist = (cursor.fetchone()[0] or 0)
+    if 'month_dist_500k' not in unlocked_ids and month_dist >= 500: newly_unlocked.append('month_dist_500k')
+    
+    cursor.execute("SELECT SUM(distance) FROM activities WHERE telegram_user_id = ? AND start_date >= ?", (user_id, year_start))
+    year_dist = (cursor.fetchone()[0] or 0)
+    if 'year_dist_10000k' not in unlocked_ids and year_dist >= 10000: newly_unlocked.append('year_dist_10000k')
     
     now_ts = int(datetime.now(timezone.utc).timestamp())
     for achievement_id in newly_unlocked:

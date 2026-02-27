@@ -5,7 +5,9 @@ from src.config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, TELEGRAM_CHAT_ID,
 from src.utils import _, format_duration
 from src.services.strava import format_activity_details, check_and_grant_achievements
 from src.services.feishu import send_feishu_notification
+from src.services.visuals import generate_static_map, generate_elevation_profile
 from stravalib.client import Client
+from telegram import InputMediaPhoto
 from telegram.ext import ContextTypes
 
 logger = logging.getLogger(__name__)
@@ -106,7 +108,29 @@ async def check_strava_activities(context: ContextTypes.DEFAULT_TYPE):
                 
                 message = "\n".join(message_lines)
                 target_chat_id = TELEGRAM_CHAT_ID if notification_mode == 'public' else telegram_user_id
-                await context.bot.send_message(chat_id=target_chat_id, text=message, parse_mode='Markdown')
+                
+                # --- 生成视觉图片 ---
+                media = []
+                
+                # 1. 静态地图
+                if hasattr(activity, 'map') and activity.map.summary_polyline:
+                    map_path = await generate_static_map(activity.id, activity.map.summary_polyline)
+                    if map_path: media.append(InputMediaPhoto(open(map_path, 'rb')))
+                
+                # 2. 海拔剖面图 (如果爬升 > 50m)
+                if float(activity.total_elevation_gain) > 50:
+                    try:
+                        streams = client.get_activity_streams(activity.id, types=['altitude', 'distance'])
+                        elev_path = await generate_elevation_profile(activity.id, streams)
+                        if elev_path: media.append(InputMediaPhoto(open(elev_path, 'rb')))
+                    except: pass
+                
+                if media:
+                    media[0].caption = message
+                    media[0].parse_mode = 'Markdown'
+                    await context.bot.send_media_group(chat_id=target_chat_id, media=media)
+                else:
+                    await context.bot.send_message(chat_id=target_chat_id, text=message, parse_mode='Markdown')
                 
                 if notification_mode == 'public':
                     await send_feishu_notification(f"Strava 新活动: {athlete.firstname} {athlete.lastname}", message)

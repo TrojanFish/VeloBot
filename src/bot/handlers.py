@@ -8,6 +8,7 @@ from src.config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, BOT_SERVER_URL, Y
 from src.utils import _, format_duration
 from src.services.strava import format_activity_details
 from src.services.weather import get_weather_for_city, get_weather_for_location
+from src.services.visuals import generate_suffer_trend
 from stravalib.client import Client
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
@@ -144,6 +145,27 @@ async def get_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
         _(user_id, "report_time").format(time=format_duration(c_time or 0), comparison=format_comparison(c_time, p_time)),
         _(user_id, "report_elev").format(elev=(c_elev or 0), comparison=format_comparison(c_elev, p_elev))
     ]
+    
+    # 生成 Suffer Score 趋势图
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT date(start_date, 'unixepoch', 'localtime') as day, SUM(suffer_score) 
+        FROM activities 
+        WHERE telegram_user_id = ? AND start_date >= ? 
+        GROUP BY day ORDER BY day ASC
+    """, (user_id, current_period_start.timestamp()))
+    trend_data = cursor.fetchall()
+    conn.close()
+    
+    if trend_data:
+        dates = [row[0][5:] for row in trend_data]  # 仅保留 MM-DD
+        scores = [row[1] or 0 for row in trend_data]
+        trend_path = await generate_suffer_trend(user_id, dates, scores)
+        if trend_path:
+            await update.message.reply_photo(photo=open(trend_path, 'rb'), caption="\n".join(message), parse_mode='Markdown')
+            return
+
     await update.message.reply_text("\n".join(message), parse_mode='Markdown')
 
 async def get_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
