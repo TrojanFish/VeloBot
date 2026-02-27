@@ -36,13 +36,16 @@ def strava_auth_callback():
             VALUES (?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(telegram_user_id) DO UPDATE SET
             strava_athlete_id=excluded.strava_athlete_id, strava_firstname=excluded.strava_firstname, strava_lastname=excluded.strava_lastname,
             strava_access_token=excluded.strava_access_token, strava_refresh_token=excluded.strava_refresh_token, strava_token_expires_at=excluded.strava_token_expires_at
-        ''', (telegram_user_id, athlete.id, athlete.firstname, athlete.lastname, access_token, refresh_token, expires_at, int(datetime.now(timezone.utc).timestamp())))
+        ''', (telegram_user_id, athlete.id, athlete.firstname, athlete.lastname, access_token, refresh_token, expires_at, 0))
         conn.commit()
         conn.close()
         logger.info(f"用户 {telegram_user_id} ({athlete.firstname} {athlete.lastname}) 的 Strava 账户已成功关联。")
         
         if telegram_app_for_flask:
+            from src.bot.tasks import sync_user_data
             telegram_app_for_flask.job_queue.run_once(send_auth_success_message, 0, data={'chat_id': telegram_user_id, 'athlete_name': athlete.firstname}, name=f"auth_success_{telegram_user_id}")
+            # 立即触发数据同步 (包括器材信息)
+            telegram_app_for_flask.job_queue.run_once(sync_user_data, 1, data={'telegram_user_id': telegram_user_id}, name=f"initial_sync_{telegram_user_id}")
             
         return "授权成功！现在可以关闭此页面了。", 200
     except Exception as e:

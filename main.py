@@ -15,7 +15,7 @@ from src.bot.handlers import (
     get_last_activity, get_last_video, get_report, get_leaderboard,
     my_rides, my_achievements, weather, route, language_command,
     welcome, location_handler, maintenance_command, units_command, set_unit,
-    add_rss, list_rss, remove_rss, menu_command
+    add_rss, list_rss, remove_rss, menu_command, sync_strava_command
 )
 from src.bot.callbacks import (
     ride_button_callback, location_button_callback, language_button_callback, menu_callback
@@ -94,6 +94,7 @@ def main():
     application.add_handler(CommandHandler("weather", weather))
     application.add_handler(CommandHandler("route", route))
     application.add_handler(CommandHandler("language", language_command))
+    application.add_handler(CommandHandler("sync_strava", sync_strava_command))
     application.add_handler(CommandHandler("maintenance", maintenance_command))
     application.add_handler(CommandHandler("units", units_command))
     application.add_handler(CommandHandler("add_rss", add_rss))

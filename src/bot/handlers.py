@@ -454,6 +454,34 @@ async def remove_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
     conn.close()
     await update.effective_message.reply_text("🗑 RSS 订阅已删除。")
 
+async def sync_strava_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """手动触发 Strava 数据同步"""
+    user_id = update.effective_user.id
+    
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT telegram_user_id, strava_access_token, strava_refresh_token, strava_token_expires_at, strava_last_activity_ts, strava_notification_mode FROM users WHERE telegram_user_id = ?", (user_id,))
+    user = cursor.fetchone()
+    
+    if not user:
+        await update.effective_message.reply_text(_(user_id, "privacy_not_linked"))
+        conn.close()
+        return
+
+    msg = await update.effective_message.reply_text(_(user_id, "sync_started"))
+    
+    try:
+        from src.bot.tasks import process_single_user_sync
+        from stravalib.client import Client
+        client = Client()
+        await process_single_user_sync(user, client, cursor, conn, context)
+        await msg.edit_text(_(user_id, "sync_success"))
+    except Exception as e:
+        logger.error(f"手动同步失败: {e}")
+        await msg.edit_text(f"❌ 同步失败: {e}")
+    finally:
+        conn.close()
+
 async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     text = f"⚙️ **VeloBot {_(user_id, 'menu_title')}**\n\n{_(user_id, 'menu_subtitle')}"
