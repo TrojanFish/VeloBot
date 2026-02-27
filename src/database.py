@@ -17,13 +17,13 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             telegram_user_id INTEGER PRIMARY KEY, strava_athlete_id INTEGER UNIQUE, strava_access_token TEXT,
             strava_refresh_token TEXT, strava_token_expires_at INTEGER, strava_last_activity_ts INTEGER,
-            strava_notification_mode TEXT NOT NULL DEFAULT 'public', strava_firstname TEXT, strava_lastname TEXT,
+            strava_notification_mode TEXT NOT NULL DEFAULT 'private', strava_firstname TEXT, strava_lastname TEXT,
             language TEXT NOT NULL DEFAULT 'en'
         )
     ''')
     cursor.execute("PRAGMA table_info(users)")
     columns = [c[1] for c in cursor.fetchall()]
-    if 'strava_notification_mode' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN strava_notification_mode TEXT NOT NULL DEFAULT 'public'")
+    if 'strava_notification_mode' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN strava_notification_mode TEXT NOT NULL DEFAULT 'private'")
     if 'strava_firstname' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN strava_firstname TEXT")
     if 'strava_lastname' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN strava_lastname TEXT")
     if 'language' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN language TEXT NOT NULL DEFAULT 'en'")
