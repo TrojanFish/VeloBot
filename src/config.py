@@ -7,6 +7,7 @@ load_dotenv()
 # --- 机器人核心参数配置 ---
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+FEISHU_WEBHOOK_URL = os.getenv("FEISHU_WEBHOOK_URL")
 
 # Strava API 配置
 STRAVA_CLIENT_ID = os.getenv("STRAVA_CLIENT_ID")

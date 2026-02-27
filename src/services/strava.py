@@ -35,11 +35,23 @@ def format_activity_details(activity, user_id):
     if activity.max_speed:
         max_speed_kmh = float(activity.max_speed) * 3.6
         if max_speed_kmh > 0: details.append(f"{_(user_id, 'activity_detail_max_speed')}: {max_speed_kmh:.1f} km/h")
-    if activity.average_heartrate: details.append(f"{_(user_id, 'activity_detail_avg_hr')}: {activity.average_heartrate:.0f} bpm")
-    if activity.calories: details.append(f"{_(user_id, 'activity_detail_calories')}: {activity.calories:.0f} kcal")
-    if activity.average_watts and activity.device_watts: details.append(f"{_(user_id, 'activity_detail_avg_power')}: {activity.average_watts:.0f} W")
-    if activity.average_cadence: details.append(f"{_(user_id, 'activity_detail_avg_cadence')}: {activity.average_cadence * 2 if activity.type == 'Run' else activity.average_cadence:.0f} {'rpm' if activity.type == 'Ride' else 'spm'}")
-    if activity.suffer_score: details.append(f"{_(user_id, 'activity_detail_suffer_score')}: {activity.suffer_score:.0f}")
+    avg_hr = getattr(activity, 'average_heartrate', None)
+    if avg_hr: details.append(f"{_(user_id, 'activity_detail_avg_hr')}: {avg_hr:.0f} bpm")
+    
+    calories = getattr(activity, 'calories', None)
+    if calories: details.append(f"{_(user_id, 'activity_detail_calories')}: {calories:.0f} kcal")
+    
+    avg_watts = getattr(activity, 'average_watts', None)
+    device_watts = getattr(activity, 'device_watts', False)
+    if avg_watts and device_watts: details.append(f"{_(user_id, 'activity_detail_avg_power')}: {avg_watts:.0f} W")
+    
+    avg_cadence = getattr(activity, 'average_cadence', None)
+    if avg_cadence:
+        act_type = str(activity.type)
+        details.append(f"{_(user_id, 'activity_detail_avg_cadence')}: {avg_cadence * 2 if act_type == 'Run' else avg_cadence:.0f} {'rpm' if act_type == 'Ride' else 'spm'}")
+    
+    suffer_score = getattr(activity, 'suffer_score', None)
+    if suffer_score: details.append(f"{_(user_id, 'activity_detail_suffer_score')}: {suffer_score:.0f}")
     return details
 
 async def check_and_grant_achievements(user_id, activity, context: ContextTypes.DEFAULT_TYPE):

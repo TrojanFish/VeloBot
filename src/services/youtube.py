@@ -4,6 +4,7 @@ import feedparser
 import asyncio
 from src.config import YOUTUBE_CHANNEL_RSS_URL, LATEST_VIDEO_ID_FILE, TELEGRAM_CHAT_ID
 from src.locales import LOCALIZATION
+from src.services.feishu import send_feishu_notification
 from telegram.ext import ContextTypes
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,7 @@ async def check_youtube_videos(context: ContextTypes.DEFAULT_TYPE):
                 logger.info(f"发现新视频: {latest_video.title}")
                 message = LOCALIZATION['en']['new_video_notification'].format(author=latest_video.author, title=latest_video.title) + f"\n\n{latest_video.link}"
                 await context.bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message, parse_mode='Markdown', disable_web_page_preview=False)
+                await send_feishu_notification(f"YouTube 新视频推送: {latest_video.title}", message)
                 with open(LATEST_VIDEO_ID_FILE, 'w') as f: f.write(latest_video_id)
                 logger.info(f"新视频 {latest_video.title} 已成功推送。")
             else: 

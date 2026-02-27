@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from src.config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, TELEGRAM_CHAT_ID, DB_FILE
 from src.utils import _, format_duration
 from src.services.strava import format_activity_details, check_and_grant_achievements
+from src.services.feishu import send_feishu_notification
 from stravalib.client import Client
 from telegram.ext import ContextTypes
 
@@ -45,6 +46,10 @@ async def check_strava_activities(context: ContextTypes.DEFAULT_TYPE):
                 message = "\n".join(message_lines)
                 target_chat_id = TELEGRAM_CHAT_ID if notification_mode == 'public' else telegram_user_id
                 await context.bot.send_message(chat_id=target_chat_id, text=message, parse_mode='Markdown')
+                
+                # 如果是公开模式，同步推送到飞书
+                if notification_mode == 'public':
+                    await send_feishu_notification(f"Strava 新活动: {athlete.firstname} {athlete.lastname}", message)
             
             latest_activity_ts = int(new_activities[-1].start_date.timestamp())
             cursor.execute("UPDATE users SET strava_last_activity_ts=? WHERE telegram_user_id=?", (latest_activity_ts, telegram_user_id))
