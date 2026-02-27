@@ -87,13 +87,47 @@ def init_db():
         )
     ''')
 
-    # --- rss_feeds 表 ---
+    # --- RSS系统表 ---
+    # 存储源信息
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS rss_feeds (
             feed_id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT UNIQUE, title TEXT,
-            last_entry_id TEXT, last_checked INTEGER, chat_id INTEGER
+            last_entry_id TEXT, last_checked INTEGER
         )
     ''')
+    # 检查旧版本是否存在 chat_id 字段并迁移
+    cursor.execute("PRAGMA table_info(rss_feeds)")
+    rss_columns = [c[1] for c in cursor.fetchall()]
+    
+    # 存储订阅关系 (哪个群订阅了哪个源)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS rss_subscriptions (
+            feed_id INTEGER, chat_id INTEGER,
+            PRIMARY KEY (feed_id, chat_id),
+            FOREIGN KEY(feed_id) REFERENCES rss_feeds(feed_id)
+        )
+    ''')
+    
+    if 'chat_id' in rss_columns:
+        logger.info("发现旧版 RSS 数据，正在迁移订阅关系...")
+        cursor.execute("SELECT feed_id, chat_id FROM rss_feeds WHERE chat_id IS NOT NULL")
+        old_data = cursor.fetchall()
+        for f_id, c_id in old_data:
+            cursor.execute("INSERT OR IGNORE INTO rss_subscriptions (feed_id, chat_id) VALUES (?, ?)", (f_id, c_id))
+        # 迁移后清理旧表（删除列较复杂，这里选择重命名并重新创建）
+        try:
+            cursor.execute("ALTER TABLE rss_feeds RENAME TO rss_feeds_old")
+            cursor.execute('''
+                CREATE TABLE rss_feeds (
+                    feed_id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT UNIQUE, title TEXT,
+                    last_entry_id TEXT, last_checked INTEGER
+                )
+            ''')
+            cursor.execute("INSERT INTO rss_feeds (feed_id, url, title, last_entry_id, last_checked) SELECT feed_id, url, title, last_entry_id, last_checked FROM rss_feeds_old")
+            cursor.execute("DROP TABLE rss_feeds_old")
+            logger.info("RSS 数据迁移完成。")
+        except Exception as e:
+            logger.error(f"RSS 数据迁移失败: {e}")
 
     conn.commit()
     conn.close()

@@ -4,7 +4,8 @@ import asyncio
 import feedparser
 import httpx
 from datetime import datetime, timezone, timedelta
-from src.config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, BOT_SERVER_URL, YOUTUBE_CHANNEL_RSS_URL, DB_FILE
+from src.config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, BOT_SERVER_URL, YOUTUBE_CHANNEL_RSS_URL
+from src.database import get_db_connection
 from src.utils import _, format_duration
 from src.services.strava import format_activity_details
 from src.services.weather import get_weather_for_city, get_weather_for_location
@@ -34,7 +35,7 @@ async def link_strava(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def toggle_strava_privacy(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT strava_notification_mode FROM users WHERE telegram_user_id = ?", (user_id,))
     result = cursor.fetchone()
@@ -53,7 +54,7 @@ async def toggle_strava_privacy(update: Update, context: ContextTypes.DEFAULT_TY
 
 async def get_last_activity(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT strava_access_token, strava_refresh_token, strava_token_expires_at FROM users WHERE telegram_user_id = ?", (user_id,))
     user_data = cursor.fetchone()
@@ -119,7 +120,7 @@ async def get_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     today = now.replace(hour=0, minute=0, second=0, microsecond=0)
     current_period_start = today - timedelta(days=7)
     previous_period_start = current_period_start - timedelta(days=7)
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     def query_stats(start_ts, end_ts):
         cursor.execute("SELECT COUNT(*), SUM(distance), SUM(moving_time), SUM(elevation_gain) FROM activities WHERE telegram_user_id = ? AND start_date >= ? AND start_date < ?", (user_id, start_ts, end_ts))
@@ -147,7 +148,7 @@ async def get_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     
     # 生成 Suffer Score 趋势图
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT date(start_date, 'unixepoch', 'localtime') as day, SUM(suffer_score) 
@@ -171,7 +172,7 @@ async def get_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def get_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     period_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=7)
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     def query_leaderboard(order_by_column):
         cursor.execute(f"SELECT u.strava_firstname, SUM(a.{order_by_column}) as total FROM activities a JOIN users u ON a.telegram_user_id = u.telegram_user_id WHERE a.start_date >= ? GROUP BY u.telegram_user_id ORDER BY total DESC LIMIT 10", (period_start.timestamp(),))
@@ -199,7 +200,7 @@ async def get_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def my_rides(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     now_ts = datetime.now(timezone.utc).timestamp()
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("""
         SELECT r.title, r.ride_time, r.creator_user_id
@@ -225,7 +226,7 @@ async def my_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     from src.locales import LOCALIZED_ACHIEVEMENTS
     from src.utils import get_achievement_text
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT achievement_id FROM achievements WHERE telegram_user_id = ?", (user_id,))
     unlocked_ids = {row[0] for row in cursor.fetchall()}
@@ -303,7 +304,7 @@ async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(_(user_id, "language_prompt"), reply_markup=reply_markup)
 async def maintenance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     
     if not context.args:
@@ -360,7 +361,7 @@ async def set_unit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = query.from_user.id
     unit = query.data.replace("set_unit_", "")
     
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("UPDATE users SET units = ? WHERE telegram_user_id = ?", (unit, user_id))
     conn.commit()
@@ -385,22 +386,32 @@ async def add_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
     url = context.args[0]
     chat_id = update.message.chat_id
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     try:
-        cursor.execute("INSERT INTO rss_feeds (url, chat_id) VALUES (?, ?)", (url, chat_id))
+        # 1. 确保 feed 记录存在
+        cursor.execute("INSERT OR IGNORE INTO rss_feeds (url) VALUES (?)", (url,))
+        cursor.execute("SELECT feed_id FROM rss_feeds WHERE url = ?", (url,))
+        feed_id = cursor.fetchone()[0]
+        
+        # 2. 建立订阅关系
+        cursor.execute("INSERT INTO rss_subscriptions (feed_id, chat_id) VALUES (?, ?)", (feed_id, chat_id))
         conn.commit()
         await update.message.reply_text("✅ RSS 订阅成功！")
     except sqlite3.IntegrityError:
-        await update.message.reply_text("⚠️ 该 RSS 源已存在。")
+        await update.message.reply_text("⚠️ 该群内已存在此 RSS 订阅。")
     finally:
         conn.close()
 
 async def list_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.message.chat_id
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT feed_id, url FROM rss_feeds WHERE chat_id = ?", (chat_id,))
+    cursor.execute("""
+        SELECT f.feed_id, f.url FROM rss_feeds f
+        JOIN rss_subscriptions s ON f.feed_id = s.feed_id
+        WHERE s.chat_id = ?
+    """, (chat_id,))
     feeds = cursor.fetchall()
     conn.close()
     if not feeds:
@@ -414,9 +425,9 @@ async def list_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def remove_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    chat_id = update.message.chat_id
+    chat_id = update.effective_chat.id
     
-    if update.message.chat.type != 'private':
+    if update.effective_chat.type != 'private':
         member = await context.bot.get_chat_member(chat_id, user_id)
         if member.status not in ['administrator', 'creator']:
             await update.message.reply_text("❌ 只有群管理员或群主才能删除 RSS 订阅。")
@@ -426,9 +437,10 @@ async def remove_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("用法 / Usage: `/remove_rss ID`", parse_mode='Markdown')
         return
     feed_id = context.args[0]
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM rss_feeds WHERE feed_id = ?", (feed_id,))
+    # 仅删除当前群组的订阅关系
+    cursor.execute("DELETE FROM rss_subscriptions WHERE feed_id = ? AND chat_id = ?", (feed_id, chat_id))
     conn.commit()
     conn.close()
     await update.message.reply_text("🗑 RSS 订阅已删除。")
