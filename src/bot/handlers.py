@@ -279,3 +279,70 @@ async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text(_(user_id, "language_prompt"), reply_markup=reply_markup)
+async def maintenance_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    
+    if not context.args:
+        # 列表显示模式
+        cursor.execute("SELECT gear_id, name, distance FROM gear WHERE telegram_user_id = ?", (user_id,))
+        gears = cursor.fetchall()
+        if not gears:
+            await update.message.reply_text(_(user_id, "maintenance_no_gear"))
+            conn.close()
+            return
+            
+        msg_lines = [_(user_id, "maintenance_title")]
+        for g_id, name, dist in gears:
+            msg_lines.append(f"\n🚲 **{name}**")
+            msg_lines.append(f"  ID: `{g_id}`")
+            msg_lines.append(f"  {_(user_id, 'activity_detail_dist')}: {dist:.1f} km")
+            
+            # 显示保养项目
+            cursor.execute("SELECT part_name, threshold_dist FROM maintenance WHERE gear_id = ?", (g_id,))
+            parts = cursor.fetchall()
+            for p_name, thresh in parts:
+                msg_lines.append(f"  🛠 {p_name}: {thresh:.0f} km")
+        
+        msg_lines.append("\n💡 用法 / Usage:")
+        msg_lines.append("`/maintenance ID PART THRESHOLD`\nEx: `/maintenance b123 Chain 3000`")
+        await update.message.reply_text("\n".join(msg_lines), parse_mode='Markdown')
+    else:
+        # 设置模式: /maintenance ID PART THRESHOLD
+        if len(context.args) < 3:
+            await update.message.reply_text("Usage: `/maintenance ID PART THRESHOLD`", parse_mode='Markdown')
+        else:
+            g_id, part, threshold = context.args[0], context.args[1], float(context.args[2])
+            cursor.execute("SELECT name FROM gear WHERE gear_id = ? AND telegram_user_id = ?", (g_id, user_id))
+            gear = cursor.fetchone()
+            if not gear:
+                await update.message.reply_text("Gear ID error.")
+            else:
+                cursor.execute("INSERT OR REPLACE INTO maintenance (gear_id, part_name, threshold_dist, notified) VALUES (?, ?, ?, 0)", (g_id, part, threshold))
+                conn.commit()
+                await update.message.reply_text(_(user_id, "maintenance_set_success").format(gear_name=gear[0], part=part, threshold=threshold))
+    conn.close()
+
+async def units_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    keyboard = [
+        [InlineKeyboardButton("Metric (km/m)", callback_data="set_unit_metric")],
+        [InlineKeyboardButton("Imperial (mi/ft)", callback_data="set_unit_imperial")]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    await update.message.reply_text(_(user_id, "units_prompt"), reply_markup=reply_markup)
+
+async def set_unit(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    user_id = query.from_user.id
+    unit = query.data.replace("set_unit_", "")
+    
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET units = ? WHERE telegram_user_id = ?", (unit, user_id))
+    conn.commit()
+    conn.close()
+    
+    await query.answer()
+    await query.edit_message_text(_(user_id, "units_set_success").format(unit=unit))

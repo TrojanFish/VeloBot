@@ -93,6 +93,11 @@ LOCALIZATION = {
         "activity_detail_avg_cadence": "🦶 Avg Cadence",
         "activity_detail_suffer_score": "🎯 Suffer Score",
         "activity_view_on_strava": "View on Strava",
+        "maintenance_title": "🔧 *Gear Maintenance Center*",
+        "maintenance_no_gear": "No gear linked yet. Try syncing activities first.",
+        "maintenance_set_success": "✅ Maintenance threshold set for {gear_name} ({part}): {threshold} km",
+        "units_prompt": "Please select your preferred unit system:",
+        "units_set_success": "✅ Unit system has been set to {unit}.",
     },
     'zh-hans': {
         "start_welcome": "👋 欢迎！我是社群机器人。使用 /help 命令查看我的功能。",
@@ -730,6 +735,8 @@ LOCALIZED_COMMANDS = {
         "weather": "🌦️ Get a weather forecast",
         "route": "🗺️ Find cycling routes",
         "language": "🌐 Switch Language",
+        "maintenance": "🔧 Gear maintenance tracking",
+        "units": "📏 Switch units (km/mi)",
     },
     'zh': {
         "start": "🚀 显示欢迎信息",
@@ -746,6 +753,8 @@ LOCALIZED_COMMANDS = {
         "weather": "🌦️ 查询天气",
         "route": "🗺️ 寻找路线",
         "language": "🌐 切换语言",
+        "maintenance": "🔧 器材保养追踪",
+        "units": "📏 切换单位 (km/mi)",
     },
     'es': {
         "start": "🚀 Mostrar mensaje de bienvenida",

@@ -10,6 +10,38 @@ from telegram.ext import ContextTypes
 
 logger = logging.getLogger(__name__)
 
+async def sync_athlete_gear(client, telegram_user_id, cursor):
+    """同步运动员的器材信息"""
+    try:
+        athlete = client.get_athlete()
+        gears = []
+        if athlete.bikes: gears.extend(athlete.bikes)
+        if athlete.shoes: gears.extend(athlete.shoes)
+        
+        for g in gears:
+            # 获取详细信息以获取品牌和型号
+            g_detail = client.get_gear(g.id)
+            cursor.execute('''
+                INSERT OR REPLACE INTO gear (gear_id, telegram_user_id, name, brand_name, model_name, distance, is_primary)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+            ''', (g_detail.id, telegram_user_id, g_detail.name, g_detail.brand_name, g_detail.model_name, float(g_detail.distance)/1000, 1 if g_detail.primary else 0))
+    except Exception as e:
+        logger.error(f"同步器材信息失败: {e}")
+
+async def check_maintenance_alerts(telegram_user_id, context, cursor):
+    """检查是否有器材需要保养"""
+    cursor.execute('''
+        SELECT g.name, m.part_name, g.distance, m.threshold_dist, m.id
+        FROM gear g JOIN maintenance m ON g.gear_id = m.gear_id
+        WHERE g.telegram_user_id = ? AND g.distance >= m.threshold_dist AND m.notified = 0
+    ''', (telegram_user_id,))
+    alerts = cursor.fetchall()
+    for alert in alerts:
+        gear_name, part_name, current_dist, threshold, m_id = alert
+        msg = f"⚠️ **保养提醒 / Maintenance Alert**\n\n您的器材 **{gear_name}** 的 **{part_name}** 已达到保养阈值！\n当前里程: {current_dist:.1f} km\n设定阈值: {threshold:.1f} km\n\n请及时维护以确保安全。"
+        await context.bot.send_message(chat_id=telegram_user_id, text=msg, parse_mode='Markdown')
+        cursor.execute("UPDATE maintenance SET notified = 1 WHERE id = ?", (m_id,))
+
 async def check_strava_activities(context: ContextTypes.DEFAULT_TYPE):
     logger.info("开始检查 Strava 活动更新...")
     conn = sqlite3.connect(DB_FILE)
@@ -26,6 +58,11 @@ async def check_strava_activities(context: ContextTypes.DEFAULT_TYPE):
                 cursor.execute('UPDATE users SET strava_access_token=?, strava_refresh_token=?, strava_token_expires_at=? WHERE telegram_user_id=?', (access_token, refresh_token, expires_at, telegram_user_id))
                 conn.commit()
             client.access_token = access_token
+            
+            # 同步器材
+            await sync_athlete_gear(client, telegram_user_id, cursor)
+            conn.commit()
+
             athlete = client.get_athlete()
             activities = client.get_activities(after=datetime.fromtimestamp(last_activity_ts, tz=timezone.utc))
             new_activities = sorted(list(activities), key=lambda a: a.start_date)
@@ -33,21 +70,44 @@ async def check_strava_activities(context: ContextTypes.DEFAULT_TYPE):
             
             for activity in new_activities:
                 logger.info(f"发现用户 {athlete.firstname} 的新活动: {activity.name}")
-                cursor.execute("INSERT OR IGNORE INTO activities (activity_id, telegram_user_id, start_date, distance, moving_time, elevation_gain) VALUES (?, ?, ?, ?, ?, ?)", 
-                               (activity.id, telegram_user_id, activity.start_date.timestamp(), float(activity.distance) / 1000, float(activity.moving_time) if activity.moving_time else 0, float(activity.total_elevation_gain)))
+                
+                # 获取更多数据
+                suffer = getattr(activity, 'suffer_score', None)
+                hr = getattr(activity, 'average_heartrate', None)
+                gear_id = getattr(activity, 'gear_id', None)
+                
+                cursor.execute('''
+                    INSERT OR IGNORE INTO activities 
+                    (activity_id, telegram_user_id, start_date, distance, moving_time, elevation_gain, suffer_score, avg_hr, gear_id) 
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ''', (activity.id, telegram_user_id, activity.start_date.timestamp(), 
+                      float(activity.distance) / 1000, float(activity.moving_time) if activity.moving_time else 0, 
+                      float(activity.total_elevation_gain), suffer, hr, gear_id))
                 conn.commit()
+                
                 await check_and_grant_achievements(telegram_user_id, activity, context)
+                
+                # 检查保养提醒
+                await check_maintenance_alerts(telegram_user_id, context, cursor)
+                conn.commit()
+
                 activity_type_emoji = {"Ride": "🚴", "Run": "🏃", "Swim": "🏊", "Walk": "🚶", "Hike": "⛰️", "AlpineSki": "⛷️", "Workout": "💪", "Yoga": "🧘", "VirtualRide": "💻🚴"}.get(str(activity.type), "🏆")
                 
                 message_lines = [f"{activity_type_emoji} **{athlete.firstname} {athlete.lastname}** has completed a new activity!\n", f"**{activity.name}**"]
                 message_lines.extend(format_activity_details(activity, telegram_user_id))
+                
+                # 添加器材名称显示
+                if gear_id:
+                    cursor.execute("SELECT name FROM gear WHERE gear_id = ?", (gear_id,))
+                    g_res = cursor.fetchone()
+                    if g_res: message_lines.append(f"🚲 **{g_res[0]}**")
+                
                 message_lines.append(f"\n🔗 [{_(telegram_user_id, 'activity_view_on_strava')}](https://www.strava.com/activities/{activity.id})")
                 
                 message = "\n".join(message_lines)
                 target_chat_id = TELEGRAM_CHAT_ID if notification_mode == 'public' else telegram_user_id
                 await context.bot.send_message(chat_id=target_chat_id, text=message, parse_mode='Markdown')
                 
-                # 如果是公开模式，同步推送到飞书
                 if notification_mode == 'public':
                     await send_feishu_notification(f"Strava 新活动: {athlete.firstname} {athlete.lastname}", message)
             

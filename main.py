@@ -13,7 +13,7 @@ from src.bot.handlers import (
     start, help_command, link_strava, toggle_strava_privacy, 
     get_last_activity, get_last_video, get_report, get_leaderboard,
     my_rides, my_achievements, weather, route, language_command,
-    welcome, location_handler
+    welcome, location_handler, maintenance_command, units_command, set_unit
 )
 from src.bot.callbacks import (
     ride_button_callback, location_button_callback, language_button_callback
@@ -75,6 +75,7 @@ def main():
     application.add_handler(CallbackQueryHandler(ride_button_callback, pattern='^join_ride_|^leave_ride_'))
     application.add_handler(CallbackQueryHandler(location_button_callback, pattern='^loc_'))
     application.add_handler(CallbackQueryHandler(language_button_callback, pattern='^set_lang_'))
+    application.add_handler(CallbackQueryHandler(set_unit, pattern='^set_unit_'))
 
     application.add_handler(CommandHandler("start", start))
     application.add_handler(CommandHandler("help", help_command))
@@ -89,6 +90,8 @@ def main():
     application.add_handler(CommandHandler("weather", weather))
     application.add_handler(CommandHandler("route", route))
     application.add_handler(CommandHandler("language", language_command))
+    application.add_handler(CommandHandler("maintenance", maintenance_command))
+    application.add_handler(CommandHandler("units", units_command))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
     application.add_handler(MessageHandler(filters.LOCATION, location_handler))
     
