@@ -371,6 +371,15 @@ async def set_unit(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def add_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    chat_id = update.message.chat_id
+    
+    # 在非私聊频道中检查管理员权限
+    if update.message.chat.type != 'private':
+        member = await context.bot.get_chat_member(chat_id, user_id)
+        if member.status not in ['administrator', 'creator']:
+            await update.message.reply_text("❌ 只有群管理员或群主才能添加 RSS 订阅。")
+            return
+
     if not context.args:
         await update.message.reply_text("用法 / Usage: `/add_rss URL`", parse_mode='Markdown')
         return
@@ -404,6 +413,15 @@ async def list_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(msg, parse_mode='Markdown')
 
 async def remove_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    chat_id = update.message.chat_id
+    
+    if update.message.chat.type != 'private':
+        member = await context.bot.get_chat_member(chat_id, user_id)
+        if member.status not in ['administrator', 'creator']:
+            await update.message.reply_text("❌ 只有群管理员或群主才能删除 RSS 订阅。")
+            return
+
     if not context.args:
         await update.message.reply_text("用法 / Usage: `/remove_rss ID`", parse_mode='Markdown')
         return
