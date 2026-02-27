@@ -33,7 +33,7 @@ async def check_strava_activities(context: ContextTypes.DEFAULT_TYPE):
             for activity in new_activities:
                 logger.info(f"发现用户 {athlete.firstname} 的新活动: {activity.name}")
                 cursor.execute("INSERT OR IGNORE INTO activities (activity_id, telegram_user_id, start_date, distance, moving_time, elevation_gain) VALUES (?, ?, ?, ?, ?, ?)", 
-                               (activity.id, telegram_user_id, activity.start_date.timestamp(), float(activity.distance) / 1000, activity.moving_time.total_seconds(), float(activity.total_elevation_gain)))
+                               (activity.id, telegram_user_id, activity.start_date.timestamp(), float(activity.distance) / 1000, float(activity.moving_time) if activity.moving_time else 0, float(activity.total_elevation_gain)))
                 conn.commit()
                 await check_and_grant_achievements(telegram_user_id, activity, context)
                 activity_type_emoji = {"Ride": "🚴", "Run": "🏃", "Swim": "🏊", "Walk": "🚶", "Hike": "⛰️", "AlpineSki": "⛷️", "Workout": "💪", "Yoga": "🧘", "VirtualRide": "💻🚴"}.get(str(activity.type), "🏆")

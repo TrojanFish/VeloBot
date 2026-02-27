@@ -26,7 +26,7 @@ def format_activity_details(activity, user_id):
     
     details.extend([
         f"{_(user_id, 'activity_detail_dist')}: {float(activity.distance)/1000:.2f} km" if activity.distance else f"{_(user_id, 'activity_detail_dist')}: 0.00 km",
-        f"{_(user_id, 'activity_detail_time')}: {format_duration(activity.moving_time.total_seconds())}" if activity.moving_time else f"{_(user_id, 'activity_detail_time')}: 0:00:00",
+        f"{_(user_id, 'activity_detail_time')}: {format_duration(float(activity.moving_time))}" if activity.moving_time else f"{_(user_id, 'activity_detail_time')}: 0:00:00",
         f"{_(user_id, 'activity_detail_elev')}: {float(activity.total_elevation_gain):.0f} m" if activity.total_elevation_gain else f"{_(user_id, 'activity_detail_elev')}: 0 m"
     ])
     if activity.average_speed:
