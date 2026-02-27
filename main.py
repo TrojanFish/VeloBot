@@ -8,12 +8,14 @@ from src.database import init_db
 from src.locales import LOCALIZED_COMMANDS
 from src.web.routes import run_flask_app, telegram_app_for_flask
 from src.services.youtube import check_youtube_videos
+from src.services.rss_manager import check_rss_feeds
 from src.bot.tasks import check_strava_activities
 from src.bot.handlers import (
     start, help_command, link_strava, toggle_strava_privacy, 
     get_last_activity, get_last_video, get_report, get_leaderboard,
     my_rides, my_achievements, weather, route, language_command,
-    welcome, location_handler, maintenance_command, units_command, set_unit
+    welcome, location_handler, maintenance_command, units_command, set_unit,
+    add_rss, list_rss, remove_rss
 )
 from src.bot.callbacks import (
     ride_button_callback, location_button_callback, language_button_callback
@@ -42,6 +44,7 @@ async def post_init(application: Application):
     scheduler = AsyncIOScheduler(timezone="UTC")
     scheduler.add_job(check_youtube_videos, 'interval', minutes=10, args=[application])
     scheduler.add_job(check_strava_activities, 'interval', minutes=15, args=[application])
+    scheduler.add_job(check_rss_feeds, 'interval', minutes=20, args=[application])
     scheduler.start()
     logger.info("后台调度器已启动。")
 
@@ -92,6 +95,9 @@ def main():
     application.add_handler(CommandHandler("language", language_command))
     application.add_handler(CommandHandler("maintenance", maintenance_command))
     application.add_handler(CommandHandler("units", units_command))
+    application.add_handler(CommandHandler("add_rss", add_rss))
+    application.add_handler(CommandHandler("list_rss", list_rss))
+    application.add_handler(CommandHandler("remove_rss", remove_rss))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
     application.add_handler(MessageHandler(filters.LOCATION, location_handler))
     

@@ -87,6 +87,14 @@ def init_db():
         )
     ''')
 
+    # --- rss_feeds 表 ---
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS rss_feeds (
+            feed_id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT UNIQUE, title TEXT,
+            last_entry_id TEXT, last_checked INTEGER, chat_id INTEGER
+        )
+    ''')
+
     conn.commit()
     conn.close()
     logger.info("数据库初始化完成。")

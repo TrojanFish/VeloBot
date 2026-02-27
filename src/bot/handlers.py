@@ -368,3 +368,49 @@ async def set_unit(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     await query.answer()
     await query.edit_message_text(_(user_id, "units_set_success").format(unit=unit))
+
+async def add_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not context.args:
+        await update.message.reply_text("用法 / Usage: `/add_rss URL`", parse_mode='Markdown')
+        return
+    url = context.args[0]
+    chat_id = update.message.chat_id
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    try:
+        cursor.execute("INSERT INTO rss_feeds (url, chat_id) VALUES (?, ?)", (url, chat_id))
+        conn.commit()
+        await update.message.reply_text("✅ RSS 订阅成功！")
+    except sqlite3.IntegrityError:
+        await update.message.reply_text("⚠️ 该 RSS 源已存在。")
+    finally:
+        conn.close()
+
+async def list_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    chat_id = update.message.chat_id
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT feed_id, url FROM rss_feeds WHERE chat_id = ?", (chat_id,))
+    feeds = cursor.fetchall()
+    conn.close()
+    if not feeds:
+        await update.message.reply_text("目前没有订阅任何 RSS 源。")
+        return
+    msg = "**当前订阅的 RSS 源：**\n"
+    for f_id, url in feeds:
+        msg += f"- `{f_id}`: {url}\n"
+    msg += "\n删除订阅使用: `/remove_rss ID`"
+    await update.message.reply_text(msg, parse_mode='Markdown')
+
+async def remove_rss(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    if not context.args:
+        await update.message.reply_text("用法 / Usage: `/remove_rss ID`", parse_mode='Markdown')
+        return
+    feed_id = context.args[0]
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM rss_feeds WHERE feed_id = ?", (feed_id,))
+    conn.commit()
+    conn.close()
+    await update.message.reply_text("🗑 RSS 订阅已删除。")

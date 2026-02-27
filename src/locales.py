@@ -745,6 +745,9 @@ LOCALIZED_COMMANDS = {
         "language": "🌐 Switch Language",
         "maintenance": "🔧 Gear maintenance tracking",
         "units": "📏 Switch units (km/mi)",
+        "add_rss": "➕ Add an RSS feed to monitor",
+        "list_rss": "📜 List your RSS subscriptions",
+        "remove_rss": "🗑 Remove an RSS feed",
     },
     'zh': {
         "start": "🚀 显示欢迎信息",
@@ -763,6 +766,9 @@ LOCALIZED_COMMANDS = {
         "language": "🌐 切换语言",
         "maintenance": "🔧 器材保养追踪",
         "units": "📏 切换单位 (km/mi)",
+        "add_rss": "➕ 添加 RSS 订阅源",
+        "list_rss": "📜 查看已订阅的 RSS",
+        "remove_rss": "🗑 删除 RSS 订阅",
     },
     'es': {
         "start": "🚀 Mostrar mensaje de bienvenida",
