@@ -1,9 +1,7 @@
-version: '3.8'
-
 services:
   bot:
     build: .
-    container_name: yolocycling-community-bot
+    container_name: velobot
     restart: unless-stopped
     ports:
       - "5000:5000"
