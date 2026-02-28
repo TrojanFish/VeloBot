@@ -32,7 +32,14 @@ def format_activity_details(activity, user_id):
     dist_str = convert_dist(float(activity.distance)/1000, units) if activity.distance else "0.00 km"
     elev_str = convert_elev(float(activity.total_elevation_gain), units) if activity.total_elevation_gain else "0 m"
     
+    date_str = "Unknown Date"
+    if hasattr(activity, 'start_date_local') and activity.start_date_local:
+        date_str = activity.start_date_local.strftime('%Y-%m-%d %H:%M')
+    elif getattr(activity, 'start_date', None):
+        date_str = activity.start_date.strftime('%Y-%m-%d %H:%M UTC')
+        
     details.extend([
+        f"📅 {date_str}",
         f"{_(user_id, 'activity_detail_dist')}: {dist_str}",
         f"{_(user_id, 'activity_detail_time')}: {format_duration(float(activity.moving_time))}" if activity.moving_time else f"{_(user_id, 'activity_detail_time')}: 0:00:00",
         f"{_(user_id, 'activity_detail_elev')}: {elev_str}"

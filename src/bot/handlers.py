@@ -458,7 +458,7 @@ async def sync_strava_command(update: Update, context: ContextTypes.DEFAULT_TYPE
     """手动触发 Strava 数据同步"""
     user_id = update.effective_user.id
     
-    conn = sqlite3.connect(DB_FILE)
+    conn = get_db_connection()
     cursor = conn.cursor()
     cursor.execute("SELECT telegram_user_id, strava_access_token, strava_refresh_token, strava_token_expires_at, strava_last_activity_ts, strava_notification_mode FROM users WHERE telegram_user_id = ?", (user_id,))
     user = cursor.fetchone()
