@@ -134,6 +134,7 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [InlineKeyboardButton(_(user_id, "language"), callback_data="cmd_lang")],
             [InlineKeyboardButton(_(user_id, "units"), callback_data="cmd_units")],
             [InlineKeyboardButton(_(user_id, "toggle_strava_privacy"), callback_data="cmd_privacy")],
+            [InlineKeyboardButton(_(user_id, "sync_strava"), callback_data="cmd_sync")],
             [InlineKeyboardButton(_(user_id, "back_to_menu"), callback_data="menu_main")]
         ]
     elif data.startswith("cmd_"):
@@ -142,14 +143,14 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         from src.bot.handlers import (
             get_last_activity, my_rides, get_report, get_leaderboard,
             maintenance_command, my_achievements, weather, route,
-            language_command, units_command, toggle_strava_privacy
+            language_command, units_command, toggle_strava_privacy, sync_strava_command
         )
         cmd_map = {
             "last_act": get_last_activity, "my_rides": my_rides,
             "report": get_report, "leaderboard": get_leaderboard,
             "maintenance": maintenance_command, "achievements": my_achievements,
             "weather": weather, "route": route, "lang": language_command,
-            "units": units_command, "privacy": toggle_strava_privacy
+            "units": units_command, "privacy": toggle_strava_privacy, "sync": sync_strava_command
         }
         handler = cmd_map.get(cmd)
         if handler:
