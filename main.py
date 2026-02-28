@@ -35,12 +35,17 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 async def post_init(application: Application):
-    # 为支持的每种语言设置命令
     for lang_code, commands_dict in LOCALIZED_COMMANDS.items():
         commands = [BotCommand(cmd, desc) for cmd, desc in commands_dict.items()]
-        await application.bot.set_my_commands(commands, language_code=lang_code)
+        # 英文作为默认语言（不指定 language_code）
+        tg_lang_code = None if lang_code == 'en' else lang_code
+        try:
+            await application.bot.set_my_commands(commands, language_code=tg_lang_code)
+            logger.info(f"Successfully set commands for language: {tg_lang_code}")
+        except Exception as e:
+            logger.error(f"Failed to set commands for language '{tg_lang_code}': {e}")
     
-    logger.info("多语言机器人快捷指令已设置。")
+    logger.info("多语言机器人快捷指令设置流程完毕。")
     scheduler = AsyncIOScheduler(timezone="UTC")
     scheduler.add_job(check_youtube_videos, 'interval', minutes=10, args=[application])
     scheduler.add_job(check_strava_activities, 'interval', minutes=15, args=[application])
