@@ -28,7 +28,7 @@ async def link_strava(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     client = Client()
     redirect_uri = f"{BOT_SERVER_URL}/strava_auth"
-    authorize_url = client.authorization_url(client_id=STRAVA_CLIENT_ID, redirect_uri=redirect_uri, scope=['read', 'activity:read'], state=str(user_id))
+    authorize_url = client.authorization_url(client_id=STRAVA_CLIENT_ID, redirect_uri=redirect_uri, scope=['read', 'activity:read_all'], state=str(user_id))
     keyboard = [[InlineKeyboardButton(_(user_id, "link_strava_button"), url=authorize_url)]]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.effective_message.reply_text(_(user_id, "link_strava_prompt"), reply_markup=reply_markup)

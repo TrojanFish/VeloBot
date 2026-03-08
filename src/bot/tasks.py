@@ -74,7 +74,7 @@ async def process_single_user_sync(user, client, cursor, conn, context):
 
         athlete = client.get_athlete()
         # 如果是第一次同步，拉取过去 30 天的活动，而不是只拉取之后的新活动
-        if last_activity_ts == 0:
+        if not last_activity_ts:
             from datetime import timedelta
             after_ts = (datetime.now(timezone.utc) - timedelta(days=30)).timestamp()
         else:
