@@ -156,7 +156,7 @@ LOCALIZATION = {
         "toggle_strava_privacy": "推送隐私切换",
         "sync_strava": "同步 Strava 数据",
         "start_welcome": "👋 欢迎！我是社群机器人。使用 /help 命令查看我的功能。",
-        "help_text": "我可以帮你监控并推送：\n🚴‍♂️ 最新 Strava 活动\n📺 最新 YouTube 视频\n\n可用命令如下：\n\n/link_strava - 关联您的 Strava 账号。\n/toggle_strava_privacy - 切换活动推送模式 (公开/私聊)。\n/set_ftp `[W]` - 设置您的 FTP (用于计算 TSS)。\n/set_max_hr `[bpm]` - 设置您的最大心率。\n/report - 查看个人周报 (包含 TSS 分析)。\n/leaderboard - 查看群组光荣榜。\n/sync_strava - 手动同步 Strava 数据。\n/menu - 打开主控制面板。\n\n🤖 **AI 教练功能**：\n- 直接在控制面板询问我骑行建议。\n- **回复**一条活动动态，问我“这次表现怎么样？”，我会为你深度分析数据。\n- 你也可以直接给我发**语音消息**，我会听完并给出建议。",
+        "help_text": "我可以帮你监控并推送：\n🚴‍♂️ 最新 Strava 活动\n📺 最新 YouTube 视频\n\n可用命令如下：\n\n/link_strava - 关联您的 Strava 账号。\n/toggle_strava_privacy - 切换活动推送模式 (公开/私聊)。\n/set_ftp `[W]` - 设置您的 FTP (用于计算 TSS)。\n/set_max_hr `[bpm]` - 设置您的最大心率。\n/report - 查看个人周报 (包含 TSS 分析)。\n/set_goal `[km]` - 设定每月目标里程。\n/set_schedule `[周几] [时间]` - 设定习惯骑行时间 (如 sat 08:00)。\n/leaderboard - 查看群组光荣榜。\n/sync_strava - 手动同步 Strava 数据。\n/menu - 打开主控制面板。\n\n🤖 **AI 教练功能**：\n- 直接在控制面板询问我骑行建议。\n- **回复**一条活动动态，问我“这次表现怎么样？”，我会为你深度分析数据。\n- 你也可以直接给我发**语音消息**，我会听完并给出建议。",
         "link_strava_prompt": "请点击下方按钮，授权机器人访问您的 Strava 活动数据：",
         "link_strava_button": "授权 Strava",
         "strava_auth_success": "✅ 授权成功！{athlete_name}，您的 Strava 账号已成功关联。\n\n默认活动将仅通过私聊发送给您，如需更改为公开推送，请发送 /toggle_strava_privacy 命令。",

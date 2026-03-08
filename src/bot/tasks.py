@@ -1,4 +1,5 @@
 import sqlite3
+import json
 import logging
 from datetime import datetime, timezone
 from src.config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, TELEGRAM_CHAT_ID, DB_FILE
@@ -10,6 +11,8 @@ from stravalib.client import Client
 from telegram import InputMediaPhoto, Bot
 from telegram.ext import ContextTypes, Application
 from src.services.visuals import generate_static_map, generate_elevation_profile, generate_suffer_trend
+from src.services.metrics import calculate_tss, generate_zone_chart, get_tss_feedback
+from src.services.weather import get_weather_for_city
 
 async def sync_athlete_gear(client, telegram_user_id, cursor):
     """同步运动员的器材信息"""
@@ -59,6 +62,10 @@ async def sync_user_data(context: ContextTypes.DEFAULT_TYPE):
 
 async def process_single_user_sync(user, client, cursor, conn, context):
     (telegram_user_id, access_token, refresh_token, expires_at, last_activity_ts, notification_mode) = user
+    # 获取 FTP 和 心率设置
+    cursor.execute("SELECT ftp, max_hr FROM users WHERE telegram_user_id = ?", (telegram_user_id,))
+    u_config = cursor.fetchone()
+    user_ftp, user_max_hr = u_config if u_config else (200, 190)
     try:
         if datetime.now(timezone.utc).timestamp() > expires_at:
             response = client.refresh_access_token(client_id=STRAVA_CLIENT_ID, client_secret=STRAVA_CLIENT_SECRET, refresh_token=refresh_token)
@@ -89,18 +96,21 @@ async def process_single_user_sync(user, client, cursor, conn, context):
             
             logger.info(f"发现用户 {athlete.firstname} 的新活动: {activity.name}")
             
-            # 获取更多数据
-            suffer = getattr(activity, 'suffer_score', None)
-            hr = getattr(activity, 'average_heartrate', None)
-            gear_id = getattr(activity, 'gear_id', None)
+            # 获取更多详细数据 (Summary 数据可能不全)
+            full_activity = client.get_activity(activity.id)
+            tss, np, if_score = calculate_tss(full_activity, user_ftp, user_max_hr)
+            
+            suffer = getattr(full_activity, 'suffer_score', None)
+            hr = getattr(full_activity, 'average_heartrate', None)
+            gear_id = getattr(full_activity, 'gear_id', None)
             
             cursor.execute('''
                 INSERT OR IGNORE INTO activities 
-                (activity_id, telegram_user_id, start_date, distance, moving_time, elevation_gain, suffer_score, avg_hr, gear_id) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (activity_id, telegram_user_id, start_date, distance, moving_time, elevation_gain, suffer_score, avg_hr, gear_id, tss, np, if_score) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (activity.id, telegram_user_id, activity.start_date.timestamp(), 
                   float(activity.distance) / 1000, float(activity.moving_time) if activity.moving_time else 0, 
-                  float(activity.total_elevation_gain), suffer, hr, gear_id))
+                  float(activity.total_elevation_gain), suffer, hr, gear_id, tss, np, if_score))
             conn.commit()
             
             await check_and_grant_achievements(telegram_user_id, activity, context)
@@ -119,6 +129,9 @@ async def process_single_user_sync(user, client, cursor, conn, context):
                 g_res = cursor.fetchone()
                 if g_res: message_lines.append(f"🚲 **{g_res[0]}**")
             
+            if tss > 0:
+                message_lines.append(f"🎯 **TSS**: {tss:.1f} (IF: {if_score:.2f})")
+            
             message_lines.append(f"\n🔗 [{_(telegram_user_id, 'activity_view_on_strava')}](https://www.strava.com/activities/{activity.id})")
             
             message = "\n".join(message_lines)
@@ -135,6 +148,15 @@ async def process_single_user_sync(user, client, cursor, conn, context):
                     elev_path = await generate_elevation_profile(activity.id, streams)
                     if elev_path: media.append(InputMediaPhoto(open(elev_path, 'rb')))
                 except: pass
+            
+            # 引入：区间分布图
+            try:
+                zones = client.get_activity_zones(activity.id)
+                if zones:
+                    zone_path = await generate_zone_chart(telegram_user_id, zones)
+                    if zone_path: media.append(InputMediaPhoto(open(zone_path, 'rb')))
+            except Exception as e:
+                logger.debug(f"获取区间数据失败: {e}")
             
             if media:
                 media[0].caption = message
@@ -196,7 +218,7 @@ async def generate_and_send_user_report(user_id, bot: Bot, report_type: str = 'w
     cursor = conn.cursor()
     
     def query_stats(s_ts, e_ts):
-        cursor.execute("SELECT COUNT(*), SUM(distance), SUM(moving_time), SUM(elevation_gain) FROM activities WHERE telegram_user_id = ? AND start_date >= ? AND start_date < ?", (user_id, s_ts, e_ts))
+        cursor.execute("SELECT COUNT(*), SUM(distance), SUM(moving_time), SUM(elevation_gain), SUM(tss) FROM activities WHERE telegram_user_id = ? AND start_date >= ? AND start_date < ?", (user_id, s_ts, e_ts))
         return cursor.fetchone()
     
     current_stats = query_stats(start.timestamp(), end.timestamp())
@@ -207,8 +229,8 @@ async def generate_and_send_user_report(user_id, bot: Bot, report_type: str = 'w
         conn.close()
         return
 
-    c_count, c_dist, c_time, c_elev = current_stats
-    p_count, p_dist, p_time, p_elev = previous_stats if previous_stats else (0, 0, 0, 0)
+    c_count, c_dist, c_time, c_elev, c_tss = current_stats
+    p_count, p_dist, p_time, p_elev, p_tss = previous_stats if previous_stats else (0, 0, 0, 0, 0)
     
     def format_comparison(current, previous):
         if previous is None or previous == 0: return ""
@@ -221,8 +243,13 @@ async def generate_and_send_user_report(user_id, bot: Bot, report_type: str = 'w
         _(user_id, "report_rides").format(count=c_count, comparison=format_comparison(c_count, p_count)),
         _(user_id, "report_dist").format(dist=(c_dist or 0), comparison=format_comparison(c_dist, p_dist)),
         _(user_id, "report_time").format(time=format_duration(c_time or 0), comparison=format_comparison(c_time, p_time)),
-        _(user_id, "report_elev").format(elev=(c_elev or 0), comparison=format_comparison(c_elev, p_elev))
+        _(user_id, "report_elev").format(elev=(c_elev or 0), comparison=format_comparison(c_elev, p_elev)),
+        f"🎯 **TSS**: {c_tss or 0:.1f}{format_comparison(c_tss, p_tss)}"
     ]
+    
+    # 添加专业分析反馈
+    if report_type == 'weekly' and (c_tss or 0) > 0:
+        message.append(f"\n{get_tss_feedback(c_tss)}")
     
     # 只有周报生成趋势图，月报年报数据点太多可能不直观
     trend_path = None
@@ -286,4 +313,49 @@ async def check_strava_activities(context: ContextTypes.DEFAULT_TYPE):
     client = Client()
     for user in users:
         await process_single_user_sync(user, client, cursor, conn, context)
+    conn.close()
+
+async def check_weather_alerts(context: ContextTypes.DEFAULT_TYPE):
+    """检查明天是否有计划周期性骑行，并提供天气预警"""
+    logger.info("开始检查天气预警...")
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT telegram_user_id, riding_schedule FROM users WHERE riding_schedule IS NOT NULL")
+    users = cursor.fetchall()
+    
+    tomorrow = (datetime.now(timezone.utc) + timedelta(days=1)).strftime('%a').lower()
+    
+    # 获取默认城市 (如果用户没设，这里暂用北京作为示例，实际应结合地理位置)
+    for user_id, schedule_str in users:
+        schedule = json.loads(schedule_str)
+        if tomorrow in schedule:
+            plan_time = schedule[tomorrow]
+            # 获取天气
+            weather_report = await get_weather_for_city("Beijing", user_id) 
+            msg = f"🔔 **骑行提醒**\n\n你计划明天 ({tomorrow.upper()}) {plan_time} 骑行。\n\n下一次骑行前的天气预测：\n{weather_report}\n\n请根据路线和天气调整装备！"
+            await context.bot.send_message(chat_id=user_id, text=msg, parse_mode='Markdown')
+    conn.close()
+
+async def check_goal_progress(context: ContextTypes.DEFAULT_TYPE):
+    """检查月度目标进度并提醒"""
+    logger.info("开始检查目标进度...")
+    now = datetime.now(timezone.utc)
+    month_start = now.replace(day=1, hour=0, minute=0, second=0).timestamp()
+    
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT telegram_user_id, monthly_goal_dist FROM users WHERE monthly_goal_dist > 0")
+    users = cursor.fetchall()
+    
+    for user_id, goal in users:
+        cursor.execute("SELECT SUM(distance) FROM activities WHERE telegram_user_id = ? AND start_date >= ?", (user_id, month_start))
+        current_dist = cursor.fetchone()[0] or 0
+        
+        progress = (current_dist / goal) * 100
+        days_in_month = (now.replace(month=now.month % 12 + 1, day=1) - timedelta(days=1)).day
+        expected_progress = (now.day / days_in_month) * 100
+        
+        if progress < expected_progress - 10: # 落后 10% 以上
+            msg = f"📈 **目标进度提醒**\n\n本月目标：{goal} km\n当前已完成：{current_dist:.1f} km ({progress:.1f}%)\n\n目前本月已过去 {now.day} 天，进度略微落后。保持节奏，加油骑手！🚴‍♂️"
+            await context.bot.send_message(chat_id=user_id, text=msg, parse_mode='Markdown')
     conn.close()

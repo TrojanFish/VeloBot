@@ -18,7 +18,8 @@ def init_db():
             telegram_user_id INTEGER PRIMARY KEY, strava_athlete_id INTEGER UNIQUE, strava_access_token TEXT,
             strava_refresh_token TEXT, strava_token_expires_at INTEGER, strava_last_activity_ts INTEGER,
             strava_notification_mode TEXT NOT NULL DEFAULT 'private', strava_firstname TEXT, strava_lastname TEXT,
-            language TEXT NOT NULL DEFAULT 'en', units TEXT NOT NULL DEFAULT 'metric'
+            language TEXT NOT NULL DEFAULT 'en', units TEXT NOT NULL DEFAULT 'metric',
+            ftp INTEGER DEFAULT 200, max_hr INTEGER DEFAULT 190, resting_hr INTEGER DEFAULT 60
         )
     ''')
     cursor.execute("PRAGMA table_info(users)")
@@ -28,6 +29,11 @@ def init_db():
     if 'strava_lastname' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN strava_lastname TEXT")
     if 'language' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN language TEXT NOT NULL DEFAULT 'en'")
     if 'units' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN units TEXT NOT NULL DEFAULT 'metric'")
+    if 'ftp' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN ftp INTEGER DEFAULT 200")
+    if 'max_hr' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN max_hr INTEGER DEFAULT 190")
+    if 'resting_hr' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN resting_hr INTEGER DEFAULT 60")
+    if 'monthly_goal_dist' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN monthly_goal_dist REAL DEFAULT 0")
+    if 'riding_schedule' not in columns: cursor.execute("ALTER TABLE users ADD COLUMN riding_schedule TEXT") # 存 JSON: {"sat": "08:00", "sun": "08:00"}
 
     # --- activities 表 ---
     cursor.execute('''
@@ -35,6 +41,7 @@ def init_db():
             activity_id INTEGER PRIMARY KEY, telegram_user_id INTEGER, start_date INTEGER,
             distance REAL, moving_time INTEGER, elevation_gain REAL,
             suffer_score REAL, avg_hr REAL, gear_id TEXT,
+            tss REAL, np REAL, if_score REAL,
             FOREIGN KEY(telegram_user_id) REFERENCES users(telegram_user_id)
         )
     ''')
@@ -43,6 +50,9 @@ def init_db():
     if 'suffer_score' not in act_columns: cursor.execute("ALTER TABLE activities ADD COLUMN suffer_score REAL")
     if 'avg_hr' not in act_columns: cursor.execute("ALTER TABLE activities ADD COLUMN avg_hr REAL")
     if 'gear_id' not in act_columns: cursor.execute("ALTER TABLE activities ADD COLUMN gear_id TEXT")
+    if 'tss' not in act_columns: cursor.execute("ALTER TABLE activities ADD COLUMN tss REAL")
+    if 'np' not in act_columns: cursor.execute("ALTER TABLE activities ADD COLUMN np REAL")
+    if 'if_score' not in act_columns: cursor.execute("ALTER TABLE activities ADD COLUMN if_score REAL")
 
     # --- gear 表 (追踪自行车/器材) ---
     cursor.execute('''

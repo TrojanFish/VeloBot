@@ -1,5 +1,6 @@
 import sqlite3
 import os
+import json
 import logging
 import asyncio
 import feedparser
@@ -560,3 +561,48 @@ async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await ai_coach_handler(update, context)
     else:
         await context.bot.edit_message_text(chat_id=user_id, message_id=waiting_msg.message_id, text="❌ 语音识别失败，请确保录音清晰。")
+
+async def set_goal(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not context.args:
+        await update.message.reply_text("使用方式: `/set_goal 500` (设置每月骑行目标里程，单位 km)", parse_mode='Markdown')
+        return
+    try:
+        goal = float(context.args[0])
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET monthly_goal_dist = ? WHERE telegram_user_id = ?", (goal, user_id))
+        conn.commit()
+        conn.close()
+        await update.message.reply_text(f"✅ 每月目标里程已设置为: {goal} km。加油，骑手！")
+    except ValueError:
+        await update.message.reply_text("❌ 请输入有效的数字。")
+
+async def set_schedule(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    usage = "使用方式: `/set_schedule sat 08:00 sun 09:00` (设置你习惯的骑行时间)"
+    if not context.args or len(context.args) % 2 != 0:
+        await update.message.reply_text(usage, parse_mode='Markdown')
+        return
+    
+    schedule = {}
+    valid_days = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
+    try:
+        for i in range(0, len(context.args), 2):
+            day = context.args[i].lower()
+            time = context.args[i+1]
+            if day not in valid_days:
+                raise ValueError(f"无效的星期: {day}")
+            # 简单验证时间格式 HH:MM
+            if not re.match(r'^\d{2}:\d{2}$', time):
+                raise ValueError(f"无效的时间格式: {time}")
+            schedule[day] = time
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET riding_schedule = ? WHERE telegram_user_id = ?", (json.dumps(schedule), user_id))
+        conn.commit()
+        conn.close()
+        await update.message.reply_text(f"✅ 习惯骑行时间已更新: {schedule}\n机器人将在计划骑行的前一晚为你提供天气预警。")
+    except ValueError as e:
+        await update.message.reply_text(f"❌ 设置失败: {e}")
