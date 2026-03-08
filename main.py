@@ -15,7 +15,8 @@ from src.bot.handlers import (
     get_last_activity, get_last_video, get_report, get_leaderboard,
     my_rides, my_achievements, weather, route, language_command,
     welcome, location_handler, maintenance_command, units_command, set_unit,
-    add_rss, list_rss, remove_rss, menu_command, sync_strava_command
+    add_rss, list_rss, remove_rss, menu_command, sync_strava_command,
+    set_ftp, set_max_hr, ai_coach_handler, voice_handler
 )
 from src.bot.callbacks import (
     ride_button_callback, location_button_callback, language_button_callback, menu_callback
@@ -102,6 +103,8 @@ def main():
     application.add_handler(CommandHandler("route", route))
     application.add_handler(CommandHandler("language", language_command))
     application.add_handler(CommandHandler("sync_strava", sync_strava_command))
+    application.add_handler(CommandHandler("set_ftp", set_ftp))
+    application.add_handler(CommandHandler("set_max_hr", set_max_hr))
     application.add_handler(CommandHandler("maintenance", maintenance_command))
     application.add_handler(CommandHandler("units", units_command))
     application.add_handler(CommandHandler("add_rss", add_rss))
@@ -110,6 +113,12 @@ def main():
     application.add_handler(CommandHandler("menu", menu_command))
     application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
     application.add_handler(MessageHandler(filters.LOCATION, location_handler))
+    
+    # AI 教练回应逻辑 (回复机器人消息 或 私聊中提问)
+    application.add_handler(MessageHandler(filters.TEXT & (filters.REPLY | filters.ChatType.PRIVATE) & ~filters.COMMAND, ai_coach_handler))
+    
+    # 语音识别逻辑
+    application.add_handler(MessageHandler(filters.VOICE, voice_handler))
     
     # 在后台线程中启动 Flask
     flask_thread = threading.Thread(target=run_flask_app, daemon=True)

@@ -1,4 +1,5 @@
 import sqlite3
+import os
 import logging
 import asyncio
 import feedparser
@@ -11,8 +12,10 @@ from src.services.strava import format_activity_details
 from src.services.weather import get_weather_for_city, get_weather_for_location
 from src.services.visuals import generate_suffer_trend
 from stravalib.client import Client
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, Chat
 from telegram.ext import ContextTypes
+from src.services.ai_coach import ask_ai_coach, transcribe_voice
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -456,3 +459,104 @@ async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.callback_query.edit_message_text(text, reply_markup=reply_markup, parse_mode='Markdown')
     else:
         await update.effective_message.reply_text(text, reply_markup=reply_markup, parse_mode='Markdown')
+
+async def set_ftp(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not context.args:
+        await update.message.reply_text("使用方式: `/set_ftp 200` (请替换为你的实际 FTP 值)", parse_mode='Markdown')
+        return
+    try:
+        ftp = int(context.args[0])
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET ftp = ? WHERE telegram_user_id = ?", (ftp, user_id))
+        conn.commit()
+        conn.close()
+        await update.message.reply_text(f"✅ FTP 已更新为: {ftp} W")
+    except ValueError:
+        await update.message.reply_text("❌ 请输入有效的数字。")
+
+async def set_max_hr(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not context.args:
+        await update.message.reply_text("使用方式: `/set_max_hr 190` (请替换为你的实际 最大心率 值)", parse_mode='Markdown')
+        return
+    try:
+        hr = int(context.args[0])
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE users SET max_hr = ? WHERE telegram_user_id = ?", (hr, user_id))
+        conn.commit()
+        conn.close()
+        await update.message.reply_text(f"✅ 最大心率 已更新为: {hr} bpm")
+    except ValueError:
+        await update.message.reply_text("❌ 请输入有效的数字。")
+
+async def ai_coach_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    query = update.effective_message.text
+    replied_msg = update.effective_message.reply_to_message
+    
+    # 基础用户数据
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT ftp, max_hr FROM users WHERE telegram_user_id = ?", (user_id,))
+    u_data = cursor.fetchone()
+    user_config = {"ftp": u_data[0], "max_hr": u_data[1]} if u_data else {"ftp": 200, "max_hr": 190}
+
+    activity_context = ""
+    # 尝试识别回复内容中的活动 ID
+    if replied_msg:
+        # 从消息文本中查找 Strava 链接
+        strava_match = re.search(r'strava\.com/activities/(\d+)', replied_msg.text or replied_msg.caption or "")
+        if strava_match:
+            act_id = strava_match.group(1)
+            cursor.execute("SELECT distance, moving_time, elevation_gain, suffer_score, avg_hr, tss, np, if_score FROM activities WHERE activity_id = ?", (act_id,))
+            a_res = cursor.fetchone()
+            if a_res:
+                activity_context = (
+                    f"此活动的数据: 距离 {a_res[0]:.2f}km, 时间 {format_duration(a_res[1])}, 爬升 {a_res[2]}m, "
+                    f"受累分 {a_res[3]}, 平均心率 {a_res[4]}, TSS {a_res[5]}, NP {a_res[6]}, IF {a_res[7]}。"
+                )
+    
+    # 如果是私聊且没回复特定消息，尝试获取最近一次活动
+    if not activity_context and update.effective_chat.type == Chat.PRIVATE:
+        cursor.execute("SELECT distance, moving_time, elevation_gain, suffer_score, avg_hr, tss, np, if_score FROM activities WHERE telegram_user_id = ? ORDER BY start_date DESC LIMIT 1", (user_id,))
+        a_res = cursor.fetchone()
+        if a_res:
+            activity_context = (
+                f"你最近一次活动的数据: 距离 {a_res[0]:.2f}km, 时间 {format_duration(a_res[1])}, 爬升 {a_res[2]}m, "
+                f"TSS {a_res[5]}, NP {a_res[6]}, IF {a_res[7]}。"
+            )
+
+    conn.close()
+
+    if not query: return
+
+    # 发送一个“思考中”的提示
+    waiting_msg = await update.effective_message.reply_text("🤔 Velo Coach 正在分析数据，请稍候...", parse_mode='Markdown')
+    
+    response = await ask_ai_coach(query, user_data=user_config, activity_data=activity_context)
+    
+    await context.bot.edit_message_text(chat_id=user_id, message_id=waiting_msg.message_id, text=response, parse_mode='Markdown')
+
+async def voice_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    voice = update.message.voice
+    
+    waiting_msg = await update.effective_message.reply_text("🎤 正在识别您的语音并进行回复...", parse_mode='Markdown')
+    
+    file = await context.bot.get_file(voice.file_id)
+    os.makedirs("temp", exist_ok=True)
+    file_path = f"temp/voice_{user_id}_{int(datetime.now().timestamp())}.ogg"
+    await file.download_to_drive(file_path)
+    
+    transcription = await transcribe_voice(file_path)
+    if os.path.exists(file_path): os.remove(file_path)
+
+    if transcription:
+        # 复用 AI coach 逻辑
+        update.effective_message.text = transcription # 伪造 text 供后续使用
+        await ai_coach_handler(update, context)
+    else:
+        await context.bot.edit_message_text(chat_id=user_id, message_id=waiting_msg.message_id, text="❌ 语音识别失败，请确保录音清晰。")
