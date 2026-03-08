@@ -9,7 +9,7 @@ from src.locales import LOCALIZED_COMMANDS
 from src.web.routes import run_flask_app, telegram_app_for_flask
 from src.services.youtube import check_youtube_videos
 from src.services.rss_manager import check_rss_feeds
-from src.bot.tasks import check_strava_activities
+from src.bot.tasks import check_strava_activities, send_periodic_reports
 from src.bot.handlers import (
     start, help_command, link_strava, toggle_strava_privacy, 
     get_last_activity, get_last_video, get_report, get_leaderboard,
@@ -50,6 +50,8 @@ async def post_init(application: Application):
     scheduler.add_job(check_youtube_videos, 'interval', minutes=10, args=[application])
     scheduler.add_job(check_strava_activities, 'interval', minutes=15, args=[application])
     scheduler.add_job(check_rss_feeds, 'interval', minutes=20, args=[application])
+    # 每天 09:00 检查并推送报表 (周报/月报/年报)
+    scheduler.add_job(send_periodic_reports, 'cron', hour=9, minute=0, args=[application])
     scheduler.start()
     logger.info("后台调度器已启动。")
 

@@ -116,58 +116,8 @@ async def welcome(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def get_report(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
-    now = datetime.now(timezone.utc)
-    today = now.replace(hour=0, minute=0, second=0, microsecond=0)
-    current_period_start = today - timedelta(days=7)
-    previous_period_start = current_period_start - timedelta(days=7)
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    def query_stats(start_ts, end_ts):
-        cursor.execute("SELECT COUNT(*), SUM(distance), SUM(moving_time), SUM(elevation_gain) FROM activities WHERE telegram_user_id = ? AND start_date >= ? AND start_date < ?", (user_id, start_ts, end_ts))
-        return cursor.fetchone()
-    current_stats = query_stats(current_period_start.timestamp(), today.timestamp())
-    previous_stats = query_stats(previous_period_start.timestamp(), current_period_start.timestamp())
-    conn.close()
-    if not current_stats or not current_stats[0]:
-        await update.effective_message.reply_text(_(user_id, "report_no_activity"), parse_mode='Markdown')
-        return
-    c_count, c_dist, c_time, c_elev = current_stats
-    p_count, p_dist, p_time, p_elev = previous_stats if previous_stats else (0, 0, 0, 0)
-    def format_comparison(current, previous):
-        if previous is None or previous == 0: return ""
-        current, previous = current or 0, previous or 0
-        diff = ((current - previous) / previous) * 100
-        return f" `({'+' if diff >= 0 else ''}{diff:.0f}%)`"
-    
-    message = [
-        _(user_id, "report_title"),
-        _(user_id, "report_rides").format(count=c_count, comparison=format_comparison(c_count, p_count)),
-        _(user_id, "report_dist").format(dist=(c_dist or 0), comparison=format_comparison(c_dist, p_dist)),
-        _(user_id, "report_time").format(time=format_duration(c_time or 0), comparison=format_comparison(c_time, p_time)),
-        _(user_id, "report_elev").format(elev=(c_elev or 0), comparison=format_comparison(c_elev, p_elev))
-    ]
-    
-    # 生成 Suffer Score 趋势图
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT date(start_date, 'unixepoch', 'localtime') as day, SUM(suffer_score) 
-        FROM activities 
-        WHERE telegram_user_id = ? AND start_date >= ? 
-        GROUP BY day ORDER BY day ASC
-    """, (user_id, current_period_start.timestamp()))
-    trend_data = cursor.fetchall()
-    conn.close()
-    
-    if trend_data:
-        dates = [row[0][5:] for row in trend_data]  # 仅保留 MM-DD
-        scores = [row[1] or 0 for row in trend_data]
-        trend_path = await generate_suffer_trend(user_id, dates, scores)
-        if trend_path:
-            await update.effective_message.reply_photo(photo=open(trend_path, 'rb'), caption="\n".join(message), parse_mode='Markdown')
-            return
-
-    await update.effective_message.reply_text("\n".join(message), parse_mode='Markdown')
+    from src.bot.tasks import generate_and_send_user_report
+    await generate_and_send_user_report(user_id, context.bot, 'demand')
 
 async def get_leaderboard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id

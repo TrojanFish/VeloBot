@@ -7,10 +7,9 @@ from src.services.strava import format_activity_details, check_and_grant_achieve
 from src.services.feishu import send_feishu_notification
 from src.services.visuals import generate_static_map, generate_elevation_profile
 from stravalib.client import Client
-from telegram import InputMediaPhoto
-from telegram.ext import ContextTypes
-
-logger = logging.getLogger(__name__)
+from telegram import InputMediaPhoto, Bot
+from telegram.ext import ContextTypes, Application
+from src.services.visuals import generate_static_map, generate_elevation_profile, generate_suffer_trend
 
 async def sync_athlete_gear(client, telegram_user_id, cursor):
     """同步运动员的器材信息"""
@@ -155,6 +154,128 @@ async def process_single_user_sync(user, client, cursor, conn, context):
         logger.error(f"处理用户 {telegram_user_id} 的 Strava 数据时出错: {e}")
         if "Authorization Error" in str(e):
             await context.bot.send_message(chat_id=telegram_user_id, text=_(telegram_user_id, "reauth_required"))
+
+
+async def generate_and_send_user_report(user_id, bot: Bot, report_type: str = 'weekly'):
+    """生成并发送个人报表"""
+    now = datetime.now(timezone.utc)
+    today = now.replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    if report_type == 'weekly':
+        end = today
+        start = end - timedelta(days=7)
+        p_end = start
+        p_start = p_end - timedelta(days=7)
+        title_key = "report_title"
+        no_act_key = "report_no_activity"
+    elif report_type == 'monthly':
+        end = today.replace(day=1)
+        last_month = end - timedelta(days=1)
+        start = last_month.replace(day=1)
+        p_end = start
+        p_start = (p_end - timedelta(days=1)).replace(day=1)
+        title_key = "report_monthly_title"
+        no_act_key = "report_monthly_no_activity"
+    elif report_type == 'yearly':
+        end = today.replace(month=1, day=1)
+        start = end.replace(year=end.year - 1)
+        p_end = start
+        p_start = p_end.replace(year=p_end.year - 1)
+        title_key = "report_yearly_title"
+        no_act_key = "report_yearly_no_activity"
+    else: # Default behavior for command on-demand (last 7 days)
+        end = today
+        start = end - timedelta(days=7)
+        p_end = start
+        p_start = p_end - timedelta(days=7)
+        title_key = "report_title"
+        no_act_key = "report_no_activity"
+
+    from src.database import get_db_connection
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    def query_stats(s_ts, e_ts):
+        cursor.execute("SELECT COUNT(*), SUM(distance), SUM(moving_time), SUM(elevation_gain) FROM activities WHERE telegram_user_id = ? AND start_date >= ? AND start_date < ?", (user_id, s_ts, e_ts))
+        return cursor.fetchone()
+    
+    current_stats = query_stats(start.timestamp(), end.timestamp())
+    previous_stats = query_stats(p_start.timestamp(), p_end.timestamp())
+    
+    if not current_stats or not current_stats[0]:
+        await bot.send_message(chat_id=user_id, text=_(user_id, no_act_key), parse_mode='Markdown')
+        conn.close()
+        return
+
+    c_count, c_dist, c_time, c_elev = current_stats
+    p_count, p_dist, p_time, p_elev = previous_stats if previous_stats else (0, 0, 0, 0)
+    
+    def format_comparison(current, previous):
+        if previous is None or previous == 0: return ""
+        current, previous = current or 0, previous or 0
+        diff = ((current - previous) / previous) * 100
+        return f" `({'+' if diff >= 0 else ''}{diff:.0f}%)`"
+    
+    message = [
+        _(user_id, title_key),
+        _(user_id, "report_rides").format(count=c_count, comparison=format_comparison(c_count, p_count)),
+        _(user_id, "report_dist").format(dist=(c_dist or 0), comparison=format_comparison(c_dist, p_dist)),
+        _(user_id, "report_time").format(time=format_duration(c_time or 0), comparison=format_comparison(c_time, p_time)),
+        _(user_id, "report_elev").format(elev=(c_elev or 0), comparison=format_comparison(c_elev, p_elev))
+    ]
+    
+    # 只有周报生成趋势图，月报年报数据点太多可能不直观
+    trend_path = None
+    if report_type == 'weekly':
+        cursor.execute("""
+            SELECT date(start_date, 'unixepoch', 'localtime') as day, SUM(suffer_score) 
+            FROM activities 
+            WHERE telegram_user_id = ? AND start_date >= ? AND start_date < ?
+            GROUP BY day ORDER BY day ASC
+        """, (user_id, start.timestamp(), end.timestamp()))
+        trend_data = cursor.fetchall()
+        if trend_data:
+            dates = [row[0][5:] for row in trend_data]
+            scores = [row[1] or 0 for row in trend_data]
+            trend_path = await generate_suffer_trend(user_id, dates, scores)
+
+    conn.close()
+    
+    final_text = "\n".join(message)
+    try:
+        if trend_path:
+            await bot.send_photo(photo=open(trend_path, 'rb'), caption=final_text, parse_mode='Markdown')
+        else:
+            await bot.send_message(chat_id=user_id, text=final_text, parse_mode='Markdown')
+    except Exception as e:
+        logger.error(f"发送报表给用户 {user_id} 失败: {e}")
+
+async def send_periodic_reports(application: Application):
+    """
+    发送定期的个人报表任务 (由 Scheduler 调用)
+    """
+    now = datetime.now(timezone.utc)
+    # 根据当前日期判断是哪种推送
+    report_type = None
+    if now.month == 1 and now.day == 1:
+        report_type = 'yearly'
+    elif now.day == 1:
+        report_type = 'monthly'
+    elif now.weekday() == 0: # Monday
+        report_type = 'weekly'
+    
+    if not report_type:
+        return
+
+    logger.info(f"触发定时任务：开始推送 {report_type} 报表...")
+    conn = sqlite3.connect(DB_FILE)
+    cursor = conn.cursor()
+    cursor.execute("SELECT telegram_user_id FROM users WHERE strava_access_token IS NOT NULL")
+    users = cursor.fetchall()
+    conn.close()
+    
+    for (user_id,) in users:
+        await generate_and_send_user_report(user_id, application.bot, report_type)
 
 async def check_strava_activities(context: ContextTypes.DEFAULT_TYPE):
     logger.info("开始检查 Strava 活动更新...")
