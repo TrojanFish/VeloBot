@@ -1,7 +1,7 @@
 import sqlite3
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from src.config import STRAVA_CLIENT_ID, STRAVA_CLIENT_SECRET, TELEGRAM_CHAT_ID, DB_FILE
 from src.utils import _, format_duration
 from src.services.strava import format_activity_details, check_and_grant_achievements
@@ -13,6 +13,8 @@ from telegram.ext import ContextTypes, Application
 from src.services.visuals import generate_static_map, generate_elevation_profile, generate_suffer_trend
 from src.services.metrics import calculate_tss, generate_zone_chart, get_tss_feedback
 from src.services.weather import get_weather_for_city
+
+logger = logging.getLogger(__name__)
 
 async def sync_athlete_gear(client, telegram_user_id, cursor):
     """同步运动员的器材信息"""
@@ -330,10 +332,10 @@ async def check_weather_alerts(context: ContextTypes.DEFAULT_TYPE):
         schedule = json.loads(schedule_str)
         if tomorrow in schedule:
             plan_time = schedule[tomorrow]
-            # 获取天气
-            weather_report = await get_weather_for_city("Beijing", user_id) 
-            msg = f"🔔 **骑行提醒**\n\n你计划明天 ({tomorrow.upper()}) {plan_time} 骑行。\n\n下一次骑行前的天气预测：\n{weather_report}\n\n请根据路线和天气调整装备！"
+            msg = f"🔔 **骑行提醒**\n\n你计划明天 ({tomorrow.upper()}) {plan_time} 骑行。\n\n预祝你一路顺风！以下是示例城市 (Beijing) 的天气预报："
             await context.bot.send_message(chat_id=user_id, text=msg, parse_mode='Markdown')
+            # 调用已有的天气发送函数
+            await get_weather_for_city(user_id, "Beijing", context, user_id)
     conn.close()
 
 async def check_goal_progress(context: ContextTypes.DEFAULT_TYPE):
