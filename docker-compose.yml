@@ -12,7 +12,7 @@ services:
     # Ensure the database directory exists and has correct permissions
     user: "1000:1000"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:5000/strava_auth" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3

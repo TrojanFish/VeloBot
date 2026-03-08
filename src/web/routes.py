@@ -18,6 +18,10 @@ async def send_auth_success_message(context: ContextTypes.DEFAULT_TYPE):
     message = _(chat_id, "strava_auth_success").format(athlete_name=athlete_name)
     await context.bot.send_message(chat_id=chat_id, text=message)
 
+@flask_app.route('/health')
+def health_check():
+    return "OK", 200
+
 @flask_app.route('/strava_auth')
 def strava_auth_callback():
     code, state = request.args.get('code'), request.args.get('state')
