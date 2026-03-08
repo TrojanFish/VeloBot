@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 # --- en Localization ---
+
 LOCALIZATION = \
 {   'achievement_unlocked': '🎉 **Achievement Unlocked!** 🎉\n'
                             '\n'

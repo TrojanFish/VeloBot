@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 # --- zh-hant Localization ---
+
 LOCALIZATION = \
 {   'achievement_unlocked': '🎉 **成就解鎖!** 🎉\n\n恭喜你獲得了 **{name}** 成就！\n_{desc}_',
     'activity_detail_avg_cadence': '🦶 平均踏頻',
@@ -69,6 +71,10 @@ LOCALIZATION = \
     'location_fetching_weather': '好的，正在查詢天氣預報...',
     'location_received': '我收到了您的位置，想做什麼呢？',
     'maintenance': '器材保養',
+    'maintenance_no_gear': 'No gear linked yet. Try syncing activities first.',
+    'maintenance_set_success': '✅ Maintenance threshold set for {gear_name} ({part}): {threshold} '
+                               'km',
+    'maintenance_title': '🔧 *Gear Maintenance Center*',
     'menu_activity': '騎行活動',
     'menu_awards': '我的成就',
     'menu_gear': '器材保養',
@@ -126,6 +132,8 @@ LOCALIZATION = \
     'sync_success': '✅ 同步完成！您的器材和最近活動已更新。',
     'toggle_strava_privacy': '推送隱私切換',
     'units': '單位切換',
+    'units_prompt': 'Please select your preferred unit system:',
+    'units_set_success': '✅ Unit system has been set to {unit}.',
     'video_error': '獲取影片時發生錯誤，請稍後再試。',
     'video_not_found': '無法從 RSS 源獲取到影片資訊。',
     'weather': '天氣預報',
@@ -150,11 +158,38 @@ LOCALIZATION = \
     'your_last_activity_is': '您最近的一次活動是：\n'}
 
 LOCALIZED_COMMANDS = \
-{}
+{   'add_rss': '➕ 添加 RSS 订阅源',
+    'create_ride': '🤝 发起约骑',
+    'get_last_activity': '🚴 查看最近一次活动',
+    'get_last_video': '📺 获取最新视频',
+    'help': 'ℹ️ 显示指令列表',
+    'language': '🌐 切换语言',
+    'leaderboard': '🏆 查看群组排行榜',
+    'link_strava': '🔗 关联 Strava 账号',
+    'list_rss': '📜 查看已订阅的 RSS',
+    'maintenance': '🔧 器材保养追踪',
+    'menu': '⚙️ 打开主控制面板',
+    'my_achievements': '🏅 查看我的成就',
+    'my_rides': '🗓️ 查看我的活动',
+    'remove_rss': '🗑 删除 RSS 订阅',
+    'report': '📊 获取个人周报',
+    'route': '🗺️ 寻找路线',
+    'start': '🚀 显示欢迎信息',
+    'sync_strava': '🔄 手动同步 Strava 活动与器材',
+    'toggle_strava_privacy': '🔒 切换隐私模式',
+    'units': '📏 切换单位 (km/mi)',
+    'weather': '🌦️ 查询天气'}
 
 LOCALIZED_ACHIEVEMENTS = \
 {   'dist_100k': {'desc': '首次完成單次超過100公里的騎行', 'name': '💯 百公里認證'},
     'elev_1000m': {'desc': '首次完成單次爬升超過1000米的活動', 'name': '🧗\u200d♂️ 爬坡能手'},
+    'elev_2000m': {   'desc': 'First time reaching over 2000m of elevation gain in a single ride',
+                      'name': '🏔 King of the Hill'},
     'max_speed_70k': {'desc': '首次最高時速超過70km/h', 'name': '⚡️ 極速傳說'},
+    'month_dist_500k': {'desc': 'Rode over 500km in a single month', 'name': '📅 Monthly Century'},
+    'total_dist_10000k': {   'desc': 'Total cycling distance reached 10,000km',
+                             'name': '👑 Titan of 10,000k'},
     'total_dist_1000k': {'desc': '累計騎行總距離達到1000公里', 'name': '🌍 千里之行'},
-    'total_dist_5000k': {'desc': '累計騎行總距離達到5000公里', 'name': '🚴\u200d♂️ 萬里騎士'}}
+    'total_dist_5000k': {'desc': '累計騎行總距離達到5000公里', 'name': '🚴\u200d♂️ 萬里騎士'},
+    'year_dist_10000k': {   'desc': 'Rode over 10,000km in a single year',
+                            'name': '🏆 Legend of the Year'}}

@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 # --- zh-hans Localization ---
+
 LOCALIZATION = \
 {   'achievement_unlocked': '🎉 **成就解锁!** 🎉\n\n恭喜你获得了 **{name}** 成就！\n_{desc}_',
     'activity_detail_avg_cadence': '🦶 平均踏频',
@@ -158,7 +160,27 @@ LOCALIZATION = \
     'your_last_activity_is': '您最近的一次活动是：\n'}
 
 LOCALIZED_COMMANDS = \
-{}
+{   'add_rss': '➕ 添加 RSS 订阅源',
+    'create_ride': '🤝 发起约骑',
+    'get_last_activity': '🚴 查看最近一次活动',
+    'get_last_video': '📺 获取最新视频',
+    'help': 'ℹ️ 显示指令列表',
+    'language': '🌐 切换语言',
+    'leaderboard': '🏆 查看群组排行榜',
+    'link_strava': '🔗 关联 Strava 账号',
+    'list_rss': '📜 查看已订阅的 RSS',
+    'maintenance': '🔧 器材保养追踪',
+    'menu': '⚙️ 打开主控制面板',
+    'my_achievements': '🏅 查看我的成就',
+    'my_rides': '🗓️ 查看我的活动',
+    'remove_rss': '🗑 删除 RSS 订阅',
+    'report': '📊 获取个人周报',
+    'route': '🗺️ 寻找路线',
+    'start': '🚀 显示欢迎信息',
+    'sync_strava': '🔄 手动同步 Strava 活动与器材',
+    'toggle_strava_privacy': '🔒 切换隐私模式',
+    'units': '📏 切换单位 (km/mi)',
+    'weather': '🌦️ 查询天气'}
 
 LOCALIZED_ACHIEVEMENTS = \
 {   'dist_100k': {'desc': '首次完成单次超过100公里的骑行', 'name': '💯 百公里认证'},

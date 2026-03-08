@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 # --- it Localization ---
+
 LOCALIZATION = \
 {   'achievement_unlocked': '🎉 **Traguardo sbloccato!** 🎉\n'
                             '\n'
@@ -83,6 +85,10 @@ LOCALIZATION = \
     'location_fetching_weather': 'Capito, recupero le previsioni del tempo...',
     'location_received': 'Ho ricevuto la tua posizione. Cosa ti piacerebbe fare?',
     'maintenance': 'Manutenzione',
+    'maintenance_no_gear': 'No gear linked yet. Try syncing activities first.',
+    'maintenance_set_success': '✅ Maintenance threshold set for {gear_name} ({part}): {threshold} '
+                               'km',
+    'maintenance_title': '🔧 *Gear Maintenance Center*',
     'menu_activity': 'Attività',
     'menu_awards': 'Premi',
     'menu_gear': 'Attrezzatura',
@@ -117,11 +123,15 @@ LOCALIZATION = \
     'report': 'Report Settimanale',
     'report_dist': '📏 *Distanza totale*: {dist:.2f} km{comparison}',
     'report_elev': '🧗 *Dislivello totale*: {elev:.0f} m{comparison}',
+    'report_monthly_no_activity': 'You have no recorded activities in the past month. Keep it up!',
+    'report_monthly_title': '📊 *Your Personal Monthly Report*\n',
     'report_no_activity': 'Non hai registrato alcuna attività negli ultimi 7 giorni. Continua '
                           'così!',
     'report_rides': '🚴\u200d♂️ *Attività*: {count} volte{comparison}',
     'report_time': '⏱️ *Tempo totale*: {time}{comparison}',
     'report_title': '📊 *Il tuo rapporto settimanale personale (ultimi 7 giorni)*\n',
+    'report_yearly_no_activity': 'You have no recorded activities in the past year. Keep it up!',
+    'report_yearly_title': '📊 *Your Personal Yearly Report*\n',
     'ride_card_creator': '👑 *Organizzatore*: {name}',
     'ride_card_desc': '📝 *Note*: {desc}',
     'ride_card_invalid': "Queste informazioni sull'uscita non sono più valide.",
@@ -148,8 +158,14 @@ LOCALIZATION = \
                            'Per impostazione predefinita, le attività ti verranno inviate solo '
                            'tramite messaggio privato. Per cambiare questa impostazione, usa il '
                            'comando /toggle_strava_privacy.',
+    'sync_started': '🔄 Starting synchronization... please wait.',
+    'sync_strava': 'Sync Strava Data',
+    'sync_success': '✅ Synchronization complete! Your gear and recent activities are now up to '
+                    'date.',
     'toggle_strava_privacy': 'Privacy Mode',
     'units': 'Unità',
+    'units_prompt': 'Please select your preferred unit system:',
+    'units_set_success': '✅ Unit system has been set to {unit}.',
     'video_error': 'Si è verificato un errore durante il recupero del video. Per favore, riprova '
                    'più tardi.',
     'video_not_found': 'Impossibile recuperare il video dal feed RSS.',
@@ -178,21 +194,26 @@ LOCALIZATION = \
     'your_last_activity_is': 'La tua ultima attività è:\n'}
 
 LOCALIZED_COMMANDS = \
-{   'create_ride': '🤝 Organizza uscita',
+{   'add_rss': '➕ Add an RSS feed to monitor',
+    'create_ride': '🤝 Organizza uscita',
     'get_last_activity': '🚴 Vedi ultima attività',
     'get_last_video': '📺 Vedi ultimo video',
     'help': 'ℹ️ Mostra elenco comandi',
     'language': '🌐 Cambia lingua',
     'leaderboard': '🏆 Vedi classifica',
     'link_strava': '🔗 Collega account Strava',
+    'list_rss': '📜 List your RSS subscriptions',
+    'maintenance': '🔧 Gear maintenance tracking',
     'menu': '⚙️ Apri il Pannello di Controllo',
     'my_achievements': '🏅 Vedi i miei traguardi',
     'my_rides': '🗓️ Vedi le mie uscite',
+    'remove_rss': '🗑 Remove an RSS feed',
     'report': '📊 Vedi report settimanale',
     'route': '🗺️ Cerca percorsi',
     'start': '🚀 Mostra messaggio di benvenuto',
     'sync_strava': '🔄 Sincronizza Strava manualmente',
     'toggle_strava_privacy': '🔒 Cambia privacy',
+    'units': '📏 Switch units (km/mi)',
     'weather': '🌦️ Vedi meteo'}
 
 LOCALIZED_ACHIEVEMENTS = \
@@ -200,9 +221,16 @@ LOCALIZED_ACHIEVEMENTS = \
                      'name': '💯 Certificato 100k'},
     'elev_1000m': {   'desc': "Prima volta completando un'attività con oltre 1000m di dislivello",
                       'name': '🧗\u200d♂️ Pro della Salita'},
+    'elev_2000m': {   'desc': 'First time reaching over 2000m of elevation gain in a single ride',
+                      'name': '🏔 King of the Hill'},
     'max_speed_70k': {   'desc': 'Prima volta sorpassando i 70km/h di velocità massima',
                          'name': '⚡️ Leggenda della Velocità'},
+    'month_dist_500k': {'desc': 'Rode over 500km in a single month', 'name': '📅 Monthly Century'},
+    'total_dist_10000k': {   'desc': 'Total cycling distance reached 10,000km',
+                             'name': '👑 Titan of 10,000k'},
     'total_dist_1000k': {   'desc': 'La distanza totale percorsa ha raggiunto i 1000km',
                             'name': '🌍 Mille Chilometri'},
     'total_dist_5000k': {   'desc': 'La distanza totale percorsa ha raggiunto i 5000km',
-                            'name': '🚴\u200d♂️ Cavaliere dei Diecimila'}}
+                            'name': '🚴\u200d♂️ Cavaliere dei Diecimila'},
+    'year_dist_10000k': {   'desc': 'Rode over 10,000km in a single year',
+                            'name': '🏆 Legend of the Year'}}
