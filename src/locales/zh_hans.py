@@ -1,4 +1,4 @@
-# --- 简体中文 Localization ---
+# --- zh-hans Localization ---
 LOCALIZATION = \
 {   'achievement_unlocked': '🎉 **成就解锁!** 🎉\n\n恭喜你获得了 **{name}** 成就！\n_{desc}_',
     'activity_detail_avg_cadence': '🦶 平均踏频',
