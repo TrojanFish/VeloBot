@@ -189,7 +189,7 @@ async def my_achievements(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.effective_message.reply_text(_(user_id, "my_achievements_no_activity"))
         return
     message_lines = [_(user_id, "my_achievements_title")]
-    for ach_id, _ in LOCALIZED_ACHIEVEMENTS['en'].items():
+    for ach_id, _unused in LOCALIZED_ACHIEVEMENTS['en'].items():
         ach_data = get_achievement_text(user_id, ach_id)
         if ach_id in unlocked_ids: message_lines.append(f"✅ *{ach_data['name']}*: _{ach_data['desc']}_")
         else: message_lines.append(f"❌ *{ach_data['name']}*: _{ach_data['desc']}_")
