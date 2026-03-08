@@ -9,3 +9,4 @@ pytz
 python-dotenv
 matplotlib
 polyline
+openai
