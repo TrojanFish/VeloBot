@@ -25,7 +25,7 @@
         "name": "💿 碟煞、飛輪與輪組系統",
         "items": [
           "• **中央鎖死碟盤鎖緊環**：40 N·m（內齒使用飛輪套筒，外齒使用外掛中軸套筒，螺紋塗微量黃油防咬死）",
-          "• **六孔碟盤固定螺絲**：5–6 N·m（對角星形分次鎖緊，務必塗抹中強度樂泰 242/243 螺絲膠）",
+          "• **六孔碟盤固定螺絲 (M5 T25)**：2–4 N·m（Shimano/SRAM 官方規範為 2–4 N·m，標準建議 4 N·m。嚴禁打到 5–6 N·m 導致螺絲滑牙或碟盤盤片受力形變微偏擺！對角星形分次交替鎖緊，務必使用帶有中強度防鬆膠的專用螺栓）",
           "• **卡式飛輪鎖緊蓋**：40 N·m（使用專用飛輪套筒鎖緊，確認最小片齒圈已完全吻合卡槽）",
           "• **平裝式 (Flat Mount) 碟煞卡鉗螺栓**：6–8 N·m（車架螺紋多為鋁合金，嚴禁超扭，需塗中強度螺絲膠）",
           "• **公路車貫通軸 / 桶軸桿 (Thru Axle)**：9–13.5 N·m（通常標稱 10 N·m，軸身與螺紋塗微量潤滑脂防異音）"
@@ -69,7 +69,7 @@
       "chain_formula": {
         "name": "公路車雙盤標準鏈條節數計算（Rigout 嚴格算法）",
         "formula": "節數 L = 2 × (C / 12.7) + (F / 2) + (R / 2) + 1",
-        "note": "其中 C = 車架後下叉長度(mm)，F = 大盤最大盤齒數，R = 飛輪最大齒數。計算結果若為單數需加 1 湊成偶數節。"
+        "note": "其中 C = 車架後下叉長度(mm)，F = 大盤最大盤齒數，R = 飛輪最大齒數。計算結果若為單數需加 1 湊成偶數節。⚠️ 本公式嚴格適用於公路車雙盤 (2x) 系統；若為單盤 (1x) 系統，因後撥導臂張力範圍差異，請採用官方繞大盤大飛加 4 節之實測法。"
       },
       "tubeless_sealant": {
         "25c": "推薦注入量：30–35 ml",
@@ -166,7 +166,7 @@
         "name": "💿 Disc Brakes, Cassette & Wheels",
         "items": [
           "• **Centerlock Rotor Lockring**: 40 N·m (Internal spline uses cassette tool; External spline uses BB tool; lightly grease threads)",
-          "• **6-Bolt Rotor Bolts**: 5–6 N·m (Star pattern tightening; always apply Loctite 242/243 blue threadlocker)",
+          "• **6-Bolt Disc Rotor Bolts (M5 T25)**: 2–4 N·m (Shimano/SRAM official spec is 2–4 N·m, standard 4 N·m. Never exceed 4.5 N·m to avoid sheared bolts or rotor warping; tighten in cross/star pattern with medium threadlocker)",
           "• **Cassette Lockring**: 40 N·m (Ensure smallest 11T/12T cog splines are fully engaged before torquing)",
           "• **Flat Mount Disc Brake Caliper Bolts**: 6–8 N·m (Frame threads are alloy, never over-torque; apply medium threadlocker)",
           "• **Road Thru-Axles**: 9–13.5 N·m (Typically 10 N·m; apply thin layer of grease on threads and shaft)"
@@ -211,7 +211,7 @@
       "chain_formula": {
         "name": "Road Double Chain Length Calculation (Rigout Formula)",
         "formula": "Links L = 2 x (C / 12.7) + (F / 2) + (R / 2) + 1",
-        "note": "C = Chainstay length (mm), F = Big chainring teeth, R = Max cassette cog teeth. Always round up to an even number."
+        "note": "C = Chainstay length (mm), F = Big chainring teeth, R = Max cassette cog teeth. Always round up to an even number. ⚠️ Rigout formula strictly applies to 2x double drivetrain systems; for 1x single chainrings, use manufacturer big-big + 4 links physical sizing method."
       },
       "tubeless_sealant": {
         "25c": "Recommended: 30–35 ml",

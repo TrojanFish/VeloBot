@@ -411,6 +411,7 @@ async def handle_pain_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             text += f"\n🧘 **Targeted Stretches & Exercises**:\n"
             for s in rx.get("stretches", []):
                 text += f"• {s}\n"
+            text += f"\n⚠️ *Disclaimer: For mechanical fit adjustments & posture reference only, NOT medical advice. Seek professional medical care if pain persists.*"
         else:
             text = (
                 f"🩺 **公路車騎行疼痛與 Fitting 調校處方籤**\n\n"
@@ -428,6 +429,7 @@ async def handle_pain_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             text += f"\n🧘 **專案拉伸與康復動作**：\n"
             for s in rx.get("stretches", []):
                 text += f"• {s}\n"
+            text += f"\n⚠️ *免責聲明：本處方僅供車輛機械幾何調整與騎姿排查參考，絕非醫療診斷。劇烈或持續疼痛請務必尋求物理治療師或醫師協助。*"
 
         keyboard = [
             [InlineKeyboardButton("🔄 " + ("Other Scenarios" if lang == "en" else "查詢其他時機"), callback_data=f"pain_area_{area_id}")],
@@ -503,7 +505,8 @@ async def handle_roi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
                 f"⚖️ <b>Weight Delta</b>: {wt_str}\n"
                 f"💰 <b>Est. Cost</b>: ¥{item['ref_price']} (¥{item['cost_per_watt']}/W)\n"
                 f"🏆 <b>Mechanic Score</b>: {item['score']}\n\n"
-                f"🛠️ <b>Mechanic Verdict</b>:\n{item['verdict'].get('en', '')}"
+                f"🛠️ <b>Mechanic Verdict</b>:\n{item['verdict'].get('en', '')}\n\n"
+                f"🔬 <i>Physics Note: Tested at 40 km/h flat road baseline (~250-300W rider power). Aero drag scales with v² and power with v³ (P ∝ v³). Gains shrink significantly at 25 km/h, and multiply at 45+ km/h. Multiple upgrades cannot be linearly summed due to boundary layer interference.</i>"
             )
         else:
             wt_g = item['weight_save_g']
@@ -516,7 +519,8 @@ async def handle_roi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
                 f"⚖️ <b>重量變化</b>：{wt_str}\n"
                 f"💰 <b>參考均價</b>：¥{item['ref_price']}（約 ¥{item['cost_per_watt']}/瓦）\n"
                 f"🏆 <b>技師推薦指數</b>：{item['score']}\n\n"
-                f"🛠️ <b>技師客觀評價</b>：\n{item['verdict'].get('zh_hant', '')}"
+                f"🛠️ <b>技師客觀評價</b>：\n{item['verdict'].get('zh_hant', '')}\n\n"
+                f"🔬 <i>物理備註：數據嚴格基於 40 km/h 平路風洞/滾阻實測（基准輸出 250–300W）。空力阻力與速度平方成正比，功率與速度三次方成正比（P ∝ v³），25 km/h 慢速或爬坡時省瓦效益將大幅縮水；多項改裝存在邊界層干擾與邊際遞減，不可簡單線性相加。</i>"
             )
 
         keyboard = [

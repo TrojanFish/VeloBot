@@ -26,13 +26,13 @@
         "en": "Road Race Speedsuit"
       },
       "watts_saved": 11.0,
-      "time_saved_40km": "70s",
+      "time_saved_40km": "48s",
       "weight_save_g": 0,
       "ref_price": 1500,
       "cost_per_watt": 136,
       "score": "★★★★★",
       "verdict": {
-        "zh_hant": "人體佔據騎行總風阻的 75%~80%。無接縫貼合連體服在風洞實測中省瓦驚人（約 11W），每瓦成本僅約 ¥136，性價比直接碾壓昂貴的大深框碳輪！",
+        "zh_hant": "人體佔據騎行總風阻的 75%~80%。無接縫貼合連體服在風洞實測中省瓦驚人（40km/h 基準下約 11W），每瓦成本僅約 ¥136，性價比直接碾壓昂貴的大深框碳輪！",
         "en": "The rider's body accounts for ~80% of total aerodynamic drag. A snug speedsuit saves ~11W at 40 km/h in wind tunnels at just ~$20/W—far better ROI than expensive wheels."
       }
     },
@@ -44,13 +44,13 @@
         "en": "Aero Fitted Jersey"
       },
       "watts_saved": 7.5,
-      "time_saved_40km": "48s",
+      "time_saved_40km": "33s",
       "weight_save_g": 0,
       "ref_price": 450,
       "cost_per_watt": 60,
       "score": "★★★★★",
       "verdict": {
-        "zh_hant": "相比傳統寬鬆版型兜風的騎行服，手臂與肩部採用導流條紋面料的修身服省瓦極佳，百元投入換來 48 秒提升，新手必改首選。",
+        "zh_hant": "相比傳統寬鬆版型兜風的騎行服，手臂與肩部採用導流條紋面料的修身服省瓦極佳，百元投入換來 33 秒提升，新手必改首選。",
         "en": "Compared to loose-fitting jerseys that parachute in headwinds, tight ribbed aero fabrics save ~7.5W. Exceptional budget upgrade."
       }
     },
@@ -62,7 +62,7 @@
         "en": "Aero Road Helmet"
       },
       "watts_saved": 5.0,
-      "time_saved_40km": "32s",
+      "time_saved_40km": "22s",
       "weight_save_g": 0,
       "ref_price": 1200,
       "cost_per_watt": 240,
@@ -80,7 +80,7 @@
         "en": "50mm Aero Carbon Wheelset"
       },
       "watts_saved": 6.5,
-      "time_saved_40km": "42s",
+      "time_saved_40km": "28s",
       "weight_save_g": 280,
       "ref_price": 4200,
       "cost_per_watt": 646,
@@ -98,7 +98,7 @@
         "en": "60mm+ Deep Section Carbon Wheels"
       },
       "watts_saved": 9.0,
-      "time_saved_40km": "58s",
+      "time_saved_40km": "39s",
       "weight_save_g": 120,
       "ref_price": 6500,
       "cost_per_watt": 722,
@@ -116,7 +116,7 @@
         "en": "Integrated Aero Carbon Cockpit"
       },
       "watts_saved": 3.8,
-      "time_saved_40km": "24s",
+      "time_saved_40km": "16s",
       "weight_save_g": 90,
       "ref_price": 1200,
       "cost_per_watt": 315,
@@ -134,7 +134,7 @@
         "en": "Ultralight TPU Inner Tubes"
       },
       "watts_saved": 3.2,
-      "time_saved_40km": "20s",
+      "time_saved_40km": "14s",
       "weight_save_g": 140,
       "ref_price": 160,
       "cost_per_watt": 50,
@@ -152,7 +152,7 @@
         "en": "Latex Inner Tubes"
       },
       "watts_saved": 2.2,
-      "time_saved_40km": "14s",
+      "time_saved_40km": "10s",
       "weight_save_g": 80,
       "ref_price": 120,
       "cost_per_watt": 55,
@@ -170,7 +170,7 @@
         "en": "Tubeless Tire Setup"
       },
       "watts_saved": 4.8,
-      "time_saved_40km": "30s",
+      "time_saved_40km": "21s",
       "weight_save_g": 180,
       "ref_price": 900,
       "cost_per_watt": 188,
@@ -188,7 +188,7 @@
         "en": "Hot-Melt Waxed Drivetrain Chain"
       },
       "watts_saved": 3.5,
-      "time_saved_40km": "22s",
+      "time_saved_40km": "15s",
       "weight_save_g": 0,
       "ref_price": 150,
       "cost_per_watt": 43,
@@ -206,7 +206,7 @@
         "en": "Oversized Pulley Wheel System (OSPW)"
       },
       "watts_saved": 1.2,
-      "time_saved_40km": "8s",
+      "time_saved_40km": "5s",
       "weight_save_g": -25,
       "ref_price": 1500,
       "cost_per_watt": 1250,
@@ -224,7 +224,7 @@
         "en": "Full Carbon Sole Road Shoes"
       },
       "watts_saved": 1.5,
-      "time_saved_40km": "10s",
+      "time_saved_40km": "7s",
       "weight_save_g": 160,
       "ref_price": 990,
       "cost_per_watt": 660,
@@ -242,7 +242,7 @@
         "en": "Aero TT Shoe Covers"
       },
       "watts_saved": 3.0,
-      "time_saved_40km": "19s",
+      "time_saved_40km": "13s",
       "weight_save_g": -30,
       "ref_price": 150,
       "cost_per_watt": 50,

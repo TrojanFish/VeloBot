@@ -40,6 +40,10 @@ TRANSLATIONS = {
             "🚀 **公路車改裝升級省瓦與性價比速查 (Upgrade ROI)**\n\n"
             "換碳輪能快多少？換一體把省幾瓦？超輕 TPU 內胎到底值不值？大雞腿導輪是不是智商税？\n"
             "基於風洞與滾阻實驗室數據，為你提供客觀省瓦量、40km 理論省時與技師毒舌評價！\n\n"
+            "🔬 **物理前提說明**：\n"
+            "• **基準速度**：所有空力數據均基於 **40 km/h 平路巡航**（車手功率約 250~300W）。\n"
+            "• **非線性功率**：空力阻力與速度平方成正比，功率與速度三次方成正比（$P \\propto v^3$）。25 km/h 慢速或爬坡時空力效益大幅衰減，45+ km/h 衝刺時則成倍放大。\n"
+            "• **不可簡單累加**：各品項為獨立對照測試，多部件同時改裝受氣流邊界層干擾存在邊際遞減效應。\n\n"
             "👉 **請點選你想了解的改裝升級類別：**"
         ),
         "roi_btn_back": "🔙 返回升級分類",
@@ -47,7 +51,7 @@ TRANSLATIONS = {
         # 胎壓解算器
         "psi_intro": (
             "🎯 **公路車前後輪科學胎壓解算器 (Differential Tire Pressure)**\n\n"
-            "基於 Frank Berto 經典公式與 Silca 15% 胎體形變最佳滾阻模型，依照前後輪動態配重（前 42% : 後 58%）精確解算。\n\n"
+            "基於 Silca 現代寬胎滾阻阻抗轉折點模型（Impedance Breakpoint）與前後輪動態配重（前 45% : 後 55%）精確解算。\n\n"
             "💡 **極速指令**：`/psi <車手體重kg> <胎寬mm>`\n"
             "例如：`/psi 72 28`（72kg車手，28c外胎）\n\n"
             "或點擊下方按鈕進行互動式推算："
@@ -61,6 +65,7 @@ TRANSLATIONS = {
             "🩺 **公路車騎行疼痛與 Fitting 自查工具**\n\n"
             "騎車哪裡不舒服？膝蓋痛、腰背酸、手掌麻木或坐墊壓迫？\n"
             "請依序點選，Bot 將為你輸出病因診斷、車輛設定調整、騎乘姿勢修正與專案拉伸動作！\n\n"
+            "⚠️ *免責聲明：本工具旨在提供車輛機械幾何與騎姿排查參考，絕非醫療診斷。劇烈或持續疼痛請務必尋求物理治療師或醫師協助。*\n\n"
             "👉 **第 1 步：請點選出現疼痛或麻木的部位：**"
         ),
         "pain_step2": (
@@ -110,7 +115,7 @@ TRANSLATIONS = {
             "• **最大飛輪齒數**：{max_cog}T\n"
             "• **後下叉長度**：{chainstay} mm\n\n"
             "✅ **推薦鏈條長度**：**`{links}` 節**（含快扣/魔術扣，標準偶數節）\n\n"
-            "💡 *實操提示*：截鏈前建議將鏈條穿過大盤和最大飛輪（不穿後變速器導輪），兩端拉緊重疊後預留 2 節作為雙重確認！"
+            "💡 *實操提示*：本公式嚴格適用於公路車雙盤 (2x) 系統。截鏈前建議將鏈條穿過大盤和最大飛輪（不穿後變速器導輪），兩端拉緊重疊後預留 2 節（若是 1x 單盤系統通常需預留 4 節）作為雙重確認！"
         ),
         "chain_error": "❌ 參數格式錯誤，請輸入純數字。例如：`/chain 50 34 410`",
 
@@ -211,6 +216,10 @@ TRANSLATIONS = {
             "🚀 **Road Bike Upgrade ROI & Watt Savings Calculator**\n\n"
             "How much faster are 50mm carbon wheels? Does an aero cockpit actually save watts? Are TPU tubes worth it?\n"
             "Check verified watt savings, 40km time saved, and mechanic verdicts based on wind-tunnel and rolling resistance tests!\n\n"
+            "🔬 **Physics & Baseline Notes**:\n"
+            "• **Benchmark Speed**: All aero data are calibrated to a **40 km/h flat road baseline** (~250–300W rider power).\n"
+            "• **Cubic Power Law**: Aerodynamic power scales with velocity cubed ($P \\propto v^3$). Gains shrink substantially at 25 km/h, and multiply exponentially at 45+ km/h.\n"
+            "• **Non-linear Summation**: Upgrades are independently tested. Multiple changes exhibit diminishing returns due to boundary layer airflow interaction.\n\n"
             "👉 **Select an upgrade category:**"
         ),
         "roi_btn_back": "🔙 Back to Categories",
@@ -218,7 +227,7 @@ TRANSLATIONS = {
         # Tire Pressure Calculator
         "psi_intro": (
             "🎯 **Scientific Road Tire Pressure Calculator (Front/Rear Differential)**\n\n"
-            "Based on Frank Berto empirical formula and Silca 15% casing deflection model, calculated dynamically for front (42%) and rear (58%) load distribution.\n\n"
+            "Based on Silca modern wide-rim impedance breakpoint research with dynamic road load distribution (Front ~45% : Rear ~55%).\n\n"
             "💡 **Fast Command**: `/psi <rider_weight_kg> <tire_width_mm>`\n"
             "Example: `/psi 72 28`\n\n"
             "Or use interactive buttons below:"
@@ -232,6 +241,7 @@ TRANSLATIONS = {
             "🩺 **Road Bike Pain Checker & Bike Fitting Prescription**\n\n"
             "Suffering from knee pain, back ache, hand numbness, or saddle soreness?\n"
             "Follow the prompts to diagnose causes, mechanical fit adjustments, riding form fixes, and targeted stretches!\n\n"
+            "⚠️ *Disclaimer: For mechanical fit adjustments & posture reference only, NOT medical advice.*\n\n"
             "👉 **Step 1: Select the troubled anatomical area:**"
         ),
         "pain_step2": (
@@ -281,7 +291,7 @@ TRANSLATIONS = {
             "• **Max Cassette Cog**: {max_cog}T\n"
             "• **Chainstay Length**: {chainstay} mm\n\n"
             "✅ **Recommended Links**: **`{links}` links** (including quick-link, even number)\n\n"
-            "💡 *Tip*: Before breaking the chain, wrap it around big-big (bypassing rear derailleur), pull tight and add 2 links as double verification!"
+            "💡 *Tip*: Rigout formula strictly applies to 2x double drivetrains. Double check by wrapping chain around big ring and max cog (bypassing rear derailleur), overlap tightly and add 2 links (or 4 links for 1x single ring setups)!"
         ),
         "chain_error": "❌ Invalid format. Please enter numeric values, e.g. `/chain 50 34 410`",
 
