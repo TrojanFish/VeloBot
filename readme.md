@@ -22,6 +22,8 @@
 ### 3. 🔧 Pocket Mechanic Toolkit (Pure Inline Keyboard, No Typing)
 - `/torque`: Standard torque specs for cockpit, seatpost, drivetrain, BB, disc brakes, cassette, and derailleurs with friction paste & threadlocker safety notes.
 - `/bb`: Bottom bracket matching wizard (BSA, BB86, T47 Internal, PF30 for Shimano 24mm, SRAM DUB 28.99mm, Rotor 30mm) with spacer setup and tool guide.
+- `/roi`: Upgrade Watt Savings & ROI Calculator, evaluating speedsuits, 50mm/60mm carbon wheels, aero cockpits, TPU tubes, hot melt waxed chains, and OSPW pulley systems with wind-tunnel watt savings, 40km time saved, and cost-per-watt ratings.
+- `/psi`: Scientific front/rear differential tire pressure calculator (supports fast command `/psi 72 28`). Based on Frank Berto empirical formula and Silca 15% casing deflection model (42% front / 58% rear dynamic load) with Tubeless conversion and Hookless 72.5 PSI safety warning.
 - `/calc` & `/chain`: Built-in calculators for chain links (e.g. `/chain 50 34 410`) and tubeless sealant guide.
 
 ### 4. 🩺 Cycling Pain Checker & Bike Fitting Rx (/pain)
@@ -54,6 +56,8 @@
 | `/torque` | Instant road bike torque specs (Cockpit/BB/Brakes/Derailleurs) | Private / Group |
 | `/bb` | Bottom bracket & crank spindle compatibility wizard | Private / Group |
 | `/pain` | Cycling pain self-check & Bike Fitting prescription | Private / Group |
+| `/roi` | Upgrade watt savings & ROI calculator (wheels/cockpit/TPU/OSPW) | Private / Group |
+| `/psi` | Scientific front/rear differential tire pressure (e.g. `/psi 72 28`) | Private / Group |
 | `/calc` | Bike assembly calculators (Chain link, Tubeless sealant) | Private / Group |
 | `/chain` | Fast chain length calculation (e.g. `/chain 50 34 410`) | Private / Group |
 | `/mybike` | Personal periodic maintenance tracker & alerts | Private |
@@ -75,19 +79,21 @@ VeloBot-main/
 ├── data/                    # Host persistent directory
 │   ├── bot_data.db          # SQLite database (with user language tracking)
 │   ├── specs_dict.json      # Bilingual road bike specs dictionary (hot reloadable)
-│   └── pain_dict.json       # Bilingual cycling pain & fit prescriptions (hot reloadable)
+│   ├── pain_dict.json       # Bilingual cycling pain & fit prescriptions (hot reloadable)
+│   └── upgrade_dict.json    # Bilingual upgrade ROI and watt saving dataset
 └── src/
     ├── config.py            # Environment configuration
     ├── database.py          # Database operations
     ├── locales.py           # Bilingual translation dictionary
-    ├── utils.py             # Chain calculation, torque & pain spec loader
+    ├── utils.py             # Chain calculation, torque/pain/upgrade spec loaders
     ├── bot/
     │   ├── handlers.py      # Command handlers & host reply interceptor
-    │   ├── callbacks.py     # Inline keyboard cascading menus
+    │   ├── callbacks.py     # Inline keyboard cascading menus & dynamic cards
     │   ├── conversations.py # Noise clinic submission conversation flow
     │   ├── captcha.py       # Group hardcore trivia captcha
     │   └── tasks.py         # Schedulers (YouTube, maintenance alert, backup)
     └── services/
+        ├── tire_calc.py     # Scientific differential tire pressure engine
         └── youtube.py       # YouTube RSS listener & enhanced broadcasting
 ```
 

@@ -3,7 +3,8 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 from src.locales import t
-from src.utils import get_specs, get_pain_specs
+from src.utils import get_specs, get_pain_specs, get_upgrade_specs
+from src.services.tire_calc import calculate_tire_pressure, format_tire_pressure_card
 from src.database import (
     get_user_lang, set_user_lang,
     add_kit_waiter, record_maintenance_done, get_user_maintenance
@@ -48,6 +49,10 @@ async def handle_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             ],
             [
                 InlineKeyboardButton(t("btn_pain", lang=new_lang), callback_data="pain_menu"),
+                InlineKeyboardButton(t("btn_roi", lang=new_lang), callback_data="roi_menu")
+            ],
+            [
+                InlineKeyboardButton(t("btn_psi", lang=new_lang), callback_data="psi_menu"),
                 InlineKeyboardButton(t("btn_calc", lang=new_lang), callback_data="calc_menu")
             ],
             [
@@ -79,6 +84,10 @@ async def handle_main_menu_refresh(update: Update, context: ContextTypes.DEFAULT
         ],
         [
             InlineKeyboardButton(t("btn_pain", lang=lang), callback_data="pain_menu"),
+            InlineKeyboardButton(t("btn_roi", lang=lang), callback_data="roi_menu")
+        ],
+        [
+            InlineKeyboardButton(t("btn_psi", lang=lang), callback_data="psi_menu"),
             InlineKeyboardButton(t("btn_calc", lang=lang), callback_data="calc_menu")
         ],
         [
@@ -427,3 +436,157 @@ async def handle_pain_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
         ]
         await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+
+async def handle_roi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """處理改裝升級省瓦 ROI 內聯回調"""
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    user = query.from_user
+    lang = get_user_lang(user.id, user.language_code)
+    specs = get_upgrade_specs(lang)
+    categories = specs.get("categories", {})
+    items = specs.get("items", [])
+
+    # 1. 頂層分類選單 (roi_menu)
+    if data == "roi_menu":
+        keyboard = []
+        cat_keys = list(categories.keys())
+        for i in range(0, len(cat_keys), 2):
+            row = [InlineKeyboardButton(categories[cat_keys[i]][lang if lang in categories[cat_keys[i]] else "zh_hant"], callback_data=f"roi_cat_{cat_keys[i]}")]
+            if i + 1 < len(cat_keys):
+                row.append(InlineKeyboardButton(categories[cat_keys[i+1]][lang if lang in categories[cat_keys[i+1]] else "zh_hant"], callback_data=f"roi_cat_{cat_keys[i+1]}"))
+            keyboard.append(row)
+        keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
+
+        await query.edit_message_text(
+            t("roi_intro", lang=lang),
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        return
+
+    # 2. 分類內各升級品項列表 (roi_cat_<cat_id>)
+    if data.startswith("roi_cat_"):
+        cat_id = data.replace("roi_cat_", "")
+        cat_title = categories.get(cat_id, {}).get(lang if lang in categories.get(cat_id, {}) else "zh_hant", cat_id)
+
+        cat_items = [it for it in items if it.get("category") == cat_id]
+        keyboard = []
+        for it in cat_items:
+            name_str = it["name"].get(lang, it["name"].get("zh_hant", it["id"]))
+            keyboard.append([InlineKeyboardButton(name_str, callback_data=f"roi_item_{it['id']}")])
+        keyboard.append([InlineKeyboardButton(t("roi_btn_back", lang=lang), callback_data="roi_menu")])
+        keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
+
+        prompt = f"🚀 **{cat_title}**\n\n" + ("Select an item to view data & ROI analysis:" if lang == "en" else "請點選具體升級品項查看風洞省瓦數據與性價比分析：")
+        await query.edit_message_text(prompt, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        return
+
+    # 3. 升級品項詳情卡片 (roi_item_<item_id>)
+    if data.startswith("roi_item_"):
+        item_id = data.replace("roi_item_", "")
+        item = next((it for it in items if it.get("id") == item_id), None)
+        if not item:
+            await query.edit_message_text("Item not found / 找不到對應升級品項")
+            return
+
+        cat_id = item.get("category", "aero")
+        if lang == "en":
+            wt_g = item['weight_save_g']
+            wt_str = f"Saves {wt_g}g" if wt_g > 0 else (f"+{abs(wt_g)}g" if wt_g < 0 else "0g")
+            text = (
+                f"🚀 <b>{item['name'].get('en', item['id'])}</b>\n"
+                f"───────────────────\n"
+                f"⚡ <b>40 km/h Baseline Saving</b>: <b>{item['watts_saved']} Watts</b>\n"
+                f"⏱️ <b>40 km Time Saved</b>: ~<b>{item['time_saved_40km']}</b>\n"
+                f"⚖️ <b>Weight Delta</b>: {wt_str}\n"
+                f"💰 <b>Est. Cost</b>: ¥{item['ref_price']} (¥{item['cost_per_watt']}/W)\n"
+                f"🏆 <b>Mechanic Score</b>: {item['score']}\n\n"
+                f"🛠️ <b>Mechanic Verdict</b>:\n{item['verdict'].get('en', '')}"
+            )
+        else:
+            wt_g = item['weight_save_g']
+            wt_str = f"減重 {wt_g}g" if wt_g > 0 else (f"增重 {abs(wt_g)}g" if wt_g < 0 else "無變化")
+            text = (
+                f"🚀 <b>{item['name'].get('zh_hant', item['id'])}</b>\n"
+                f"───────────────────\n"
+                f"⚡ <b>40 km/h 基准省瓦</b>：<b>{item['watts_saved']} W</b>\n"
+                f"⏱️ <b>40 km 賽道理論省時</b>：約 <b>{item['time_saved_40km']}</b>\n"
+                f"⚖️ <b>重量變化</b>：{wt_str}\n"
+                f"💰 <b>參考均價</b>：¥{item['ref_price']}（約 ¥{item['cost_per_watt']}/瓦）\n"
+                f"🏆 <b>技師推薦指數</b>：{item['score']}\n\n"
+                f"🛠️ <b>技師客觀評價</b>：\n{item['verdict'].get('zh_hant', '')}"
+            )
+
+        keyboard = [
+            [InlineKeyboardButton(t("roi_btn_back", lang=lang), callback_data=f"roi_cat_{cat_id}")],
+            [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
+        ]
+        await query.edit_message_text(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
+        return
+
+async def handle_psi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """處理前後輪科學胎壓解算內聯回調"""
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    user = query.from_user
+    lang = get_user_lang(user.id, user.language_code)
+
+    # 1. 胎壓選單 / 體重選擇 (psi_menu)
+    if data == "psi_menu":
+        keyboard = [
+            [
+                InlineKeyboardButton("55 kg", callback_data="psi_w_55"),
+                InlineKeyboardButton("65 kg", callback_data="psi_w_65"),
+                InlineKeyboardButton("75 kg", callback_data="psi_w_75"),
+                InlineKeyboardButton("85 kg+", callback_data="psi_w_85"),
+            ],
+            [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
+        ]
+        await query.edit_message_text(
+            t("psi_intro", lang=lang),
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        return
+
+    # 2. 選擇外胎寬度 (psi_w_<weight>)
+    if data.startswith("psi_w_"):
+        weight_str = data.replace("psi_w_", "")
+        weight = float(weight_str)
+
+        keyboard = [
+            [
+                InlineKeyboardButton("25 mm (25c)", callback_data=f"psi_c_{weight_str}_25"),
+                InlineKeyboardButton("28 mm (28c)", callback_data=f"psi_c_{weight_str}_28"),
+            ],
+            [
+                InlineKeyboardButton("30 mm (30c)", callback_data=f"psi_c_{weight_str}_30"),
+                InlineKeyboardButton("32 mm (32c)", callback_data=f"psi_c_{weight_str}_32"),
+            ],
+            [InlineKeyboardButton(t("btn_back_list", lang=lang), callback_data="psi_menu")]
+        ]
+        await query.edit_message_text(
+            t("psi_step_width", lang=lang, weight=int(weight)),
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        return
+
+    # 3. 計算並生成胎壓卡片 (psi_c_<weight>_<width>)
+    if data.startswith("psi_c_"):
+        parts = data.split("_")
+        weight = float(parts[2])
+        width = float(parts[3])
+
+        result = calculate_tire_pressure(weight, width, lang=lang)
+        card_text = format_tire_pressure_card(result, lang=lang)
+
+        keyboard = [
+            [InlineKeyboardButton("🔄 " + ("Re-calculate" if lang == "en" else "重新計算"), callback_data="psi_menu")],
+            [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
+        ]
+        await query.edit_message_text(card_text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
+        return

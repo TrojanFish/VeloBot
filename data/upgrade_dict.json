@@ -1,0 +1,256 @@
+{
+  "categories": {
+    "aero": {
+      "zh_hant": "💨 空力破風升級",
+      "en": "💨 Aerodynamic Upgrades"
+    },
+    "rolling": {
+      "zh_hant": "🚲 輪胎滾阻系統",
+      "en": "🚲 Rolling Resistance System"
+    },
+    "drivetrain": {
+      "zh_hant": "⚙️ 傳動系統減摩",
+      "en": "⚙️ Drivetrain Friction Reduction"
+    },
+    "shoes": {
+      "zh_hant": "👟 鎖鞋人身裝備",
+      "en": "👟 Shoes & Apparel Upgrades"
+    }
+  },
+  "items": [
+    {
+      "id": "speedsuit",
+      "category": "aero",
+      "name": {
+        "zh_hant": "競賽破風連體服 (Road Speedsuit)",
+        "en": "Road Race Speedsuit"
+      },
+      "watts_saved": 11.0,
+      "time_saved_40km": "70s",
+      "weight_save_g": 0,
+      "ref_price": 1500,
+      "cost_per_watt": 136,
+      "score": "★★★★★",
+      "verdict": {
+        "zh_hant": "人體佔據騎行總風阻的 75%~80%。無接縫貼合連體服在風洞實測中省瓦驚人（約 11W），每瓦成本僅約 ¥136，性價比直接碾壓昂貴的大深框碳輪！",
+        "en": "The rider's body accounts for ~80% of total aerodynamic drag. A snug speedsuit saves ~11W at 40 km/h in wind tunnels at just ~$20/W—far better ROI than expensive wheels."
+      }
+    },
+    {
+      "id": "aero_jersey",
+      "category": "aero",
+      "name": {
+        "zh_hant": "低風阻分體騎行服 (Aero Jersey)",
+        "en": "Aero Fitted Jersey"
+      },
+      "watts_saved": 7.5,
+      "time_saved_40km": "48s",
+      "weight_save_g": 0,
+      "ref_price": 450,
+      "cost_per_watt": 60,
+      "score": "★★★★★",
+      "verdict": {
+        "zh_hant": "相比傳統寬鬆版型兜風的騎行服，手臂與肩部採用導流條紋面料的修身服省瓦極佳，百元投入換來 48 秒提升，新手必改首選。",
+        "en": "Compared to loose-fitting jerseys that parachute in headwinds, tight ribbed aero fabrics save ~7.5W. Exceptional budget upgrade."
+      }
+    },
+    {
+      "id": "aero_helmet",
+      "category": "aero",
+      "name": {
+        "zh_hant": "全氣動破風頭盔 (Aero Road Helmet)",
+        "en": "Aero Road Helmet"
+      },
+      "watts_saved": 5.0,
+      "time_saved_40km": "32s",
+      "weight_save_g": 0,
+      "ref_price": 1200,
+      "cost_per_watt": 240,
+      "score": "★★★★☆",
+      "verdict": {
+        "zh_hant": "針對頭部正面高風壓區導流優化（如 Evade 3 / Utopia）。雖然夏天炎熱爬坡散熱稍遜，但平路 35km/h 以上巡航節省瓦數非常穩定。",
+        "en": "Optimizes high frontal pressure zone over the head. Slightly warmer on summer climbs, but yields dependable 5W gains on high-speed flats."
+      }
+    },
+    {
+      "id": "wheels_50",
+      "category": "aero",
+      "name": {
+        "zh_hant": "50mm 綜合氣動碳纖輪組",
+        "en": "50mm Aero Carbon Wheelset"
+      },
+      "watts_saved": 6.5,
+      "time_saved_40km": "42s",
+      "weight_save_g": 280,
+      "ref_price": 4200,
+      "cost_per_watt": 646,
+      "score": "★★★★★",
+      "verdict": {
+        "zh_hant": "相比原廠鋁輪，50mm 框高是平路破風與抗側風的最佳平衡點。外圈旋轉慣性極佳，時速 32km/h 以上能清晰感受「被風托著走」的巡航感。",
+        "en": "The gold-standard rim depth balancing aero drag and crosswind stability. Distinct flywheel cruise momentum above 32 km/h."
+      }
+    },
+    {
+      "id": "wheels_60",
+      "category": "aero",
+      "name": {
+        "zh_hant": "60mm+ 深框破風碳輪",
+        "en": "60mm+ Deep Section Carbon Wheels"
+      },
+      "watts_saved": 9.0,
+      "time_saved_40km": "58s",
+      "weight_save_g": 120,
+      "ref_price": 6500,
+      "cost_per_watt": 722,
+      "score": "★★★☆☆",
+      "verdict": {
+        "zh_hant": "純平路單飛、鐵三與繞圈衝刺神器。缺點是重量偏重，且突發側風時對車手操控技術與體重要求較高，泛用性不如 50mm。",
+        "en": "Outstanding on dead-flat courses and crits. However, prone to crosswind buffeting and slower to spin up on punchy climbs."
+      }
+    },
+    {
+      "id": "int_handlebar",
+      "category": "aero",
+      "name": {
+        "zh_hant": "一體全內走線碳把 (Integrated Handlebar)",
+        "en": "Integrated Aero Carbon Cockpit"
+      },
+      "watts_saved": 3.8,
+      "time_saved_40km": "24s",
+      "weight_save_g": 90,
+      "ref_price": 1200,
+      "cost_per_watt": 315,
+      "score": "★★★★☆",
+      "verdict": {
+        "zh_hant": "隱藏車頭迎風面全部裸露線管，視覺極度純淨，扁平翼型把橫提供良好氣動截面。唯一的缺點是裝車穿管與維護調校成本成倍上升。",
+        "en": "Completely hides cables from the frontal airstream with sleek wing-profile tops. Outstanding aesthetics, though increases mechanic maintenance time."
+      }
+    },
+    {
+      "id": "tpu_tube",
+      "category": "rolling",
+      "name": {
+        "zh_hant": "超輕 TPU 內胎 (28g~36g 對裝)",
+        "en": "Ultralight TPU Inner Tubes"
+      },
+      "watts_saved": 3.2,
+      "time_saved_40km": "20s",
+      "weight_save_g": 140,
+      "ref_price": 160,
+      "cost_per_watt": 50,
+      "score": "★★★★★",
+      "verdict": {
+        "zh_hant": "百元級別「最強平民物理外掛」！相比普通丁基膠內胎，直接減去輪組最外圈 140g 旋轉質量，滾阻省 ~3.2W，起步加速感極其輕快！",
+        "en": "The single best bang-for-buck upgrade. Slashes 140g of rotating rim mass and saves ~3.2W rolling resistance for just ~$25. Instant acceleration boost."
+      }
+    },
+    {
+      "id": "latex_tube",
+      "category": "rolling",
+      "name": {
+        "zh_hant": "乳膠內胎 (Latex Inner Tubes)",
+        "en": "Latex Inner Tubes"
+      },
+      "watts_saved": 2.2,
+      "time_saved_40km": "14s",
+      "weight_save_g": 80,
+      "ref_price": 120,
+      "cost_per_watt": 55,
+      "score": "★★★★☆",
+      "verdict": {
+        "zh_hant": "滯後損失極低，路感柔和細膩、貼地吸震感超越 TPU。唯一缺點是乳膠微孔分子較大，基本需要每天出車前打氣。",
+        "en": "Extremely low hysteresis loss with silky, supple road feel. The only caveat is fast air loss requiring daily pumping."
+      }
+    },
+    {
+      "id": "tubeless_sys",
+      "category": "rolling",
+      "name": {
+        "zh_hant": "真空胎無內胎系統 (Tubeless System)",
+        "en": "Tubeless Tire Setup"
+      },
+      "watts_saved": 4.8,
+      "time_saved_40km": "30s",
+      "weight_save_g": 180,
+      "ref_price": 900,
+      "cost_per_watt": 188,
+      "score": "★★★★☆",
+      "verdict": {
+        "zh_hant": "徹底消除內胎與外胎之間的剪切摩擦力，配合自補液可自愈微小扎胎，且能以更低胎壓行駛獲得巨大抓地力與舒適度。初次安裝打氣需要氣泵技巧。",
+        "en": "Eliminates casing-tube friction completely. Offers puncture self-repair and allows lower pressures for unmatched grip and speed."
+      }
+    },
+    {
+      "id": "wax_chain",
+      "category": "drivetrain",
+      "name": {
+        "zh_hant": "高純度熱浸石蠟鏈條 (Hot Melt Waxed Chain)",
+        "en": "Hot-Melt Waxed Drivetrain Chain"
+      },
+      "watts_saved": 3.5,
+      "time_saved_40km": "22s",
+      "weight_save_g": 0,
+      "ref_price": 150,
+      "cost_per_watt": 43,
+      "score": "★★★★★",
+      "verdict": {
+        "zh_hant": "硬核技師強推！石蠟在金屬微孔內形成固態潤滑，完全不吸附泥沙黑油，傳動阻力比普通濕性鏈條油低 3~4W，且鏈條和飛輪壽命延長 3 倍！",
+        "en": "Mechanic's favorite! Solid paraffin wax repels road dust and dirt completely, saving ~3.5W friction while tripling chain and cassette life."
+      }
+    },
+    {
+      "id": "ospw",
+      "category": "drivetrain",
+      "name": {
+        "zh_hant": "陶瓷超大導輪系統 (OSPW 大雞腿)",
+        "en": "Oversized Pulley Wheel System (OSPW)"
+      },
+      "watts_saved": 1.2,
+      "time_saved_40km": "8s",
+      "weight_save_g": -25,
+      "ref_price": 1500,
+      "cost_per_watt": 1250,
+      "score": "★★☆☆☆",
+      "verdict": {
+        "zh_hant": "【爭議/性價比極低】加大導輪雖能微減鏈條彎折阻力，但實測僅省 1W 上下，且增加後撥總重、降低換擋清脆度。主要價值在於高調顏值與心理信仰。",
+        "en": "Controversial low-ROI upgrade. Laboratory gains are only ~1.2W at very high cost (~$200), with minor penalty in shift crispness. Mostly for bling."
+      }
+    },
+    {
+      "id": "carbon_shoes",
+      "category": "shoes",
+      "name": {
+        "zh_hant": "全碳纖維硬底鎖鞋 (Full Carbon Road Shoes)",
+        "en": "Full Carbon Sole Road Shoes"
+      },
+      "watts_saved": 1.5,
+      "time_saved_40km": "10s",
+      "weight_save_g": 160,
+      "ref_price": 990,
+      "cost_per_watt": 660,
+      "score": "★★★★☆",
+      "verdict": {
+        "zh_hant": "硬度指數 10+ 的碳纖底板徹底消除尼龍底的形變卸力，同時減輕足底末端旋轉質量，能顯著改善長途發力均勻度，緩解足底筋膜疲勞。",
+        "en": "Carbon sole stiffness index 10+ stops energy dissipation from flexing, reducing foot hotspots and optimizing power delivery over long rides."
+      }
+    },
+    {
+      "id": "aero_shoecover",
+      "category": "shoes",
+      "name": {
+        "zh_hant": "空力破風鞋套 (Aero Shoe Covers)",
+        "en": "Aero TT Shoe Covers"
+      },
+      "watts_saved": 3.0,
+      "time_saved_40km": "19s",
+      "weight_save_g": -30,
+      "ref_price": 150,
+      "cost_per_watt": 50,
+      "score": "★★★★☆",
+      "verdict": {
+        "zh_hant": "鎖鞋上的 BOA 旋鈕和魔術貼在高速旋轉時會產生大量紊流。百元鞋套平滑包裹鞋面，實測省瓦可觀，計時賽與平路高速必備。",
+        "en": "Shoe dials and straps churn significant air turbulence when pedaling. A sleek shoe cover creates a laminar surface, yielding cheap aero watts."
+      }
+    }
+  ]
+}

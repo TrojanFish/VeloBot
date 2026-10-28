@@ -1,12 +1,13 @@
 import os
 import json
 import logging
-from src.config import SPECS_FILE, PAIN_FILE
+from src.config import SPECS_FILE, PAIN_FILE, UPGRADE_FILE
 
 logger = logging.getLogger(__name__)
 
 _specs_cache = None
 _pain_cache = None
+_upgrade_cache = None
 
 def get_specs(lang: str = "zh_hant") -> dict:
     """讀取指定語言版本的參數字典 (支援熱重載)"""
@@ -37,6 +38,20 @@ def get_pain_specs(lang: str = "zh_hant") -> dict:
     except Exception as e:
         logger.error(f"讀取疼痛自查字典失敗: {e}")
         return (_pain_cache.get(lang) if _pain_cache else {}) or {}
+
+def get_upgrade_specs(lang: str = "zh_hant") -> dict:
+    """讀取改裝升級 ROI 字典 (支援熱重載)"""
+    global _upgrade_cache
+    if not os.path.exists(UPGRADE_FILE):
+        logger.error(f"改裝升級字典檔案不存在: {UPGRADE_FILE}")
+        return {"categories": {}, "items": []}
+    try:
+        with open(UPGRADE_FILE, "r", encoding="utf-8") as f:
+            _upgrade_cache = json.load(f)
+            return _upgrade_cache
+    except Exception as e:
+        logger.error(f"讀取改裝升級字典失敗: {e}")
+        return _upgrade_cache or {"categories": {}, "items": []}
 
 def calculate_chain_length(chainstay_mm: float, big_ring_teeth: int, max_cog_teeth: int) -> int:
     """

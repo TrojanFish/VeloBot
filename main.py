@@ -17,13 +17,13 @@ warnings.filterwarnings("ignore", category=PTBUserWarning)
 from src.config import TELEGRAM_BOT_TOKEN, ADMIN_ID, CHECK_INTERVAL_MINUTES
 from src.database import init_db
 from src.bot.handlers import (
-    start, language_command, torque_command, bb_command, pain_command, calc_command,
+    start, language_command, torque_command, bb_command, pain_command, roi_command, psi_command, calc_command,
     chain_calc_command, mybike_command, help_command, admin_reply_handler
 )
 from src.bot.callbacks import (
     handle_lang_callback, handle_main_menu_refresh,
-    handle_torque_callback, handle_bb_callback, handle_pain_callback, handle_calc_callback,
-    handle_waitlist_callback, handle_maintenance_callback
+    handle_torque_callback, handle_bb_callback, handle_pain_callback, handle_roi_callback, handle_psi_callback,
+    handle_calc_callback, handle_waitlist_callback, handle_maintenance_callback
 )
 from src.bot.conversations import noise_conversation_handler
 from src.bot.captcha import new_member_captcha, handle_captcha_callback
@@ -44,6 +44,8 @@ async def post_init(application: Application):
         BotCommand("torque", "🔧 關鍵部位標準鎖緊扭力速查"),
         BotCommand("bb", "⚙️ 五通規格與大盤軸心相容指南"),
         BotCommand("pain", "🩺 騎行疼痛自查與 Fitting 處方籤"),
+        BotCommand("roi", "🚀 改裝升級省瓦與性價比速查"),
+        BotCommand("psi", "🎯 前後輪科學差異化胎壓推算"),
         BotCommand("calc", "📐 組裝實用計算器選單"),
         BotCommand("chain", "📏 鏈條標準節數計算"),
         BotCommand("mybike", "🚲 個人車輛週期保養管家"),
@@ -57,6 +59,8 @@ async def post_init(application: Application):
         BotCommand("torque", "🔧 Standard torque values lookup"),
         BotCommand("bb", "⚙️ BB & crank spindle compatibility"),
         BotCommand("pain", "🩺 Cycling pain checker & Bike Fit rx"),
+        BotCommand("roi", "🚀 Upgrade watt savings & ROI"),
+        BotCommand("psi", "🎯 Scientific tire pressure recommendation"),
         BotCommand("calc", "📐 Bike build calculators"),
         BotCommand("chain", "📏 Chain link length calculation"),
         BotCommand("mybike", "🚲 Maintenance tracker & alerts"),
@@ -121,6 +125,10 @@ def main():
     application.add_handler(CommandHandler("torque", torque_command))
     application.add_handler(CommandHandler("bb", bb_command))
     application.add_handler(CommandHandler("pain", pain_command))
+    application.add_handler(CommandHandler("roi", roi_command))
+    application.add_handler(CommandHandler("upgrade", roi_command))
+    application.add_handler(CommandHandler("psi", psi_command))
+    application.add_handler(CommandHandler("pressure", psi_command))
     application.add_handler(CommandHandler("calc", calc_command))
     application.add_handler(CommandHandler("chain", chain_calc_command))
     application.add_handler(CommandHandler("mybike", mybike_command))
@@ -135,6 +143,8 @@ def main():
     application.add_handler(CallbackQueryHandler(handle_torque_callback, pattern="^torque_"))
     application.add_handler(CallbackQueryHandler(handle_bb_callback, pattern="^bb_"))
     application.add_handler(CallbackQueryHandler(handle_pain_callback, pattern="^pain_"))
+    application.add_handler(CallbackQueryHandler(handle_roi_callback, pattern="^roi_"))
+    application.add_handler(CallbackQueryHandler(handle_psi_callback, pattern="^psi_"))
     application.add_handler(CallbackQueryHandler(handle_calc_callback, pattern="^calc_"))
     application.add_handler(CallbackQueryHandler(handle_waitlist_callback, pattern="^waitlist_add_"))
     application.add_handler(CallbackQueryHandler(handle_maintenance_callback, pattern="^maint_done_"))

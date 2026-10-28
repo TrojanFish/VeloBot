@@ -4,7 +4,8 @@ from telegram.ext import ContextTypes
 
 from src.config import ADMIN_ID
 from src.locales import t
-from src.utils import get_specs, calculate_chain_length, get_pain_specs
+from src.utils import get_specs, calculate_chain_length, get_pain_specs, get_upgrade_specs
+from src.services.tire_calc import calculate_tire_pressure, format_tire_pressure_card
 from src.database import (
     get_user_lang, set_user_lang,
     get_video_by_id, get_video_by_admin_msg, update_video_kit,
@@ -78,6 +79,10 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ],
         [
             InlineKeyboardButton(t("btn_pain", lang=lang), callback_data="pain_menu"),
+            InlineKeyboardButton(t("btn_roi", lang=lang), callback_data="roi_menu")
+        ],
+        [
+            InlineKeyboardButton(t("btn_psi", lang=lang), callback_data="psi_menu"),
             InlineKeyboardButton(t("btn_calc", lang=lang), callback_data="calc_menu")
         ],
         [
@@ -94,6 +99,67 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
+
+async def roi_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/roi 或 /upgrade 改裝升級省瓦與性價比速查"""
+    user = update.effective_user
+    lang = get_user_lang(user.id, user.language_code)
+    specs = get_upgrade_specs(lang)
+    categories = specs.get("categories", {})
+
+    keyboard = []
+    cat_keys = list(categories.keys())
+    for i in range(0, len(cat_keys), 2):
+        row = [InlineKeyboardButton(categories[cat_keys[i]][lang if lang in categories[cat_keys[i]] else "zh_hant"], callback_data=f"roi_cat_{cat_keys[i]}")]
+        if i + 1 < len(cat_keys):
+            row.append(InlineKeyboardButton(categories[cat_keys[i+1]][lang if lang in categories[cat_keys[i+1]] else "zh_hant"], callback_data=f"roi_cat_{cat_keys[i+1]}"))
+        keyboard.append(row)
+    keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
+
+    text = t("roi_intro", lang=lang)
+    if update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+    else:
+        await update.effective_message.reply_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+
+async def psi_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/psi 或 /pressure 前後輪科學差異化胎壓推算"""
+    args = context.args
+    user = update.effective_user
+    lang = get_user_lang(user.id, user.language_code)
+
+    # 1. 支援快捷指令: /psi 72 28 [tl]
+    if args and len(args) >= 2:
+        try:
+            weight = float(args[0])
+            width = float(args[1])
+            is_tubeless = len(args) >= 3 and ("tl" in args[2].lower() or "tubeless" in args[2].lower())
+            res = calculate_tire_pressure(weight, width, is_tubeless=is_tubeless, lang=lang)
+            card = format_tire_pressure_card(res, lang=lang)
+            keyboard = [[InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]]
+            await update.effective_message.reply_text(card, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
+            return
+        except ValueError:
+            await update.effective_message.reply_text(t("psi_usage", lang=lang), parse_mode="Markdown")
+            return
+
+    # 2. 無參數互動選單
+    keyboard = [
+        [
+            InlineKeyboardButton("55 kg", callback_data="psi_w_55"),
+            InlineKeyboardButton("65 kg", callback_data="psi_w_65"),
+            InlineKeyboardButton("75 kg", callback_data="psi_w_75"),
+            InlineKeyboardButton("85 kg+", callback_data="psi_w_85"),
+        ],
+        [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
+    ]
+    text = t("psi_intro", lang=lang)
+    if update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+    else:
+        await update.effective_message.reply_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def pain_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/pain 騎行疼痛自查與 Bike Fitting 處方籤指令"""
@@ -256,6 +322,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "• /torque - Standard torque values for cockpit, BB, brakes, derailleurs\n"
             "• /bb - Frame shell and crank spindle compatibility wizard\n"
             "• /pain - Cycling pain self-check & Bike Fitting prescription\n"
+            "• /roi - Upgrade watt savings & ROI calculator (wheels, cockpit, TPU)\n"
+            "• /psi - Scientific front/rear tire pressure recommendation\n"
             "• /calc - Chain length and tubeless sealant calculators\n"
             "• /chain - Fast chain link calculation (e.g. `/chain 50 34 410`)\n"
             "• /mybike - Periodic maintenance log & reminder (sealant, wax, brake fluid)\n"
@@ -269,6 +337,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "• /torque - 關鍵部位標準鎖緊扭力速查（龍頭、車把、座管、中軸、碟煞、變速等）\n"
             "• /bb - 五通規格與大盤軸心相容匹配指南（墊圈配置與拆裝工具）\n"
             "• /pain - 騎行疼痛自查與 Bike Fitting 處方籤（膝蓋/腰背/手麻/坐墊等）\n"
+            "• /roi - 改裝升級省瓦與性價比速查（輪組、一體把、TPU內胎、大導輪）\n"
+            "• /psi - 前後輪科學差異化胎壓推算（支援 `/psi 72 28`）\n"
             "• /calc - 組裝計算器選單\n"
             "• /chain - 快速計算鏈條標準節數（如 `/chain 50 34 410`）\n"
             "• /mybike - 個人週期保養到期提醒（無內胎補胎液、浸蠟、煞車油）\n"

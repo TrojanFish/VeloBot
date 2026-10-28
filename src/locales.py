@@ -12,6 +12,8 @@ TRANSLATIONS = {
             "• /torque - 關鍵部位標準鎖緊扭力速查\n"
             "• /bb - 五通規格與大盤軸心相容匹配器\n"
             "• /pain - 騎行疼痛自查與 Fitting 處方籤\n"
+            "• /roi - 改裝升級省瓦與性價比速查 (Upgrade ROI)\n"
+            "• /psi - 前後輪科學差異化胎壓推算\n"
             "• /calc - 鏈條節數與無內胎補胎液推薦計算器\n"
             "• /mybike - 個人車輛週期保養打卡與提醒\n"
             "• /ask - 異音門診與組裝疑難雜症投稿\n"
@@ -21,6 +23,8 @@ TRANSLATIONS = {
         "btn_torque": "🔧 扭力速查",
         "btn_bb": "⚙️ 五通匹配器",
         "btn_pain": "🩺 疼痛自查",
+        "btn_roi": "🚀 改裝省瓦 ROI",
+        "btn_psi": "🎯 科學前後輪胎壓",
         "btn_calc": "📐 組裝計算器",
         "btn_mybike": "🚲 保養管家",
         "btn_ask": "🩺 異音門診投稿",
@@ -30,6 +34,27 @@ TRANSLATIONS = {
         "btn_notify_waitlist": "🔔 本期清單更新後通知我",
         "btn_back_menu": "🔙 返回主選單",
         "btn_back_list": "🔙 返回列表",
+
+        # 改裝省瓦 ROI
+        "roi_intro": (
+            "🚀 **公路車改裝升級省瓦與性價比速查 (Upgrade ROI)**\n\n"
+            "換碳輪能快多少？換一體把省幾瓦？超輕 TPU 內胎到底值不值？大雞腿導輪是不是智商税？\n"
+            "基於風洞與滾阻實驗室數據，為你提供客觀省瓦量、40km 理論省時與技師毒舌評價！\n\n"
+            "👉 **請點選你想了解的改裝升級類別：**"
+        ),
+        "roi_btn_back": "🔙 返回升級分類",
+
+        # 胎壓解算器
+        "psi_intro": (
+            "🎯 **公路車前後輪科學胎壓解算器 (Differential Tire Pressure)**\n\n"
+            "基於 Frank Berto 經典公式與 Silca 15% 胎體形變最佳滾阻模型，依照前後輪動態配重（前 42% : 後 58%）精確解算。\n\n"
+            "💡 **極速指令**：`/psi <車手體重kg> <胎寬mm>`\n"
+            "例如：`/psi 72 28`（72kg車手，28c外胎）\n\n"
+            "或點擊下方按鈕進行互動式推算："
+        ),
+        "psi_step_weight": "⚖️ **第 1 步：請選擇車手體重區間（kg）：**",
+        "psi_step_width": "🚲 當前車手體重：**{weight} kg**\n\n👉 **第 2 步：請選擇外胎寬度規格：**",
+        "psi_usage": "❌ 格式錯誤。用法：`/psi <體重kg> <胎寬mm>`\n例如：`/psi 72 28`",
 
         # 疼痛自查
         "pain_intro": (
@@ -158,6 +183,8 @@ TRANSLATIONS = {
             "• /torque - Standard torque values lookup\n"
             "• /bb - Bottom bracket & crank spindle compatibility wizard\n"
             "• /pain - Cycling pain checker & Bike Fit prescription\n"
+            "• /roi - Upgrade watt savings & ROI calculator\n"
+            "• /psi - Differential front/rear scientific tire pressure\n"
             "• /calc - Chain length & tubeless sealant calculators\n"
             "• /mybike - Personal periodic maintenance tracker & alerts\n"
             "• /ask - Road bike noise clinic & symptom submission\n"
@@ -167,6 +194,8 @@ TRANSLATIONS = {
         "btn_torque": "🔧 Torque Lookup",
         "btn_bb": "⚙️ BB Matcher",
         "btn_pain": "🩺 Pain Checker",
+        "btn_roi": "🚀 Upgrade ROI",
+        "btn_psi": "🎯 Scientific Tire PSI",
         "btn_calc": "📐 Calculators",
         "btn_mybike": "🚲 Maintenance",
         "btn_ask": "🩺 Noise Clinic",
@@ -176,6 +205,27 @@ TRANSLATIONS = {
         "btn_notify_waitlist": "🔔 Notify me when updated",
         "btn_back_menu": "🔙 Main Menu",
         "btn_back_list": "🔙 Back",
+
+        # Upgrade ROI
+        "roi_intro": (
+            "🚀 **Road Bike Upgrade ROI & Watt Savings Calculator**\n\n"
+            "How much faster are 50mm carbon wheels? Does an aero cockpit actually save watts? Are TPU tubes worth it?\n"
+            "Check verified watt savings, 40km time saved, and mechanic verdicts based on wind-tunnel and rolling resistance tests!\n\n"
+            "👉 **Select an upgrade category:**"
+        ),
+        "roi_btn_back": "🔙 Back to Categories",
+
+        # Tire Pressure Calculator
+        "psi_intro": (
+            "🎯 **Scientific Road Tire Pressure Calculator (Front/Rear Differential)**\n\n"
+            "Based on Frank Berto empirical formula and Silca 15% casing deflection model, calculated dynamically for front (42%) and rear (58%) load distribution.\n\n"
+            "💡 **Fast Command**: `/psi <rider_weight_kg> <tire_width_mm>`\n"
+            "Example: `/psi 72 28`\n\n"
+            "Or use interactive buttons below:"
+        ),
+        "psi_step_weight": "⚖️ **Step 1: Select rider body weight (kg):**",
+        "psi_step_width": "🚲 Selected Weight: **{weight} kg**\n\n👉 **Step 2: Select nominal tire width:**",
+        "psi_usage": "❌ Invalid format. Usage: `/psi <weight_kg> <width_mm>`\nExample: `/psi 72 28`",
 
         # Pain Checker
         "pain_intro": (
