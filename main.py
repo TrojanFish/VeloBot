@@ -1,13 +1,18 @@
 import logging
 import datetime
+import warnings
 try:
     from zoneinfo import ZoneInfo
 except ImportError:
     from pytz import timezone as ZoneInfo
 from telegram import BotCommand
+from telegram.warnings import PTBUserWarning
 from telegram.ext import (
-    Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
+    Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
 )
+
+# 忽略 ConversationHandler 針對 CallbackQueryHandler 的常規提示
+warnings.filterwarnings("ignore", category=PTBUserWarning)
 
 from src.config import TELEGRAM_BOT_TOKEN, ADMIN_ID, CHECK_INTERVAL_MINUTES
 from src.database import init_db
