@@ -65,14 +65,27 @@ async def check_youtube_videos(context: ContextTypes.DEFAULT_TYPE):
 
         if CHANNEL_ID:
             try:
-                await context.bot.send_message(
-                    chat_id=CHANNEL_ID,
-                    text=channel_text,
-                    parse_mode="Markdown",
-                    reply_markup=InlineKeyboardMarkup(keyboard),
-                    disable_web_page_preview=False
-                )
-                logger.info(f"新影片已成功推播至頻道 {CHANNEL_ID}")
+                # 優先嘗試以高清大圖形式發送滿版封面 (maxresdefault.jpg)
+                thumbnail_url = f"https://img.youtube.com/vi/{video_id}/maxresdefault.jpg"
+                try:
+                    await context.bot.send_photo(
+                        chat_id=CHANNEL_ID,
+                        photo=thumbnail_url,
+                        caption=channel_text,
+                        parse_mode="Markdown",
+                        reply_markup=InlineKeyboardMarkup(keyboard)
+                    )
+                    logger.info(f"新影片已成功推播至頻道 {CHANNEL_ID}（帶高清滿版封面）")
+                except Exception as img_err:
+                    logger.warning(f"發送高清大圖封面失敗 ({img_err})，降級為標準消息加載網頁預覽")
+                    await context.bot.send_message(
+                        chat_id=CHANNEL_ID,
+                        text=channel_text,
+                        parse_mode="Markdown",
+                        reply_markup=InlineKeyboardMarkup(keyboard),
+                        disable_web_page_preview=False
+                    )
+                    logger.info(f"新影片已成功推播至頻道 {CHANNEL_ID}（網頁預覽模式）")
             except Exception as e:
                 logger.error(f"向頻道 {CHANNEL_ID} 推播新影片失敗: {e}")
 
