@@ -3,7 +3,7 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 from src.locales import t
-from src.utils import get_specs
+from src.utils import get_specs, get_pain_specs
 from src.database import (
     get_user_lang, set_user_lang,
     add_kit_waiter, record_maintenance_done, get_user_maintenance
@@ -47,11 +47,14 @@ async def handle_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYP
                 InlineKeyboardButton(t("btn_bb", lang=new_lang), callback_data="bb_menu")
             ],
             [
-                InlineKeyboardButton(t("btn_calc", lang=new_lang), callback_data="calc_menu"),
-                InlineKeyboardButton(t("btn_mybike", lang=new_lang), callback_data="maint_view")
+                InlineKeyboardButton(t("btn_pain", lang=new_lang), callback_data="pain_menu"),
+                InlineKeyboardButton(t("btn_calc", lang=new_lang), callback_data="calc_menu")
             ],
             [
-                InlineKeyboardButton(t("btn_ask", lang=new_lang), callback_data="entry_ask_noise"),
+                InlineKeyboardButton(t("btn_mybike", lang=new_lang), callback_data="maint_view"),
+                InlineKeyboardButton(t("btn_ask", lang=new_lang), callback_data="entry_ask_noise")
+            ],
+            [
                 InlineKeyboardButton(t("btn_lang", lang=new_lang), callback_data="lang_select_menu")
             ]
         ]
@@ -75,11 +78,14 @@ async def handle_main_menu_refresh(update: Update, context: ContextTypes.DEFAULT
             InlineKeyboardButton(t("btn_bb", lang=lang), callback_data="bb_menu")
         ],
         [
-            InlineKeyboardButton(t("btn_calc", lang=lang), callback_data="calc_menu"),
-            InlineKeyboardButton(t("btn_mybike", lang=lang), callback_data="maint_view")
+            InlineKeyboardButton(t("btn_pain", lang=lang), callback_data="pain_menu"),
+            InlineKeyboardButton(t("btn_calc", lang=lang), callback_data="calc_menu")
         ],
         [
-            InlineKeyboardButton(t("btn_ask", lang=lang), callback_data="entry_ask_noise"),
+            InlineKeyboardButton(t("btn_mybike", lang=lang), callback_data="maint_view"),
+            InlineKeyboardButton(t("btn_ask", lang=lang), callback_data="entry_ask_noise")
+        ],
+        [
             InlineKeyboardButton(t("btn_lang", lang=lang), callback_data="lang_select_menu")
         ]
     ]
@@ -310,3 +316,114 @@ async def handle_maintenance_callback(update: Update, context: ContextTypes.DEFA
     keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
 
     await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+
+async def handle_pain_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """處理騎行疼痛自查與 Bike Fitting 處方籤按鈕點選"""
+    query = update.callback_query
+    await query.answer()
+    user = query.from_user
+    lang = get_user_lang(user.id, user.language_code)
+    pain_data = get_pain_specs(lang)
+    data = query.data
+
+    # 主選單：部位選擇
+    if data == "pain_menu":
+        areas = pain_data.get("areas", {})
+        keyboard = []
+        area_keys = list(areas.keys())
+        for i in range(0, len(area_keys), 2):
+            row = [InlineKeyboardButton(areas[area_keys[i]]["title"], callback_data=f"pain_area_{area_keys[i]}")]
+            if i + 1 < len(area_keys):
+                row.append(InlineKeyboardButton(areas[area_keys[i+1]]["title"], callback_data=f"pain_area_{area_keys[i+1]}"))
+            keyboard.append(row)
+        keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
+
+        await query.edit_message_text(
+            t("pain_intro", lang=lang),
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        return
+
+    # 第 2 步：情境/時機選擇
+    if data.startswith("pain_area_"):
+        area_id = data.replace("pain_area_", "")
+        areas = pain_data.get("areas", {})
+        timings = pain_data.get("timings", {})
+        area_info = areas.get(area_id, {})
+        area_title = area_info.get("title", area_id)
+
+        keyboard = []
+        for timing_id, timing_info in timings.items():
+            keyboard.append([InlineKeyboardButton(timing_info["title"], callback_data=f"pain_rx_{area_id}_{timing_id}")])
+        keyboard.append([InlineKeyboardButton(t("btn_back_list", lang=lang), callback_data="pain_menu")])
+
+        await query.edit_message_text(
+            t("pain_step2", lang=lang, area=area_title),
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+        return
+
+    # 第 3 步：生成處方籤卡片
+    if data.startswith("pain_rx_"):
+        parts = data.split("_")
+        # pain_rx_<area_id>_<timing_id>
+        area_id = parts[2]
+        timing_id = "_".join(parts[3:])
+
+        areas = pain_data.get("areas", {})
+        timings = pain_data.get("timings", {})
+        prescriptions = pain_data.get("prescriptions", {})
+
+        area_title = areas.get(area_id, {}).get("title", area_id)
+        timing_info = timings.get(timing_id, {})
+        timing_title = timing_info.get("title", timing_id)
+
+        rx = prescriptions.get(area_id, {}).get(timing_id, {})
+        if not rx:
+            await query.edit_message_text("No prescription found / 暫無該情境的處方數據")
+            return
+
+        if lang == "en":
+            text = (
+                f"🩺 **Bike Fitting Prescription Card**\n\n"
+                f"🎯 **Target Area**: {area_title}\n"
+                f"⏱️ **Scenario**: {timing_title}\n\n"
+                f"📋 **Diagnosis**: {rx.get('diagnosis')}\n\n"
+                f"🔬 **Biomechanism**: {rx.get('mechanism')}\n\n"
+                f"⚙️ **Mechanical Adjustments**:\n"
+            )
+            for m in rx.get("mechanical", []):
+                text += f"• {m}\n"
+            text += f"\n🚴 **Riding Technique Fixes**:\n"
+            for r in rx.get("riding", []):
+                text += f"• {r}\n"
+            text += f"\n🧘 **Targeted Stretches & Exercises**:\n"
+            for s in rx.get("stretches", []):
+                text += f"• {s}\n"
+        else:
+            text = (
+                f"🩺 **公路車騎行疼痛與 Fitting 調校處方籤**\n\n"
+                f"🎯 **疼痛部位**：{area_title}\n"
+                f"⏱️ **誘發情境**：{timing_title}\n\n"
+                f"📋 **病因診斷**：{rx.get('diagnosis')}\n\n"
+                f"🔬 **受力機理**：{rx.get('mechanism')}\n\n"
+                f"⚙️ **車輛設定調整建議**：\n"
+            )
+            for m in rx.get("mechanical", []):
+                text += f"• {m}\n"
+            text += f"\n🚴 **騎乘姿勢與發力修正**：\n"
+            for r in rx.get("riding", []):
+                text += f"• {r}\n"
+            text += f"\n🧘 **專案拉伸與康復動作**：\n"
+            for s in rx.get("stretches", []):
+                text += f"• {s}\n"
+
+        keyboard = [
+            [InlineKeyboardButton("🔄 " + ("Other Scenarios" if lang == "en" else "查詢其他時機"), callback_data=f"pain_area_{area_id}")],
+            [InlineKeyboardButton(t("pain_btn_restart", lang=lang), callback_data="pain_menu")],
+            [InlineKeyboardButton(t("pain_btn_ask", lang=lang), callback_data="entry_ask_noise")],
+            [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
+        ]
+        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))

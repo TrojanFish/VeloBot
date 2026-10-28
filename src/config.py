@@ -23,3 +23,4 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 DB_FILE = os.path.join(DATA_DIR, "bot_data.db")
 SPECS_FILE = os.path.join(DATA_DIR, "specs_dict.json")
+PAIN_FILE = os.path.join(DATA_DIR, "pain_dict.json")

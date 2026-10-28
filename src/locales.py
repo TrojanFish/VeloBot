@@ -11,6 +11,7 @@ TRANSLATIONS = {
             "🛠️ **常用技師指令：**\n"
             "• /torque - 關鍵部位標準鎖緊扭力速查\n"
             "• /bb - 五通規格與大盤軸心相容匹配器\n"
+            "• /pain - 騎行疼痛自查與 Fitting 處方籤\n"
             "• /calc - 鏈條節數與無內胎補胎液推薦計算器\n"
             "• /mybike - 個人車輛週期保養打卡與提醒\n"
             "• /ask - 異音門診與組裝疑難雜症投稿\n"
@@ -19,6 +20,7 @@ TRANSLATIONS = {
         ),
         "btn_torque": "🔧 扭力速查",
         "btn_bb": "⚙️ 五通匹配器",
+        "btn_pain": "🩺 疼痛自查",
         "btn_calc": "📐 組裝計算器",
         "btn_mybike": "🚲 保養管家",
         "btn_ask": "🩺 異音門診投稿",
@@ -28,6 +30,20 @@ TRANSLATIONS = {
         "btn_notify_waitlist": "🔔 本期清單更新後通知我",
         "btn_back_menu": "🔙 返回主選單",
         "btn_back_list": "🔙 返回列表",
+
+        # 疼痛自查
+        "pain_intro": (
+            "🩺 **公路車騎行疼痛與 Fitting 自查工具**\n\n"
+            "騎車哪裡不舒服？膝蓋痛、腰背酸、手掌麻木或坐墊壓迫？\n"
+            "請依序點選，Bot 將為你輸出病因診斷、車輛設定調整、騎乘姿勢修正與專案拉伸動作！\n\n"
+            "👉 **第 1 步：請點選出現疼痛或麻木的部位：**"
+        ),
+        "pain_step2": (
+            "🩺 當前所選部位：**{area}**\n\n"
+            "👉 **第 2 步：請問疼痛或不適通常在什麼情境下出現？**"
+        ),
+        "pain_btn_restart": "🔄 查詢其他部位",
+        "pain_btn_ask": "🩺 提交異音/門診",
 
         # 語言切換
         "lang_switch_prompt": "🌐 請選擇你的偏好語言 / Please select your preferred language:",
@@ -141,6 +157,7 @@ TRANSLATIONS = {
             "🛠️ **Commands:**\n"
             "• /torque - Standard torque values lookup\n"
             "• /bb - Bottom bracket & crank spindle compatibility wizard\n"
+            "• /pain - Cycling pain checker & Bike Fit prescription\n"
             "• /calc - Chain length & tubeless sealant calculators\n"
             "• /mybike - Personal periodic maintenance tracker & alerts\n"
             "• /ask - Road bike noise clinic & symptom submission\n"
@@ -149,6 +166,7 @@ TRANSLATIONS = {
         ),
         "btn_torque": "🔧 Torque Lookup",
         "btn_bb": "⚙️ BB Matcher",
+        "btn_pain": "🩺 Pain Checker",
         "btn_calc": "📐 Calculators",
         "btn_mybike": "🚲 Maintenance",
         "btn_ask": "🩺 Noise Clinic",
@@ -158,6 +176,20 @@ TRANSLATIONS = {
         "btn_notify_waitlist": "🔔 Notify me when updated",
         "btn_back_menu": "🔙 Main Menu",
         "btn_back_list": "🔙 Back",
+
+        # Pain Checker
+        "pain_intro": (
+            "🩺 **Road Bike Pain Checker & Bike Fitting Prescription**\n\n"
+            "Suffering from knee pain, back ache, hand numbness, or saddle soreness?\n"
+            "Follow the prompts to diagnose causes, mechanical fit adjustments, riding form fixes, and targeted stretches!\n\n"
+            "👉 **Step 1: Select the troubled anatomical area:**"
+        ),
+        "pain_step2": (
+            "🩺 Selected Area: **{area}**\n\n"
+            "👉 **Step 2: When does the pain or discomfort typically occur?**"
+        ),
+        "pain_btn_restart": "🔄 Check Another Area",
+        "pain_btn_ask": "🩺 Ask Mechanic",
 
         # Language Switch
         "lang_switch_prompt": "🌐 Please select your preferred language / 請選擇語言：",

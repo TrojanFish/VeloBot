@@ -4,7 +4,7 @@ from telegram.ext import ContextTypes
 
 from src.config import ADMIN_ID
 from src.locales import t
-from src.utils import get_specs, calculate_chain_length
+from src.utils import get_specs, calculate_chain_length, get_pain_specs
 from src.database import (
     get_user_lang, set_user_lang,
     get_video_by_id, get_video_by_admin_msg, update_video_kit,
@@ -77,11 +77,14 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             InlineKeyboardButton(t("btn_bb", lang=lang), callback_data="bb_menu")
         ],
         [
-            InlineKeyboardButton(t("btn_calc", lang=lang), callback_data="calc_menu"),
-            InlineKeyboardButton(t("btn_mybike", lang=lang), callback_data="maint_view")
+            InlineKeyboardButton(t("btn_pain", lang=lang), callback_data="pain_menu"),
+            InlineKeyboardButton(t("btn_calc", lang=lang), callback_data="calc_menu")
         ],
         [
-            InlineKeyboardButton(t("btn_ask", lang=lang), callback_data="entry_ask_noise"),
+            InlineKeyboardButton(t("btn_mybike", lang=lang), callback_data="maint_view"),
+            InlineKeyboardButton(t("btn_ask", lang=lang), callback_data="entry_ask_noise")
+        ],
+        [
             InlineKeyboardButton(t("btn_lang", lang=lang), callback_data="lang_select_menu")
         ]
     ]
@@ -91,6 +94,29 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         parse_mode="Markdown",
         reply_markup=InlineKeyboardMarkup(keyboard)
     )
+
+async def pain_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/pain 騎行疼痛自查與 Bike Fitting 處方籤指令"""
+    user = update.effective_user
+    lang = get_user_lang(user.id, user.language_code)
+    pain_data = get_pain_specs(lang)
+    areas = pain_data.get("areas", {})
+
+    keyboard = []
+    area_keys = list(areas.keys())
+    for i in range(0, len(area_keys), 2):
+        row = [InlineKeyboardButton(areas[area_keys[i]]["title"], callback_data=f"pain_area_{area_keys[i]}")]
+        if i + 1 < len(area_keys):
+            row.append(InlineKeyboardButton(areas[area_keys[i+1]]["title"], callback_data=f"pain_area_{area_keys[i+1]}"))
+        keyboard.append(row)
+    keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
+
+    text = t("pain_intro", lang=lang)
+    if update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+    else:
+        await update.effective_message.reply_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def language_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/lang 語言切換指令"""
@@ -229,6 +255,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "📖 **Road Bike Mechanic Toolkit Help**\n\n"
             "• /torque - Standard torque values for cockpit, BB, brakes, derailleurs\n"
             "• /bb - Frame shell and crank spindle compatibility wizard\n"
+            "• /pain - Cycling pain self-check & Bike Fitting prescription\n"
             "• /calc - Chain length and tubeless sealant calculators\n"
             "• /chain - Fast chain link calculation (e.g. `/chain 50 34 410`)\n"
             "• /mybike - Periodic maintenance log & reminder (sealant, wax, brake fluid)\n"
@@ -241,6 +268,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "📖 **公路車技師口袋工具箱指令表**\n\n"
             "• /torque - 關鍵部位標準鎖緊扭力速查（龍頭、車把、座管、中軸、碟煞、變速等）\n"
             "• /bb - 五通規格與大盤軸心相容匹配指南（墊圈配置與拆裝工具）\n"
+            "• /pain - 騎行疼痛自查與 Bike Fitting 處方籤（膝蓋/腰背/手麻/坐墊等）\n"
             "• /calc - 組裝計算器選單\n"
             "• /chain - 快速計算鏈條標準節數（如 `/chain 50 34 410`）\n"
             "• /mybike - 個人週期保養到期提醒（無內胎補胎液、浸蠟、煞車油）\n"

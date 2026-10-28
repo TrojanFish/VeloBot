@@ -8,6 +8,7 @@ data/*.sqlite
 data/*.sqlite3
 data/*.txt
 !data/specs_dict.json
+!data/pain_dict.json
 
 # Python
 __pycache__/

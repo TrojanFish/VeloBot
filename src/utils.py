@@ -1,11 +1,12 @@
 import os
 import json
 import logging
-from src.config import SPECS_FILE
+from src.config import SPECS_FILE, PAIN_FILE
 
 logger = logging.getLogger(__name__)
 
 _specs_cache = None
+_pain_cache = None
 
 def get_specs(lang: str = "zh_hant") -> dict:
     """讀取指定語言版本的參數字典 (支援熱重載)"""
@@ -16,12 +17,26 @@ def get_specs(lang: str = "zh_hant") -> dict:
     try:
         with open(SPECS_FILE, "r", encoding="utf-8") as f:
             _specs_cache = json.load(f)
-            # 支援 zh_hant 與 en 兩大分支
             lang_key = "en" if lang == "en" else "zh_hant"
             return _specs_cache.get(lang_key, _specs_cache.get("zh_hant", {}))
     except Exception as e:
         logger.error(f"讀取參數字典失敗: {e}")
         return (_specs_cache.get(lang) if _specs_cache else {}) or {}
+
+def get_pain_specs(lang: str = "zh_hant") -> dict:
+    """讀取指定語言版本的騎行疼痛自查字典 (支援熱重載)"""
+    global _pain_cache
+    if not os.path.exists(PAIN_FILE):
+        logger.error(f"疼痛自查字典檔案不存在: {PAIN_FILE}")
+        return {}
+    try:
+        with open(PAIN_FILE, "r", encoding="utf-8") as f:
+            _pain_cache = json.load(f)
+            lang_key = "en" if lang == "en" else "zh_hant"
+            return _pain_cache.get(lang_key, _pain_cache.get("zh_hant", {}))
+    except Exception as e:
+        logger.error(f"讀取疼痛自查字典失敗: {e}")
+        return (_pain_cache.get(lang) if _pain_cache else {}) or {}
 
 def calculate_chain_length(chainstay_mm: float, big_ring_teeth: int, max_cog_teeth: int) -> int:
     """

@@ -1,0 +1,845 @@
+{
+  "zh_hant": {
+    "areas": {
+      "knee": { "title": "🦵 膝蓋疼痛 (Knee Pain)" },
+      "lower_back": { "title": "🧗 下背與腰部酸痛 (Lower Back Pain)" },
+      "neck_shoulder": { "title": "💆 頸部與肩部酸痛 (Neck & Shoulder Pain)" },
+      "wrist_hand": { "title": "🖐️ 手腕與手掌麻木 (Wrist & Hand Numbness)" },
+      "buttock": { "title": "🪑 坐骨與會陰壓痛 (Saddle & Perineum Pain)" },
+      "foot": { "title": "🦶 腳掌與足底灼熱麻木 (Foot Numbness & Hot Foot)" }
+    },
+    "timings": {
+      "early_ride": { "title": "⏱️ 起騎 15~30 分鐘內迅速出現", "badge": "靜態幾何失調" },
+      "fatigue_endurance": { "title": "🔋 騎行 2 小時以上疲勞後顯現", "badge": "耐力代償衰竭" },
+      "high_torque_climb": { "title": "⛰️ 大阻力重踩或陡坡爬坡時", "badge": "高扭矩峰值過載" },
+      "aero_drop_posture": { "title": "🚀 抓握下把或低趴破風姿態時", "badge": "落差與屈曲極限" }
+    },
+    "prescriptions": {
+      "knee": {
+        "early_ride": {
+          "diagnosis": "靜態坐墊高度/前後位置或卡踏浮動角嚴重失配",
+          "mechanism": "起騎即疼通常非疲勞引起，而是曲柄轉動下死點腿部過度屈曲（坐墊過低引發髕腱高壓）或過度超伸（坐墊過高引發膕肌拉扯），或卡踏 0° 零浮動鎖死自然內外旋力線。",
+          "mechanical": [
+            "坐墊高度精準校準：腳跟踩在踏板最低點時腿部完全伸直且骨盆不傾斜，以腳掌踩踏時膝角維持在 25°~30°。",
+            "前膝痛建議坐墊微調高 3~5mm 並向後移 3mm；後膝痛建議微調低 3~5mm 並微向前移。",
+            "卡鞋浮動片核查：嚴禁使用 0° 零浮動紅片/黑片，換用 4.5°~6° 浮動卡踏片，釋放腳踝天然微小旋動。"
+          ],
+          "riding": [
+            "踩踏到底時腳跟保持平順水平，嚴禁腳後跟下沉深踩。",
+            "踩踏時雙膝正對車架前樑上下直行，不要刻意內收或外撇。"
+          ],
+          "stretches": [
+            "【站姿股四頭肌後拉伸展】（目標：股直肌與髕骨上腱）：單腿站立手拉腳踝貼近臀部，膝蓋垂直向下，挺胸骨盆中立（每側 30 秒 x 3 組）。",
+            "【仰臥膕繩肌毛巾牽拉】（目標：大腿後側膕肌與半腱肌）：仰臥用毛巾套住足弓，伸直腿向上牽拉至大腿後側溫和拉伸（每側 35 秒 x 3 組）。"
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "長途耐力衰竭誘發臀中肌疲勞骨盆傾斜，引起髂脛束摩擦綜合徵 (ITBS)",
+          "mechanism": "隨著騎行時長增加，維持骨盆穩定的臀中肌力竭，骨盆向踩踏對側下沉，導致大腿股骨內旋內收，髂脛束與股骨外側髁劇烈摩擦形成無菌性炎症。",
+          "mechanical": [
+            "坐墊微調低 2~3mm：略微降低下死點延伸量，減輕下肢在力竭狀態下的骨盆擺動代償。",
+            "檢查坐墊支撐剛性：若舊坐墊底板塌陷軟化，更換具有高彈發泡或碳纖底板的專業長途坐墊。",
+            "檢查卡鞋內側支撐：加裝 1° 鎖片內翻墊片穩定足弓力線，防止長途腳掌內扣。"
+          ],
+          "riding": [
+            "長途巡航維持 85~95 RPM 穩定踏頻，減少單腳大力深踏的力矩脈衝。",
+            "有意識微收核心下腹部，感知坐骨兩側均勻壓實在坐墊後翼。"
+          ],
+          "stretches": [
+            "【髂脛束與闊筋膜張肌滾壓】（目標：大腿外側 ITB 筋膜束）：側臥在滾筒上，從髖骨外側下方向膝蓋上方緩慢滾動，在痛點停留深呼吸（每側 45 秒 x 2 組）。",
+            "【鴿子式臀深層肌群拉伸】（目標：臀中肌、梨狀肌）：單腿前屈折疊貼地，後腿完全伸展，上身前傾下伏感受臀外側深層牽拉（每側 40 秒 x 3 組）。"
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "爬坡極低踏頻大扭矩導致髕股關節過度擠壓與乳酸堆積",
+          "mechanism": "面對 8%~15% 陡坡且缺少大飛輪時，踏頻暴跌至 50~60 RPM，單腿踩踏峰值切向力超過體重的 2~3 倍，使髕骨軟骨承受極高的剪切衝擊壓。",
+          "mechanical": [
+            "傳動系統齒比擴容：改裝 34T 或 36T 爬坡大飛輪，必要時搭配 50-34T 壓縮盤。",
+            "縮短曲柄長度（如 172.5mm 改為 165mm 或 170mm）：減小上死點膝關節屈曲極限角，顯著釋放踩踏啟動峰值扭矩。"
+          ],
+          "riding": [
+            "進陡坡前 50 米提前換輕檔並提高踏頻至 80 RPM 蓄勢，避免硬抗重踩。",
+            "採用「坐踩 1 分鐘 + 站姿抽車 15 秒」交替循環，利用自身體重分擔膝蓋局部肌肉張力。"
+          ],
+          "stretches": [
+            "【低位弓箭步髂腰肌拉伸】（目標：髖屈肌與股直肌近端）：單腿大步向前呈弓箭步，後膝著地骨盆向前下沉，挺胸感受腹股溝牽拉（每側 30 秒 x 3 組）。",
+            "【靠牆靜蹲激活股內側斜肌】（目標：VMO 股內側肌）：背靠牆屈膝至 60°~90°，雙膝夾一個瑜伽磚，增強髕骨軌跡內向穩定性（每次 45 秒 x 2 組）。"
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "深落差低趴姿態導致髖膝關節屈角受限與力線扭曲",
+          "mechanism": "抓握下把位或伏把破風時，軀幹與大腿夾角變小，若車手髖關節靈活性受限，膝蓋會在踩踏上死點下意識外撇避讓肋骨，造成內旋肌與髕腱力線折角扭曲。",
+          "mechanical": [
+            "減少座艙落差（Drop）：在龍頭下方增加 5~10mm 墊圈，或更換小角度龍頭。",
+            "坐墊微向前滑動 3~5mm：打開髖關節角度，使伏把時上死點踩踏更加順暢。"
+          ],
+          "riding": [
+            "伏把時胸腔微張，下背部保持微弧，用骨盆向前旋轉帶動上身，而非單單彎折腰椎。",
+            "避免雙膝在踩踏上死點向車架外側大幅撇開。"
+          ],
+          "stretches": [
+            "【仰臥蝴蝶式髖關節外展拉伸】（目標：內收肌群與髖臼關節囊）：仰臥腳心相對雙膝自然向兩側下沉打開，雙手置於腹部平穩深呼吸（每次 60 秒）。",
+            "【坐姿轉體胸椎活動度激活】（目標：胸椎旋轉度與腹外斜肌）：坐在椅子上雙手抱頭，呼氣向一側水平轉動胸廓，骨盆保持正對前方（每側 10 次 x 2 組）。"
+          ]
+        }
+      },
+      "lower_back": {
+        "early_ride": {
+          "diagnosis": "座艙 Reach 過長或龍頭過長，脊椎過度前伸拉傷",
+          "mechanism": "車架尺碼偏大或龍頭過長，迫使騎手雙臂死死向前探出，背部豎脊肌從起騎第 1 分鐘起就處於被動持續極限牽拉狀態，無法由核心分擔重力。",
+          "mechanical": [
+            "龍頭縮短 10~20mm（例如由 110mm 更換為 90mm），立竿見影縮短座艙延伸。",
+            "將把手變速把頭向後上方仰調 2°~3°，縮短手部握持極限點。",
+            "坐墊適度向前滑動 3~5mm，拉近坐骨與車頭的距離。"
+          ],
+          "riding": [
+            "手臂保持微屈（手肘約 15° 彎曲），充當天然彈性避震臂，禁止雙臂死直鎖定。",
+            "騎行中不要把重心全部死死壓在雙手上。"
+          ],
+          "stretches": [
+            "【貓牛式脊椎多節段活動】（目標：胸腰段豎脊肌與多裂肌）：四足跪姿，吸氣抬頭塌腰伸展腹部，呼氣弓背低頭收縮腹肌拉伸後背（每組 10 次 x 3 組）。",
+            "【嬰兒式背部深度減壓】（目標：下背腰方肌與背闊肌）：雙膝跪地臀部坐於腳後跟，雙臂向前伸展趴在墊上，額頭貼地深呼吸（每次 60 秒）。"
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "核心腹橫肌衰竭導致骨盆後傾，重力全由腰椎間盤硬抗",
+          "mechanism": "2 小時以上長途騎行時腹肌與深層穩定肌力竭，騎手下意識塌腰弓背，使骨盆嚴重後傾，顛簸路面的垂直震動直擊腰椎椎間盤。",
+          "mechanical": [
+            "車頭墊圈加高 5~10mm，使長途座艙處於更加直立舒展的耐力舒適幾何。",
+            "檢查坐墊俯仰角：坐墊鼻頭若上翹會頂住恥骨迫使骨盆後傾，將其調平或鼻頭微降 1°。"
+          ],
+          "riding": [
+            "每騎行 20 分鐘主動提肛微收小腹，重新喚醒骨盆中立位。",
+            "安全下坡或平路路段嘗試短時間直立騎行（直腰握橫把）放鬆腰背。"
+          ],
+          "stretches": [
+            "【眼鏡蛇式腰椎伸展】（目標：腹直肌拉伸與腰椎後伸釋放）：俯臥雙手撐在胸旁緩慢推起上半身，骨盆緊貼地面，微抬頭感受腹部拉伸（每次 30 秒 x 3 組）。",
+            "【死蟲式核心深層腹橫肌激活】（目標：深層核心與骨盆穩定性）：仰臥舉雙手屈雙腿 90°，對側手腳緩慢下放至接近地面且下背不離地（每側 12 次 x 2 組）。"
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "陡坡大力抽車拔把發力，背闊肌與腰方肌超負荷代償",
+          "mechanism": "爬坡遇到重阻力時，很多車友習慣用雙手使勁後拉車把借力，導致腰背豎脊肌與腰方肌承受雙向非對稱剪切扭矩。",
+          "mechanical": [
+            "提升爬坡踏頻：加裝大飛輪或壓縮盤，將踏頻提至 75 RPM 以上以輕快踩踏代替重踩。",
+            "檢查車把寬度：過窄的車把在抽車時槓桿力臂不足，迫使腰背付出更大扭轉力量。"
+          ],
+          "riding": [
+            "爬坡抽車時以重心的自然左右擺動帶動車輛傾斜，嚴禁用手臂死力撕扯車把。",
+            "坐踩時手掌虛搭在橫把上，專注於臀大肌的主動踩踏輸出。"
+          ],
+          "stretches": [
+            "【仰臥抱膝壓胸放鬆】（目標：下腰部脊椎減壓）：仰臥雙腿彎曲，雙手抱住小腿向胸部收緊，輕輕左右晃動背部按摩腰椎（每次 45 秒）。",
+            "【骨盆臀橋激活臀大肌】（目標：臀大肌伸髖驅動替代腰背借力）：仰臥屈膝腳踩地，利用臀部發力將骨盆抬至膝髖肩一線，頂峰收縮 2 秒（15 次 x 3 組）。"
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "落差 Drop 深度超出車手髖關節後側柔韌度代償極限",
+          "mechanism": "追求過度激進的落差美學，把立墊圈全砍，導致下趴時腰椎被迫過度屈曲，引發腰背肌肉痙攣與神經壓迫。",
+          "mechanical": [
+            "增加龍頭墊圈 10~15mm，或將原本大角度負角度龍頭（-17°）換為常規（-6°）。",
+            "選用短鼻中空坐墊並允許坐骨適當支撐，使骨盆能夠在低趴時整體向前順暢旋轉。"
+          ],
+          "riding": [
+            "氣動姿態應依靠髖關節（髖屈）向前折疊，而非單純彎折腰椎。",
+            "短途突圍或逆風時抓下把，平路巡航適度回歸變速把位交替舒緩。"
+          ],
+          "stretches": [
+            "【站姿體前屈膕繩肌伸展】（目標：下肢後側鏈柔韌度）：雙腳微開從髖部折疊上身緩慢下沉，雙手盡量觸碰腳尖或腳踝，呼吸放鬆（每次 40 秒 x 2 組）。",
+            "【側向支撐強化側腹腰方肌】（目標：腹外斜肌與腰方肌抗側屈穩定）：單側手肘支撐，身體側向挺起成一線，保持核心緊繃骨盆不塌陷（每側 30 秒 x 2 組）。"
+          ]
+        }
+      },
+      "neck_shoulder": {
+        "early_ride": {
+          "diagnosis": "車把過寬或變速手把角度外撇，肩袖肌群持續處於張力撕扯",
+          "mechanism": "原廠常搭配 420mm 車把，而亞洲人實際肩寬多在 380~400mm。握距過寬導致雙臂呈倒八字，肩胛骨長時間外展，斜方肌和提肩胛肌緊繃抽筋。",
+          "mechanical": [
+            "更換與鎖骨肩峰同寬的車把（例如換用 380mm 或 400mm 窄把）。",
+            "將變速手把適當向內傾斜 3°~5°，符合手臂自然內收生理握持習慣。"
+          ],
+          "riding": [
+            "沉肩、墜肘：騎行中經常自我提示將肩胛骨向下向後收緊，不要縮脖子聳肩。",
+            "手腕與小臂對齊，不要向外折角。"
+          ],
+          "stretches": [
+            "【側向拉頭斜方肌牽拉】（目標：上斜方肌與提肩胛肌）：一手背後固定，另一手輕拉頭部向同側肩膀，感受對側頸部拉伸（每側 30 秒 x 3 組）。",
+            "【胸大肌門框後展伸展】（目標：胸大肌與三角肌前束）：小臂貼在門框上，身體緩慢向前邁步，感受胸前拉伸與肩胛回縮（每側 30 秒 x 2 組）。"
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "長時間同一姿勢支撐導致肩頸靜力性缺血僵硬",
+          "mechanism": "長時間保持手握手變頭單一姿勢，頸後肌群持續抗阻頭部重力（頭部加頭盔重達 6kg 以上），缺乏體態交替引發肌纖維局部微缺血。",
+          "mechanical": [
+            "增加龍頭墊圈 5mm，減輕仰頭視物視角 3°~5°。",
+            "選用視野開闊的無邊框輕量化風鏡，避免因眼鏡框遮擋視線而被迫使勁仰頭。"
+          ],
+          "riding": [
+            "騎行中每 15 分鐘變換一次握把姿態：橫把位巡航、變速把頭推行、下把位交替。",
+            "在安全筆直路段輕微左右轉頭並聳肩放鬆，促進肩頸血液回流。"
+          ],
+          "stretches": [
+            "【靠牆 W-to-Y 肩胛滑動】（目標：菱形肌與下斜方肌）：背靠牆小臂貼牆呈 W 姿態，向上推成 Y 姿態，感受肩胛骨下沉（12 次 x 3 組）。",
+            "【下頜內收強化頸深屈肌】（目標：頸深部屈肌群）：身體直立，用手指輕按鼻尖引導頭部水平向後平移做「收雙下巴」動作（每次停頓 5 秒 x 10 次）。"
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "爬坡攻堅過度緊張，死力抓把引起斜方肌應激性痙攣",
+          "mechanism": "爬陡坡時心率飆升與腿部酸痛，上肢下意識死死捏緊把套，肩膀高高聳起，將腿部的疲勞轉化成了肩頸的過度發力。",
+          "mechanical": [
+            "纏繞 2.5~3.0mm 厚度高吸震把帶，減少路面顛簸衝擊波直傳肩胛。",
+            "調整煞車握距調節螺絲（Reach Adjust），讓手指更輕鬆勾到煞車，消除緊繃感。"
+          ],
+          "riding": [
+            "爬坡時做規律深長呼吸，每次呼氣時主動提示雙肩下沉放鬆。",
+            "手掌僅需鬆弛地搭在車把手變頭頂部，讓重力自然下沉。"
+          ],
+          "stretches": [
+            "【雙肩前後大環繞】（目標：肩鎖關節與斜方肌）：挺胸直立雙肩由前向上、向後向下做大幅度旋轉（順時針與逆時針各 15 圈）。",
+            "【雙手背後交叉反向牽拉】（目標：胸背聯動筋膜鏈）：雙手在背後十指相扣，手心向外緩慢向上抬起同時挺胸伸展（每次 30 秒 x 2 組）。"
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "極致低趴使頸椎處於過度後伸過仰，枕下神經受壓",
+          "mechanism": "握下把破風時軀幹幾乎與地面水平，為了看清前方路況，頸椎必須維持近 60° 的極限仰角，枕下肌群極度受擠。",
+          "mechanical": [
+            "減少座艙落差 10mm，尋找速度與舒適的折中平衡點。",
+            "安全帽換用輕量化空力帽（<230g），減少頸椎承受的額外重力力矩。"
+          ],
+          "riding": [
+            "學會「眼球上視」替代「使勁仰頭」：頭部保持中立，利用眼球向上轉動觀察路況。",
+            "非必要衝刺時不要整程死握下把，分段切換姿態。"
+          ],
+          "stretches": [
+            "【頸前側胸鎖乳突肌斜拉伸】（目標：胸鎖乳突肌）：一手按住鎖骨，頭向對側後上方微仰，感受頸側與下頜緣緊繃拉伸（每側 25 秒 x 2 組）。",
+            "【枕下肌群指壓放鬆】（目標：風池穴與枕骨下緣肌群）：雙手大拇指置於後腦勺骨頭下凹陷處，做溫和畫圈按壓深呼吸（按壓 40 秒）。"
+          ]
+        }
+      },
+      "wrist_hand": {
+        "early_ride": {
+          "diagnosis": "坐墊過度向前傾斜，身體前滑導致雙臂掌根承受大部分體重",
+          "mechanism": "坐墊鼻頭下斜過多，騎手像滑梯一樣向前滑動，雙手只能死命推頂車把支撐，正中神經與尺神經遭受劇烈擠壓。",
+          "mechanical": [
+            "使用水平尺校準坐墊：將坐墊表面調整至完全水平（0°）或僅微斜 -0.5°。",
+            "手握手變頭時小臂、手腕與手背必須連成平順直線，消除手腕背折角。"
+          ],
+          "riding": [
+            "手掌掌心輕放車把，禁止以「伏地挺身」的姿態死壓車把。",
+            "重量大部分分配在腳踏和坐墊上，雙手僅負責方向引導與輕微平衡。"
+          ],
+          "stretches": [
+            "【前臂屈肌腕掌反拉伸展】（目標：旋前圓肌與腕屈肌群）：單臂伸直掌心向前手指向下，另一手握住手指往回輕拉（每側 30 秒 x 3 組）。",
+            "【雙手合十祈禱式拉伸】（目標：腕關節掌側韌帶）：雙手掌心合十於胸前，緩慢向下壓保持掌根貼合（每次 30 秒 x 2 組）。"
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "路面連續高頻微震引起尺神經與正中神經微循環缺血（手麻綜合徵）",
+          "mechanism": "長時間抓握車把，地面微震持續敲擊手掌小魚際（尺管 Guyon 管），導致小指與無名指麻木、觸覺變鈍甚至無力握攏煞車。",
+          "mechanical": [
+            "升級厚度在 2.5mm~3.2mm 的高緩震聚氨酯凝膠手把帶。",
+            "佩戴專業帶凝膠減震襯墊的騎行手套。",
+            "胎壓適度微降 3~5 PSI，利用輪胎形變過濾 80% 的路面高頻微震。"
+          ],
+          "riding": [
+            "騎行中每 10 分鐘單手脫把向下自然下垂甩動 10 秒，恢復手掌血液供應。",
+            "在平路橫把、變速把頭上握、掌托外緣輪流切換支撐點。"
+          ],
+          "stretches": [
+            "【尺神經滑車神經滑動訓練】（目標：尺神經順應性）：手臂向側方展開屈肘，拇指食指捏合做「OK」倒扣在眼睛旁成眼鏡狀，再緩慢展開（每側 10 次 x 2 組）。",
+            "【手掌與手指反向伸張】（目標：蚓狀肌與骨間肌）：用力張開五指維持 5 秒，再用力握緊拳頭，快速交替（重複 20 次）。"
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "爬坡重踩死捏把套，腕關節長時間處於極限背伸與側偏",
+          "mechanism": "陡坡抓握變速手把用力後拉時，手腕往往出現向小指側的過度偏斜，使腕掌關節間隙受擠變窄。",
+          "mechanical": [
+            "若扁平空力把橫太薄導致抓握掌心懸空，可加裹一層緩震內襯膠。",
+            "微調變速手把安裝位置，使手腕在握持發力時處於中立解剖位。"
+          ],
+          "riding": [
+            "爬坡時改握把橫（橫把位），讓前臂呈自然中立姿態，卸掉手腕剪切角。",
+            "手掌均勻受力，不要把所有爆發力全部壓在掌根一點。"
+          ],
+          "stretches": [
+            "【手腕八字環繞運動】（目標：腕關節囊與滑膜）：雙手十指交叉相扣，輕柔畫 8 字連續轉動手腕（持續 40 秒）。",
+            "【手背反向牽伸】（目標：前臂外側伸肌群）：手臂伸直手心向內，另一手按壓手背向身體方向緩慢折曲（每側 30 秒 x 2 組）。"
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "握下把位彎角過陡，手腕背伸角度劇烈增加導致腕管受擠",
+          "mechanism": "彎把下把弧度與把手落差不匹配，導致抓握下把時為了勾住煞車桿，手腕必須過度向上折起，誘發腕管綜合徵。",
+          "mechanical": [
+            "選用人體工學小下把壓縮彎把（Compact 彎把，Drop 僅 120~125mm）。",
+            "利用煞車握距螺栓將煞車把向內調近 5~10mm，讓手指自然搭住煞車。"
+          ],
+          "riding": [
+            "下把位握持在下把平直段，僅在需要煞車時將手指搭上煞車桿。",
+            "手腕與前臂盡量維持平直力線。"
+          ],
+          "stretches": [
+            "【前臂前側筋膜球滾動】（目標：旋前肌與前臂筋膜）：用筋膜球從小臂內側推壓至手掌（每側 60 秒）。",
+            "【指尖對推手指張力放鬆】（目標：指淺屈肌腱）：雙手指尖相對推壓形成穹頂，掌心分離（每次 20 秒 x 2 組）。"
+          ]
+        }
+      },
+      "buttock": {
+        "early_ride": {
+          "diagnosis": "坐墊寬度與坐骨間距脫節，或實心坐墊壓迫會陰神經血管束",
+          "mechanism": "若坐墊太窄，兩顆堅硬的坐骨懸空無支撐，身體重量全由中間柔軟的會陰部承擔，起騎 10 分鐘即劇痛麻木。",
+          "mechanical": [
+            "精準測量坐骨寬度：坐墊寬度通常需比坐骨寬 20~25mm（常見 143mm / 155mm）。",
+            "選用具備全通中空大減壓槽（Cut-out）或短鼻寬翼設計的專業坐墊。",
+            "校準坐墊水平：測量坐墊前中區域，保持 0° 水平或鼻頭向下 1°。"
+          ],
+          "riding": [
+            "坐車時主動將臀部向後挪動，確保坐骨穩穩落在坐墊後部寬翼支撐區。",
+            "絕對禁止在車褲內穿任何普通內褲，內褲接縫是磨破皮膚的主要元兇！"
+          ],
+          "stretches": [
+            "【坐姿 4 字形梨狀肌拉伸】（目標：梨狀肌與臀深層外旋肌）：坐姿單腳踝架在另一側膝蓋成 4 字形，挺胸前傾下壓（每側 35 秒 x 3 組）。",
+            "【臥姿抱膝骨盆正位放鬆】（目標：骶髂關節與臀大肌）：仰臥雙手抱住單膝向同側胸口收縮（每側 30 秒 x 2 組）。"
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "坐墊高度過高導致踩踏到底骨盆左右劇烈搖擺，撕扯會陰皮膚",
+          "mechanism": "坐墊設定哪怕偏高 5mm，長途每分鐘轉動 90 圈時雙側骨盆就會像蹺蹺板一樣來回傾斜，與坐墊皮面形成數千次摩擦剪切。",
+          "mechanical": [
+            "坐墊高度立即降低 3~5mm：消除腳踏到底時的過度超伸與骨盆代償晃動。",
+            "升級具備高密度海綿或 3D 打印網格的優質車褲。",
+            "長途騎行前在會陰處塗抹專業護臀霜（Chamois Cream）。"
+          ],
+          "riding": [
+            "養成規律站姿排空習慣：每騎行 15 分鐘主動離開坐墊站立踩踏 15~20 秒恢復血流。",
+            "騎行中感知骨盆是否平穩，若感覺臀部左右蹭動立即檢查坐墊高度。"
+          ],
+          "stretches": [
+            "【仰臥蝴蝶式骨盆放鬆】（目標：內收肌與會陰筋膜）：仰臥腳心相對雙膝自然下垂打開，深呼吸放鬆（保持 60 秒）。",
+            "【低位臀橋盆底肌微激活】（目標：盆底肌平衡與臀肌激活）：仰臥屈膝慢推骨盆至半高微夾臀（12 次 x 2 組）。"
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "爬陡坡時坐姿下意識前移，坐骨脫離後翼坐上窄鼻頭",
+          "mechanism": "爬坡時為了克服重心後仰，很多車手不自覺向前滑到坐墊前端的窄鼻頭上，寬度僅 35mm，坐骨無法著力，會陰承受數倍高壓。",
+          "mechanical": [
+            "坐墊整體微向前滑動 3~5mm，使得爬坡前傾時坐骨依然能落在寬翼區。",
+            "換用現代短鼻坐墊（長度約 240~250mm，鼻頭較平寬）。"
+          ],
+          "riding": [
+            "爬坡時提醒自己將骨盆留在坐墊後部，上身透過手肘微屈調節重心。",
+            "遇到 10% 以上陡坡果斷起身抽車，卸除坐墊對臀部的壓迫。"
+          ],
+          "stretches": [
+            "【深蹲式骨盆底舒展拉伸】（目標：臀下肌群與髖臼深度活動）：雙腳略寬於肩全蹲，雙肘頂在雙膝內側合十深呼吸（保持 40 秒）。",
+            "【大腿內收肌仰臥開合】（目標：內收長肌與恥骨肌）：仰臥雙腿向上舉起緩慢向兩側打開至極限再合攏（15 次 x 2 組）。"
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "伏把低趴使骨盆深度前傾，恥骨直接頂死坐墊前端",
+          "mechanism": "氣動姿勢要求骨盆大幅向前翻轉，傳統長鼻坐墊前部凸起會像硬木棍頂住恥骨結節，引發刺痛甚至麻木。",
+          "mechanical": [
+            "必須選用短鼻中空坐墊（如 Power / Dimension / Stealth）。",
+            "將坐墊鼻頭微調向下傾斜 1.5°~2.5°，為前傾恥骨留出物理間隙。"
+          ],
+          "riding": [
+            "前傾俯身時收縮下腹核心，骨盆自然前傾但不要癱在坐墊前端。",
+            "在下把位破風 5~10 分鐘後，切回變速手把位讓會陰部重獲減壓。"
+          ],
+          "stretches": [
+            "【貓牛式骨盆前傾後傾滑動】（目標：骨盆靈活性與盆底張力）：四足跪姿專注帶動骨盆做主動前傾後傾切換（慢速 12 次 x 2 組）。",
+            "【仰臥提膝單側拉伸】（目標：臀大肌與股方肌）：仰臥單腿抱膝貼胸，對側腿完全貼地伸展（每側 30 秒 x 2 組）。"
+          ]
+        }
+      },
+      "foot": {
+        "early_ride": {
+          "diagnosis": "卡鞋鞋楦過窄橫向擠壓跖骨，或 BOA 旋鈕起騎時擰太緊",
+          "mechanism": "騎行 15 分鐘前掌即麻木刺痛、發熱（灼熱足），90% 是鞋楦寬度不夠。歐洲楦頭偏窄，亞洲腳型前掌偏寬偏扁，雙側被硬碳底緊緊箍住阻斷神經微循環。",
+          "mechanical": [
+            "換用亞洲寬楦（Wide 版）專業卡鞋（如 Shimano Wide 或 Lake）。",
+            "起騎前 BOA 旋鈕切勿擰死，體溫上升後腳會微脹，留有微動餘量。",
+            "鎖片向後滑動 5~8mm，減輕對跖骨頭神經束的直接衝擊壓強。"
+          ],
+          "riding": [
+            "踩踏時五趾自然舒展平放，切記不要用腳趾死摳鞋底。",
+            "踏頻保持 85~90 RPM 輕快踩踏，避免沉重大力壓榨腳掌。"
+          ],
+          "stretches": [
+            "【網球足底筋膜滾壓】（目標：足底腱膜與跖側肌群）：坐姿踩在網球上，從前腳掌向足跟反覆滾動按壓（每側 60 秒）。",
+            "【腳趾主動屈伸與抓毛巾】（目標：足內肌力量與足橫弓彈性）：用腳趾抓緊地面毛巾再用力張開（每側 15 次 x 2 組）。"
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "長途疲勞足弓塌陷，平底鞋墊無法支撐引發足底筋膜剪切應力",
+          "mechanism": "騎行突破 80~100 公里時，支撐足弓的脛後肌力竭，足弓扁平塌陷被反覆機械拉扯，誘發足底筋膜炎與腳跟酸痛。",
+          "mechanical": [
+            "換用帶立體足弓支撐的專業騎行鞋墊（如 BG 騎行鞋墊或 Solestar）。",
+            "若有明顯前足內翻，在鎖片內側墊入 1°~2° 傾角斜墊片穩定踩踏力線。"
+          ],
+          "riding": [
+            "長途平路在踩踏抬腳上死點時有意識放鬆小腿與腳踝，不要全程緊繃。",
+            "休息站停車時脫掉卡鞋讓腳掌踩地通風散熱。"
+          ],
+          "stretches": [
+            "【階梯小腿與足跟下沉拉伸】（目標：腓腸肌、比目魚肌與跟腱）：前腳掌站台階邊緣，腳後跟緩慢下沉至水平面以下（每側 35 秒 x 3 組）。",
+            "【腳踝順逆時針大畫圈】（目標：距下關節與滑液循環）：抬腳做腳尖大幅度畫圈（順時針與逆時針各 15 圈）。"
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "前掌力臂過長，爬坡大扭矩使跟腱與小腿過早衰竭",
+          "mechanism": "鎖片安裝過於靠前（在腳尖下方），爬坡用力踩踏時腳掌力臂極大，小腿肌肉必須付出雙倍力量保持腳踝穩定，引發足掌高壓灼熱與抽筋。",
+          "mechanical": [
+            "鎖片整體向後平移 8~10mm，縮短力臂，顯著降低足底壓強與小腿肌耗。",
+            "選用剛度指數更高的全碳纖維大底卡鞋（剛性 10+），防止鞋底彎曲變軟夾腳。"
+          ],
+          "riding": [
+            "爬坡時不要刻意墊起腳尖重踩，下死點保持腳後跟微下沉或水平。",
+            "保持平滑踩踏圓周，避免猛力踹踏。"
+          ],
+          "stretches": [
+            "【推牆弓步小腿深度拉伸】（目標：比目魚肌與腓腸肌深層）：面對牆雙手推牆，後腳跟完全踩死地面拉伸小腿肚（每側 30 秒 x 3 組）。",
+            "【跟腱抗震微回彈練習】（目標：跟腱彈性儲能）：雙手扶扶手做輕快平順的提踵與下落（20 次 x 2 組）。"
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "低趴姿勢導致踩踏到底踝關節過度下探，小腳趾側受力剪切",
+          "mechanism": "伏把低趴時為了彌補髖關節開度不足，許多騎手在踩踏下死點下意識將腳尖朝下用力扎，造成前掌外側與鞋底旋轉摩擦。",
+          "mechanical": [
+            "坐墊高度微降 2~4mm：讓下死點蹬踏腳掌自然平實，杜絕下探腳尖。",
+            "檢查卡踏鎖片左右間距（Q-Factor），使雙腳保持最符合骨盆寬度的間距。"
+          ],
+          "riding": [
+            "關注踩踏下死點的踝關節姿態，使腳底板與地面基本保持平行。",
+            "低趴伏把時多動腳趾保持神經興奮度。"
+          ],
+          "stretches": [
+            "【跪姿足背伸展】（目標：脛骨前肌與足背伸肌腱）：雙膝跪軟墊上腳背貼地，慢慢把臀部坐向腳後跟（保持 30 秒 x 2 組）。",
+            "【足底滾壓冷敷舒緩】（目標：微血管收縮與神經鎮定）：用冰鎮易開罐在足底輕輕滾動（持續 2~3 分鐘）。"
+          ]
+        }
+      }
+    }
+  },
+
+  "en": {
+    "areas": {
+      "knee": { "title": "🦵 Knee Pain" },
+      "lower_back": { "title": "🧗 Lower Back Pain" },
+      "neck_shoulder": { "title": "💆 Neck & Shoulder Pain" },
+      "wrist_hand": { "title": "🖐️ Wrist & Hand Numbness" },
+      "buttock": { "title": "🪑 Saddle & Perineum Soreness" },
+      "foot": { "title": "🦶 Foot Numbness & Hot Foot" }
+    },
+    "timings": {
+      "early_ride": { "title": "⏱️ Quickly appears within 15–30 mins", "badge": "Static Fit Mismatch" },
+      "fatigue_endurance": { "title": "🔋 Appears after 2+ hours of riding", "badge": "Endurance Fatigue" },
+      "high_torque_climb": { "title": "⛰️ Heavy grinding or steep climbing", "badge": "High Torque Overload" },
+      "aero_drop_posture": { "title": "🚀 Drops or aggressive aero posture", "badge": "Flexion & Drop Limit" }
+    },
+    "prescriptions": {
+      "knee": {
+        "early_ride": {
+          "diagnosis": "Saddle height / fore-aft or cleat float severely mismatched",
+          "mechanism": "Immediate pain is usually caused by excessive knee flexion at BDC (saddle too low increasing patellar pressure) or hyperextension (saddle too high stretching hamstrings), or zero-float cleats locking rotation.",
+          "mechanical": [
+            "Accurate saddle height: Leg fully straight with heel on pedal at lowest point without hip rocking; 25°–30° knee angle with ball of foot.",
+            "Anterior knee pain: Raise saddle 3–5mm and slide back 3mm; Posterior knee pain: Lower saddle 3–5mm and slide forward.",
+            "Cleat float: Switch to 4.5°–6° floating cleats to allow natural ankle rotation."
+          ],
+          "riding": [
+            "Keep heel level at bottom of stroke; avoid dropping heels.",
+            "Ensure knees track vertically over pedals without collapsing inward or flaring outward."
+          ],
+          "stretches": [
+            "【Standing Quad Stretch】: Stand on one leg, pull ankle to glutes with knee pointing down (30s x 3 sets per side).",
+            "【Towel Hamstring Stretch】: Lie on back, loop towel around foot arch and extend leg upward gently (35s x 3 sets per side)."
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "Gluteus medius fatigue causing hip drop & IT Band Friction (ITBS)",
+          "mechanism": "As stabilizer muscles fatigue over long miles, pelvis tilts laterally, internally rotating the femur and rubbing the iliotibial band against the lateral femoral condyle.",
+          "mechanical": [
+            "Lower saddle 2–3mm to reduce pelvic rocking under fatigue.",
+            "Check saddle shell firmness: replace sagging old saddles with firm carbon or high-density foam models.",
+            "Install 1° varus wedge under cleats to support arch alignment."
+          ],
+          "riding": [
+            "Maintain 85–95 RPM cadence to lower peak torque per stroke.",
+            "Engage lower core gently and sit squarely on saddle wings."
+          ],
+          "stretches": [
+            "【ITB Foam Rolling】: Roll from below hip bone to above knee (45s x 2 sets per side).",
+            "【Pigeon Pose Stretch】: Deep glute & piriformis stretch (40s x 3 sets per side)."
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "Low cadence grinding putting excessive shear on patellofemoral joint",
+          "mechanism": "Grinding steep gradients at 50–60 RPM doubles the peak joint reaction force against the patella.",
+          "mechanical": [
+            "Expand gear range: fit 34T/36T cassette and compact 50-34T chainrings.",
+            "Shorten crank length (e.g. 172.5mm to 165mm/170mm) to open knee angle at top dead center."
+          ],
+          "riding": [
+            "Anticipate hills by shifting early and spinning at 80+ RPM.",
+            "Alternate between 1 min seated climbing and 15s standing out of the saddle."
+          ],
+          "stretches": [
+            "【Low Lunge Hip Flexor Stretch】: Lunge forward, drop back knee to ground and sink hips (30s x 3 sets).",
+            "【Wall Squats with Ball】: Squeeze yoga block between knees to activate VMO (45s x 2 sets)."
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "Deep drop angle pinching hip and twisting knee tracking",
+          "mechanism": "In drops, closed torso-thigh angle forces knees to flare out at top dead center to clear chest, twisting patellar tendon tracking.",
+          "mechanical": [
+            "Reduce handlebar drop: add 5–10mm headset spacers or reduce stem angle.",
+            "Slide saddle forward 3–5mm to open hip angle."
+          ],
+          "riding": [
+            "Rotate pelvis forward rather than hunching lower back.",
+            "Keep knees tracking straight along top tube."
+          ],
+          "stretches": [
+            "【Butterfly Stretch】: Soles together, knees sinking outward to open adductors (60s).",
+            "【Seated Thoracic Rotation】: Rotate torso with hands behind head (10 reps x 2 sets)."
+          ]
+        }
+      },
+      "lower_back": {
+        "early_ride": {
+          "diagnosis": "Cockpit reach too long or stem over-extended, overstretching erector spinae",
+          "mechanism": "Oversized frame or excessive stem length forces arms forward and locks the back in continuous strain.",
+          "mechanical": [
+            "Shorten stem by 10–20mm (e.g. 110mm to 90mm).",
+            "Tilt brake hoods slightly upward 2°–3° to bring reach closer.",
+            "Slide saddle forward 3–5mm."
+          ],
+          "riding": [
+            "Keep elbows slightly bent (~15°) as natural shock absorbers; do not lock arms straight.",
+            "Balance weight between saddle and pedals rather than dumping it onto hands."
+          ],
+          "stretches": [
+            "【Cat-Cow Spinal Mobility】: On all fours, alternate between arching and hollowing back (10 reps x 3 sets).",
+            "【Child's Pose Back Decompression】: Sit on heels, reach arms forward on floor (60s)."
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "Core muscle fatigue causing posterior pelvic tilt and disc compression",
+          "mechanism": "Deep core stabilizers fatigue after 2+ hours, causing pelvic slumping and directing road vibrations straight into lumbar discs.",
+          "mechanical": [
+            "Add 5–10mm spacers under stem for an endurance geometry.",
+            "Level saddle or drop nose 1° to prevent pelvic posterior tilt."
+          ],
+          "riding": [
+            "Re-engage lower abs every 20 minutes to maintain neutral pelvis.",
+            "Sit upright briefly on safe flats to relieve spine pressure."
+          ],
+          "stretches": [
+            "【Cobra Pose Stretch】: Lie face down, press hands to raise chest while hips stay grounded (30s x 3 sets).",
+            "【Dead Bug Core Activation】: Engage deep transverse abdominis on floor (12 reps x 2 sets per side)."
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "Pulling aggressively on bars during climbing overloading lats & quadratus lumborum",
+          "mechanism": "Wrenching handlebars creates asymmetrical twisting shear across the lower spine.",
+          "mechanical": [
+            "Spin faster with lower climbing gears (keep above 75 RPM).",
+            "Ensure bar width allows proper leverage without excessive torso twist."
+          ],
+          "riding": [
+            "Let bike rock naturally under weight shift; do not pull violently with arms.",
+            "Rest hands lightly on tops during seated climbing."
+          ],
+          "stretches": [
+            "【Knees-to-Chest Lumbar Decompression】: Lie on back, hug knees to chest (45s).",
+            "【Glute Bridge Activation】: Drive through glutes to elevate hips (15 reps x 3 sets)."
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "Handlebar drop exceeds posterior chain flexibility limit",
+          "mechanism": "Extreme slam-that-stem drop forces lumbar flexion beyond functional ROM.",
+          "mechanical": [
+            "Add 10–15mm spacers or swap negative 17° stem for standard 6°.",
+            "Use short-nose saddle with cutout to enable anterior pelvic rotation."
+          ],
+          "riding": [
+            "Hinge from hips rather than curving lower back.",
+            "Use drops strategically for headwinds and return to hoods on flats."
+          ],
+          "stretches": [
+            "【Standing Forward Fold】: Hinge from hips toward toes (40s x 2 sets).",
+            "【Side Plank Stability】: Strengthen obliques and QL (30s x 2 sets per side)."
+          ]
+        }
+      },
+      "neck_shoulder": {
+        "early_ride": {
+          "diagnosis": "Handlebar too wide or hoods splayed out, straining trapezius",
+          "mechanism": "Wide bars splay arms outward, keeping scapulae protracted and upper trapezius in chronic tension.",
+          "mechanical": [
+            "Swap to bar matching shoulder width (e.g. 380mm or 400mm).",
+            "Turn hoods inward 3°–5° for natural wrist alignment."
+          ],
+          "riding": [
+            "Drop shoulders away from ears; relax elbows.",
+            "Keep wrist and forearm aligned."
+          ],
+          "stretches": [
+            "【Upper Trap Lateral Stretch】: Gently draw head toward shoulder (30s x 3 sets).",
+            "【Doorway Pec Stretch】: Forearms on doorway, step forward gently (30s x 2 sets)."
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "Static neck extension under helmet weight causing muscle ischemia",
+          "mechanism": "Supporting 6kg head + helmet in extended posture causes neck extensor muscle tightness.",
+          "mechanical": [
+            "Add 5mm headset spacer to reduce viewing tilt angle.",
+            "Use frameless cycling glasses for unobstructed upper field of vision."
+          ],
+          "riding": [
+            "Switch hand positions every 15 minutes.",
+            "Roll shoulders and gently rotate neck on safe straights."
+          ],
+          "stretches": [
+            "【Wall W-to-Y Slide】: Slide forearms up wall to strengthen lower traps (12 reps x 3 sets).",
+            "【Chin Tucks】: Pull chin straight back to activate deep neck flexors (5s hold x 10 reps)."
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "Tension shrugging while grinding climbs causing trap spasms",
+          "mechanism": "Stress and heavy leg fatigue cause riders to tense shoulders and grip bars with a death grip.",
+          "mechanical": [
+            "Wrap 2.5–3.0mm cushioned bar tape to damp road buzz.",
+            "Adjust brake lever reach closer to relax fingers."
+          ],
+          "riding": [
+            "Breathe deeply and drop shoulders on every exhale.",
+            "Rest hands loosely on hoods/tops."
+          ],
+          "stretches": [
+            "【Shoulder Circles】: Roll shoulders forward and backward smoothly (15 circles each).",
+            "【Chest Opener Behind Back】: Interlace fingers behind back and lift gently (30s x 2 sets)."
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "Severe drop angles forcing extreme suboccipital cervical extension",
+          "mechanism": "Looking 50m ahead while horizontal requires a 60° cervical upward angle, pinching suboccipital nerves.",
+          "mechanical": [
+            "Reduce drop by 10mm to balance aerodynamics and comfort.",
+            "Switch to a lightweight helmet (<230g)."
+          ],
+          "riding": [
+            "Look up with eyes rather than hyperextending neck.",
+            "Alternate between drops and hoods."
+          ],
+          "stretches": [
+            "【SCM Neck Stretch】: Pin collarbone, look up and away gently (25s x 2 sets).",
+            "【Suboccipital Acupressure】: Gentle circular pressure at base of skull (40s)."
+          ]
+        }
+      },
+      "wrist_hand": {
+        "early_ride": {
+          "diagnosis": "Saddle tilted forward, dumping body weight onto wrists",
+          "mechanism": "Down-angled saddle causes rider to slide forward; hands must push back violently to resist sliding.",
+          "mechanical": [
+            "Level saddle with a bubble level (0° to -0.5°).",
+            "Align brake hoods so forearm, wrist, and hand form a straight line."
+          ],
+          "riding": [
+            "Rest hands lightly on bars; do not support entire torso weight.",
+            "Engage core to support upper body."
+          ],
+          "stretches": [
+            "【Wrist Flexor Stretch】: Arm forward, palm out, fingers down, pull gently back (30s x 3 sets).",
+            "【Prayer Wrist Stretch】: Palms together at chest, press down gently (30s x 2 sets)."
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "Road vibration compressing ulnar & median nerves (Cyclist's Palsy)",
+          "mechanism": "Sustained pressure on Guyon's canal compresses the ulnar nerve, causing numbness in ring & pinky fingers.",
+          "mechanical": [
+            "Upgrade to 2.5–3.2mm gel-padded bar tape.",
+            "Wear cycling gloves with targeted palm gel padding.",
+            "Drop tire pressure by 3–5 PSI for compliance."
+          ],
+          "riding": [
+            "Dangle and shake hands downward every 10 minutes.",
+            "Rotate hand positions across hoods, tops, and drops."
+          ],
+          "stretches": [
+            "【Ulnar Nerve Gliding】: Make 'OK' glasses shape around eyes and unfold (10 reps x 2 sets).",
+            "【Finger Spread & Squeeze】: Alternate wide finger spreads and tight fists (20 reps)."
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "Excessive wrist extension & ulnar deviation while wrenching bars",
+          "mechanism": "Pulling back on hoods creates sharp angles across wrist joints.",
+          "mechanical": [
+            "Pad flat aero bar tops if palm contact feels hollow.",
+            "Position hoods so wrists stay in neutral anatomical angle."
+          ],
+          "riding": [
+            "Hold the bar tops during climbing for a relaxed forearm posture.",
+            "Distribute grip pressure evenly across the palm."
+          ],
+          "stretches": [
+            "【Figure-8 Wrist Mobility】: Interlace fingers and circle wrists in figure-8s (40s).",
+            "【Wrist Extensor Stretch】: Press back of hand gently toward body (30s x 2 sets)."
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "Aggressive drop curve forcing extreme upward wrist angle to reach brakes",
+          "mechanism": "Mismatch between drop curvature and reach forces wrists to hyperextend.",
+          "mechanical": [
+            "Switch to compact bars with short 120–125mm drop.",
+            "Adjust brake lever reach screws closer to the bar."
+          ],
+          "riding": [
+            "Grip the flat section of drops; only reach for levers when braking.",
+            "Keep wrist and forearm in a straight line."
+          ],
+          "stretches": [
+            "【Forearm Foam/Ball Rolling】: Roll fascia from elbow to palm (60s).",
+            "【Fingertip Dome Presses】: Press fingertips together with palms apart (20s x 2 sets)."
+          ]
+        }
+      },
+      "buttock": {
+        "early_ride": {
+          "diagnosis": "Saddle width too narrow for sit bones, or solid saddle compressing perineum",
+          "mechanism": "Sit bones overhang narrow saddle; entire body weight is concentrated on sensitive perineal nerves and soft tissue.",
+          "mechanical": [
+            "Measure sit bone width: saddle should be 20–25mm wider than sit bones (e.g. 143mm or 155mm).",
+            "Switch to a saddle with a generous central relief cutout and short nose.",
+            "Level saddle to 0° or tilt nose down 1°."
+          ],
+          "riding": [
+            "Sit squarely on rear wings of saddle.",
+            "Never wear regular underwear beneath cycling bibs!"
+          ],
+          "stretches": [
+            "【Figure-4 Seated Glute Stretch】: Ankle over opposite knee, lean chest forward (35s x 3 sets).",
+            "【Knee-to-Chest Relaxer】: Lie on back, hug single knee to chest (30s x 2 sets)."
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "Saddle slightly too high causing hips to rock and chafe skin",
+          "mechanism": "Even a 5mm excessive saddle height causes pelvic rocking 5,000 times per hour, severely abrading perineal skin.",
+          "mechanical": [
+            "Lower saddle by 3–5mm immediately.",
+            "Upgrade to premium bib shorts with high-density foam or 3D printed padding.",
+            "Apply chamois cream generously before rides."
+          ],
+          "riding": [
+            "Stand on pedals for 15–20s every 15 minutes to restore capillary circulation.",
+            "Check for pelvic rocking: hips should remain stable."
+          ],
+          "stretches": [
+            "【Reclined Butterfly Stretch】: Soles together, knees sinking open (60s).",
+            "【Pelvic Floor Glute Bridges】: Gentle bridge pulses (12 reps x 2 sets)."
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "Sliding forward onto narrow nose during climbs",
+          "mechanism": "Riders creep forward onto the 35mm nose to maintain balance, overloading soft tissue.",
+          "mechanical": [
+            "Slide saddle forward 3–5mm so sit bones stay on wings even when leaning forward.",
+            "Use modern short-nose saddles (240–250mm length)."
+          ],
+          "riding": [
+            "Keep pelvis anchored on rear saddle wings during seated climbing.",
+            "Stand out of the saddle on steep 10%+ switchbacks."
+          ],
+          "stretches": [
+            "【Deep Squat Pelvic Opener】: Squat deep with elbows pressing knees out (40s).",
+            "【Lying Leg Adductor Openers】: Slow leg openers on back (15 reps x 2 sets)."
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "Pelvic anterior tilt jamming pubic bone into saddle front",
+          "mechanism": "Aggressive aero rotation pushes pubic ramus against traditional long-nosed saddles.",
+          "mechanical": [
+            "Use short-nose cutout saddle (Power, Stealth, Dimension).",
+            "Tilt saddle nose downward 1.5°–2.5° for anatomical clearance."
+          ],
+          "riding": [
+            "Engage lower core to avoid collapsing into saddle nose.",
+            "Alternate out of drops every 10 minutes."
+          ],
+          "stretches": [
+            "【Cat-Cow Pelvic Tilts】: On all fours, focus on pelvic tilt control (12 reps x 2 sets).",
+            "【Single Leg Knee Hug】: Lie on back, hug knee to chest (30s x 2 sets)."
+          ]
+        }
+      },
+      "foot": {
+        "early_ride": {
+          "diagnosis": "Shoe toe box too narrow or BOA dials over-tightened",
+          "mechanism": "Standard European shoe lasts compress wider Asian foot shapes, pinching metatarsal nerves within 15 minutes.",
+          "mechanical": [
+            "Switch to Asian Wide fit cycling shoes (Shimano Wide or Lake Wide).",
+            "Do not over-tighten BOA dials before riding; feet swell as temperature rises.",
+            "Slide cleats backward 5–8mm behind 1st & 5th metatarsals."
+          ],
+          "riding": [
+            "Keep toes relaxed; do not curl toes against the sole.",
+            "Maintain smooth 85–90 RPM cadence."
+          ],
+          "stretches": [
+            "【Tennis Ball Plantar Rolling】: Roll ball firmly under foot arch and ball (60s).",
+            "【Toe Splay & Towel Scrunches】: Scrunch towel with toes on floor (15 reps x 2 sets)."
+          ]
+        },
+        "fatigue_endurance": {
+          "diagnosis": "Arch collapse under fatigue causing plantar shear stress",
+          "mechanism": "Tibialis posterior fatigues after 80km, collapsing foot arch against flat insoles and triggering plantar fasciitis.",
+          "mechanical": [
+            "Replace flat insoles with custom or high-arch supportive cycling insoles (Specialized BG, Solestar).",
+            "Use 1°–2° cleat varus wedges if forefoot varus is present."
+          ],
+          "riding": [
+            "Relax calves and ankles at top dead center of the stroke.",
+            "Take shoes off at rest stops to air out and cool feet."
+          ],
+          "stretches": [
+            "【Stair Heel Drop Stretch】: Stand on step edge, lower heels below step level (35s x 3 sets).",
+            "【Ankle Rotations】: Circle ankles clockwise and counterclockwise (15 circles each)."
+          ]
+        },
+        "high_torque_climb": {
+          "diagnosis": "Excessive lever arm from forward cleats overloading Achilles & calves",
+          "mechanism": "Forward cleats increase pedal lever arm, forcing calf muscles into severe fatigue and causing hot spots.",
+          "mechanical": [
+            "Slide cleats backward 8–10mm to shorten lever arm and reduce calf strain.",
+            "Use stiff carbon-soled shoes (stiffness 10+) to prevent sole flex."
+          ],
+          "riding": [
+            "Do not point toes down when climbing; keep heels level or slightly dropped.",
+            "Maintain smooth circular pedaling."
+          ],
+          "stretches": [
+            "【Wall Calf Stretch】: Hands on wall, back leg straight with heel flat on ground (30s x 3 sets).",
+            "【Achilles Rebound Pulses】: Gentle ankle pulses on step (20 reps x 2 sets)."
+          ]
+        },
+        "aero_drop_posture": {
+          "diagnosis": "Closed hip angle causing toe-pointing and lateral foot shear",
+          "mechanism": "Riders unconsciously point toes down at BDC to compensate for tight hip angle, shearing the lateral foot.",
+          "mechanical": [
+            "Lower saddle by 2–4mm to eliminate need to toe-point at BDC.",
+            "Check pedal Q-factor and stance width for natural pelvic alignment."
+          ],
+          "riding": [
+            "Keep foot sole roughly parallel to ground at bottom of pedal stroke.",
+            "Wiggle toes periodically in aero tuck."
+          ],
+          "stretches": [
+            "【Kneeling Shin Stretch】: Kneel with tops of feet flat on floor, sit back gently (30s x 2 sets).",
+            "【Cold Bottle Plantar Rolling】: Roll chilled bottle under sole (2–3 mins)."
+          ]
+        }
+      }
+    }
+  }
+}

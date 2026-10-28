@@ -24,17 +24,22 @@
 - `/bb`: Bottom bracket matching wizard (BSA, BB86, T47 Internal, PF30 for Shimano 24mm, SRAM DUB 28.99mm, Rotor 30mm) with spacer setup and tool guide.
 - `/calc` & `/chain`: Built-in calculators for chain links (e.g. `/chain 50 34 410`) and tubeless sealant guide.
 
-### 4. 🛡️ Hardcore Cycling Group Captcha
+### 4. 🩺 Cycling Pain Checker & Bike Fitting Rx (/pain)
+- Derived from professional Bike Fitting and sports rehabilitation data, covering **6 anatomical areas** (knee, lower back, neck & shoulders, hands & wrists, saddle & perineum, foot numbness).
+- Diagnoses across **4 trigger scenarios** (static fit mismatch within 15 mins, endurance fatigue after 2+ hours, climbing torque overload, aggressive aero drop limit).
+- 2 clicks generate an instant "Fit Prescription Card": root causes, mechanical cockpit/cleat adjustments, riding posture fixes, and targeted stretches.
+
+### 5. 🛡️ Hardcore Cycling Group Captcha
 - Automatically mutes new members upon joining the discussion group.
 - Presents a 3-choice road bike tech trivia question (pedal thread directions, Shimano brake mineral oil vs DOT, etc.) with a 120-second timer.
 - 100% blocks spam bots while building a hardcore technical community culture.
 
-### 5. 🩺 "Noise Clinic" & Video Submissions (/ask)
+### 6. 🩺 "Noise Clinic" & Video Submissions (/ask)
 - Subscribers can submit 10–15s symptom videos or audios with description.
 - **Zero VPS Disk Usage**: Extracts Telegram cloud `file_id` and forwards media directly to host's DM.
 - Host replies to the forwarded message in TG to push diagnosis back to the rider. Great source for upcoming video topics!
 
-### 6. 🚲 Bike Maintenance Tracker (/mybike)
+### 7. 🚲 Bike Maintenance Tracker (/mybike)
 - Tracks time-based irreversible degradation (tubeless sealant drying after 90 days, chain hot wax cycles, annual hydraulic brake bleeding).
 - Daily 09:00 AM check with 1-click "Done Today" button to reset the timer.
 - Daily 03:30 AM automatic SQLite database offsite backup sent directly to the host's Telegram chat.
@@ -48,6 +53,7 @@
 | `/start` | Launch bot and show visual menu (supports Deep Link args) | Private |
 | `/torque` | Instant road bike torque specs (Cockpit/BB/Brakes/Derailleurs) | Private / Group |
 | `/bb` | Bottom bracket & crank spindle compatibility wizard | Private / Group |
+| `/pain` | Cycling pain self-check & Bike Fitting prescription | Private / Group |
 | `/calc` | Bike assembly calculators (Chain link, Tubeless sealant) | Private / Group |
 | `/chain` | Fast chain length calculation (e.g. `/chain 50 34 410`) | Private / Group |
 | `/mybike` | Personal periodic maintenance tracker & alerts | Private |
@@ -68,12 +74,13 @@ VeloBot-main/
 ├── main.py                  # Entry point, bilingual menu registration, schedulers
 ├── data/                    # Host persistent directory
 │   ├── bot_data.db          # SQLite database (with user language tracking)
-│   └── specs_dict.json      # Bilingual road bike specs dictionary (hot reloadable)
+│   ├── specs_dict.json      # Bilingual road bike specs dictionary (hot reloadable)
+│   └── pain_dict.json       # Bilingual cycling pain & fit prescriptions (hot reloadable)
 └── src/
     ├── config.py            # Environment configuration
     ├── database.py          # Database operations
     ├── locales.py           # Bilingual translation dictionary
-    ├── utils.py             # Chain calculation & spec loader
+    ├── utils.py             # Chain calculation, torque & pain spec loader
     ├── bot/
     │   ├── handlers.py      # Command handlers & host reply interceptor
     │   ├── callbacks.py     # Inline keyboard cascading menus
@@ -88,55 +95,11 @@ VeloBot-main/
 
 ## 🚀 Quick Deployment (VPS + Docker)
 
-### 1. Prerequisites
-- An overseas VPS (capable of connecting to Telegram API and YouTube RSS).
-- A Telegram Bot Token from [@BotFather](https://t.me/BotFather).
-- Your personal Telegram numeric ID from [@userinfobot](https://t.me/userinfobot).
-
-### 2. Telegram Group & Channel Permissions
-1. **Broadcast Channel**: Add the Bot as an **Administrator** with "Post Messages" permission.
-2. **Discussion Group**: Add the Bot as an **Administrator** with:
-   - **Restrict Members** (for muting new members during captcha)
-   - **Delete Messages** (for auto-cleaning captcha messages)
-
-### 3. Environment Configuration
 ```bash
 cp .env.example .env
 nano .env
-```
-
-**.env Variables:**
-```dotenv
-TELEGRAM_BOT_TOKEN=123456789:ABCDEF_your_bot_token
-CHANNEL_ID=@YourRoadBikeChannel
-GROUP_ID=-1001234567890
-ADMIN_ID=987654321
-YOUTUBE_CHANNEL_ID=UCxxxxxxxxxxxxxxxxxxxxxx
-CHECK_INTERVAL_MINUTES=10
-```
-
-### 4. Start Container
-```bash
 docker compose up -d --build
 ```
-
-### 5. Inspect Logs
-```bash
-docker compose logs -f --tail=50
-```
-
----
-
-## 💡 Channel Host Workflow Guide
-
-1. **How to bind video tool kits?**
-   - When a new video is published, Bot automatically sends you a private Telegram notification.
-   - Simply **Reply to that message** on your phone with tools, torques, or tips. Bot will immediately bind them to the video and notify all waiting subscribers!
-2. **How to reply to Noise Clinic tickets?**
-   - When a rider submits a 10–15s symptom video via `/ask`, Bot forwards it to your private chat.
-   - Simply **Reply to that forwarded message** with your diagnosis. Bot will route the answer back to the rider!
-3. **How to update specs without rebuilding?**
-   - Edit `./data/specs_dict.json` directly on the host machine. Changes take effect instantly without restarting Docker!
 
 ---
 
