@@ -192,5 +192,6 @@ noise_conversation_handler = ConversationHandler(
     fallbacks=[
         CommandHandler("cancel", cancel_ask)
     ],
-    allow_reentry=True
+    allow_reentry=True,
+    per_message=False
 )

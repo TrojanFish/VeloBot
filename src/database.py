@@ -13,19 +13,46 @@ def get_db_connection():
     return conn
 
 def init_db():
-    """初始化 VeloBot 2.0 數據庫架構"""
+    """初始化 VeloBot 2.0 數據庫架構，並自動平滑遷移舊版表結構"""
     os.makedirs(DATA_DIR, exist_ok=True)
     conn = get_db_connection()
     cursor = conn.cursor()
 
-    # 0. 用戶語言偏好與設置表 (zh_hant / en)
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            user_id INTEGER PRIMARY KEY,
-            language TEXT DEFAULT 'zh_hant',
-            created_at TEXT
-        )
-    ''')
+    # 0. 檢查並平滑遷移舊版 users 表 (相容舊版 telegram_user_id 欄位)
+    cursor.execute("PRAGMA table_info(users)")
+    user_cols = [c[1] for c in cursor.fetchall()]
+
+    if user_cols:
+        if 'user_id' not in user_cols and 'telegram_user_id' in user_cols:
+            logger.info("檢測到舊版 users 表，正在自動平滑遷移至 VeloBot 2.0 架構...")
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS users_v2 (
+                    user_id INTEGER PRIMARY KEY,
+                    language TEXT DEFAULT 'zh_hant',
+                    created_at TEXT
+                )
+            ''')
+            has_lang = 'language' in user_cols
+            if has_lang:
+                cursor.execute("INSERT OR IGNORE INTO users_v2 (user_id, language) SELECT telegram_user_id, COALESCE(language, 'zh_hant') FROM users")
+            else:
+                cursor.execute("INSERT OR IGNORE INTO users_v2 (user_id, language) SELECT telegram_user_id, 'zh_hant' FROM users")
+            cursor.execute("DROP TABLE users")
+            cursor.execute("ALTER TABLE users_v2 RENAME TO users")
+            logger.info("users 表結構遷移升級成功。")
+        else:
+            if 'language' not in user_cols:
+                cursor.execute("ALTER TABLE users ADD COLUMN language TEXT DEFAULT 'zh_hant'")
+            if 'created_at' not in user_cols:
+                cursor.execute("ALTER TABLE users ADD COLUMN created_at TEXT")
+    else:
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                user_id INTEGER PRIMARY KEY,
+                language TEXT DEFAULT 'zh_hant',
+                created_at TEXT
+            )
+        ''')
 
     # 1. YouTube 視頻與裝車物料表
     cursor.execute('''
@@ -84,12 +111,6 @@ def init_db():
 
 def get_user_lang(user_id: int, tg_lang_code: str = None) -> str:
     """獲取用戶語言設定（繁體中文 zh_hant 或 英文 en）"""
-    with get_db_connection() as conn:
-        row = conn.execute("SELECT language FROM users WHERE user_id = ?", (user_id,)).fetchone()
-        if row and row['language']:
-            return row['language']
-
-    # 若未主動設置，根據 Telegram 客戶端語言自動探測
     default_lang = "zh_hant"
     if tg_lang_code:
         code = tg_lang_code.lower()
@@ -98,25 +119,35 @@ def get_user_lang(user_id: int, tg_lang_code: str = None) -> str:
         elif any(k in code for k in ["hant", "tw", "hk", "mo", "zh"]):
             default_lang = "zh_hant"
 
-    # 寫入初始偏好
-    with get_db_connection() as conn:
-        conn.execute('''
-            INSERT OR IGNORE INTO users (user_id, language, created_at)
-            VALUES (?, ?, datetime('now'))
-        ''', (user_id, default_lang))
-        conn.commit()
+    try:
+        with get_db_connection() as conn:
+            row = conn.execute("SELECT language FROM users WHERE user_id = ?", (user_id,)).fetchone()
+            if row and row['language']:
+                return row['language']
+
+            conn.execute('''
+                INSERT INTO users (user_id, language, created_at)
+                VALUES (?, ?, datetime('now'))
+                ON CONFLICT(user_id) DO UPDATE SET language = excluded.language
+            ''', (user_id, default_lang))
+            conn.commit()
+    except Exception as e:
+        logger.error(f"讀取/寫入用戶語言異常: {e}")
 
     return default_lang
 
 def set_user_lang(user_id: int, lang: str):
     """設置用戶語言偏好"""
-    with get_db_connection() as conn:
-        conn.execute('''
-            INSERT INTO users (user_id, language, created_at)
-            VALUES (?, ?, datetime('now'))
-            ON CONFLICT(user_id) DO UPDATE SET language = excluded.language
-        ''', (user_id, lang))
-        conn.commit()
+    try:
+        with get_db_connection() as conn:
+            conn.execute('''
+                INSERT INTO users (user_id, language, created_at)
+                VALUES (?, ?, datetime('now'))
+                ON CONFLICT(user_id) DO UPDATE SET language = excluded.language
+            ''', (user_id, lang))
+            conn.commit()
+    except Exception as e:
+        logger.error(f"設置用戶語言異常: {e}")
 
 # ==================== YouTube 業務數據操作 ====================
 

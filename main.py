@@ -59,12 +59,12 @@ async def post_init(application: Application):
     ]
 
     try:
-        # 註冊預設與英文選單
-        await application.bot.set_my_commands(en_commands)
+        # 1. 預設選單（預設繁體中文，無語言限制）
+        await application.bot.set_my_commands(zh_commands)
+        # 2. 中文使用者 (zh)
+        await application.bot.set_my_commands(zh_commands, language_code="zh")
+        # 3. 英文使用者 (en)
         await application.bot.set_my_commands(en_commands, language_code="en")
-        # 註冊繁體中文選單（覆蓋常見繁中代碼）
-        for lang_code in ["zh-hant", "zh-tw", "zh-hk", "zh-mo"]:
-            await application.bot.set_my_commands(zh_commands, language_code=lang_code)
         logger.info("雙語快捷指令選單註冊完畢。")
     except Exception as e:
         logger.error(f"快捷指令選單註冊失敗: {e}")
@@ -143,6 +143,12 @@ def main():
                 admin_reply_handler
             )
         )
+
+    # 6. 全域異常處理器
+    async def global_error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+        logger.error("處理 Telegram 更新時發生未捕獲異常:", exc_info=context.error)
+
+    application.add_error_handler(global_error_handler)
 
     logger.info("VeloBot 2.0 雙語版啟動成功，開始 Long Polling 監聽...")
     application.run_polling(drop_pending_updates=True)
