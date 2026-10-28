@@ -2,10 +2,12 @@
 .env
 *.bak
 
-# Database
-data/
-*.db
-*.sqlite
+# Database & runtime files
+data/*.db
+data/*.sqlite
+data/*.sqlite3
+data/*.txt
+!data/specs_dict.json
 
 # Python
 __pycache__/

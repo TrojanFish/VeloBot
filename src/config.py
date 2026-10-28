@@ -4,29 +4,22 @@ from dotenv import load_dotenv
 # 加载 .env 文件
 load_dotenv()
 
-# --- 机器人核心参数配置 ---
+# --- Telegram 机器人配置 ---
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-FEISHU_WEBHOOK_URL = os.getenv("FEISHU_WEBHOOK_URL")
-MAPBOX_ACCESS_TOKEN = os.getenv("MAPBOX_ACCESS_TOKEN")
+CHANNEL_ID = os.getenv("CHANNEL_ID") or os.getenv("TELEGRAM_CHAT_ID")
+GROUP_ID = os.getenv("GROUP_ID")
+ADMIN_ID = os.getenv("ADMIN_ID")
+if ADMIN_ID and ADMIN_ID.isdigit():
+    ADMIN_ID = int(ADMIN_ID)
 
-# AI 教练配置
-AI_API_KEY = os.getenv("AI_API_KEY")
-AI_BASE_URL = os.getenv("AI_BASE_URL", "https://api.openai.com/v1")
-AI_MODEL = os.getenv("AI_MODEL", "gpt-3.5-turbo")
+# --- YouTube 配置 ---
+YOUTUBE_CHANNEL_ID = os.getenv("YOUTUBE_CHANNEL_ID", "")
+YOUTUBE_RSS_URL = f"https://www.youtube.com/feeds/videos.xml?channel_id={YOUTUBE_CHANNEL_ID}"
+CHECK_INTERVAL_MINUTES = int(os.getenv("CHECK_INTERVAL_MINUTES", "10"))
 
-# Strava API 配置
-STRAVA_CLIENT_ID = os.getenv("STRAVA_CLIENT_ID")
-STRAVA_CLIENT_SECRET = os.getenv("STRAVA_CLIENT_SECRET")
+# --- 数据目录与文件路径 ---
+DATA_DIR = os.getenv("DATA_DIR", "data")
+os.makedirs(DATA_DIR, exist_ok=True)
 
-# 机器人运行的服务器地址
-BOT_SERVER_URL = os.getenv("BOT_SERVER_URL", "http://localhost:5000")
-
-# YouTube 频道配置
-YOUTUBE_CHANNEL_ID = os.getenv("YOUTUBE_CHANNEL_ID", "UClxfOUDSPpfZmW0UA2H2LaQ")
-YOUTUBE_CHANNEL_RSS_URL = f"https://www.youtube.com/feeds/videos.xml?channel_id={YOUTUBE_CHANNEL_ID}"
-
-# 数据文件路径
-DATA_DIR = "data"
 DB_FILE = os.path.join(DATA_DIR, "bot_data.db")
-LATEST_VIDEO_ID_FILE = os.path.join(DATA_DIR, "latest_video_id.txt")
+SPECS_FILE = os.path.join(DATA_DIR, "specs_dict.json")

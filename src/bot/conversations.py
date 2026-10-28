@@ -1,103 +1,196 @@
-import sqlite3
 import logging
-from datetime import datetime
-from src.config import DB_FILE, TELEGRAM_CHAT_ID
-from src.utils import _, get_user_lang
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import ContextTypes, ConversationHandler
+from telegram.ext import (
+    ConversationHandler, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
+)
+
+from src.config import ADMIN_ID
+from src.locales import t
+from src.database import get_user_lang, create_noise_ticket, set_ticket_admin_msg
 
 logger = logging.getLogger(__name__)
 
-RIDE_TITLE, RIDE_TIME, RIDE_ROUTE, RIDE_DESC = range(4)
+ASK_PART, ASK_MEDIA, ASK_DESC = range(3)
 
-async def create_ride(update: Update, context: ContextTypes.DEFAULT_TYPE):
+PART_CHOICES = {
+    "zh_hant": {
+        "ask_part_cockpit": "🚲 龍頭 / 車把 / 碗組",
+        "ask_part_drivetrain": "⚙️ 五通 / 曲柄 / 踏板",
+        "ask_part_shifting": "🔄 前後變速與鏈條",
+        "ask_part_brakes": "💿 碟煞卡鉗與輪組",
+        "ask_part_seat": "🪑 座管與座墊區域",
+        "ask_part_other": "❓ 其他疑難雜症"
+    },
+    "en": {
+        "ask_part_cockpit": "🚲 Cockpit / Handlebar / Headset",
+        "ask_part_drivetrain": "⚙️ BB / Crankset / Pedals",
+        "ask_part_shifting": "🔄 Derailleurs & Chain",
+        "ask_part_brakes": "💿 Disc Brakes & Wheels",
+        "ask_part_seat": "🪑 Seatpost & Saddle Area",
+        "ask_part_other": "❓ Other Symptoms"
+    }
+}
+
+async def start_ask(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """啟動異音門診投稿"""
     user = update.effective_user
-    await update.message.reply_text(_(user.id, "create_ride_start"))
-    return RIDE_TITLE
+    lang = get_user_lang(user.id, user.language_code)
+    choices = PART_CHOICES.get(lang, PART_CHOICES["zh_hant"])
 
-async def ride_title(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    context.user_data['ride_title'] = update.message.text
-    await update.message.reply_text(_(user_id, "create_ride_title_ok"))
-    return RIDE_TIME
+    keyboard = []
+    keys = list(choices.keys())
+    for i in range(0, len(keys), 2):
+        row = [InlineKeyboardButton(choices[keys[i]], callback_data=keys[i])]
+        if i + 1 < len(keys):
+            row.append(InlineKeyboardButton(choices[keys[i+1]], callback_data=keys[i+1]))
+        keyboard.append(row)
 
-async def ride_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    try:
-        dt_obj = datetime.strptime(update.message.text, '%Y-%m-%d %H:%M')
-        context.user_data['ride_time'] = dt_obj
-        await update.message.reply_text(_(user_id, "create_ride_time_ok"))
-        return RIDE_ROUTE
-    except ValueError:
-        await update.message.reply_text(_(user_id, "create_ride_time_error"))
-        return RIDE_TIME
+    text = t("ask_intro", lang=lang)
 
-async def ride_route(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    context.user_data['ride_route'] = update.message.text
-    await update.message.reply_text(_(user_id, "create_ride_route_ok"))
-    return RIDE_DESC
+    if update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.message.reply_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+    else:
+        await update.effective_message.reply_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
-async def ride_desc(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    context.user_data['ride_desc'] = update.message.text if update.message.text.lower() not in ['无', 'no', 'none'] else "无"
-    ride, creator = context.user_data, update.effective_user
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO rides (creator_user_id, group_chat_id, title, ride_time, route, description) VALUES (?, ?, ?, ?, ?, ?)",
-                   (creator.id, update.message.chat_id, ride['ride_title'], ride['ride_time'].timestamp(), ride['ride_route'], ride['ride_desc']))
-    ride_id = cursor.lastrowid
-    cursor.execute("INSERT INTO ride_participants (ride_id, telegram_user_id) VALUES (?, ?)", (ride_id, creator.id))
-    conn.commit()
-    conn.close()
-    
-    ride_card_text = await format_ride_card(ride_id, user_id)
-    keyboard = [[
-        InlineKeyboardButton(_(user_id, "ride_card_join"), callback_data=f"join_ride_{ride_id}"),
-        InlineKeyboardButton(_(user_id, "ride_card_leave"), callback_data=f"leave_ride_{ride_id}")
-    ]]
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    sent_message = await context.bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=ride_card_text, reply_markup=reply_markup, parse_mode='Markdown')
-    
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("UPDATE rides SET message_id = ? WHERE ride_id = ?", (sent_message.message_id, ride_id))
-    conn.commit()
-    conn.close()
-    
-    await update.message.reply_text(_(user_id, "create_ride_desc_ok"))
+    return ASK_PART
+
+async def select_part_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """處理部位選擇"""
+    query = update.callback_query
+    await query.answer()
+    user = query.from_user
+    lang = get_user_lang(user.id, user.language_code)
+    choices = PART_CHOICES.get(lang, PART_CHOICES["zh_hant"])
+
+    part_label = choices.get(query.data, "Component")
+    context.user_data["noise_part"] = part_label
+
+    text = t("ask_step2", lang=lang, part=part_label)
+    await query.edit_message_text(text, parse_mode="Markdown")
+    return ASK_MEDIA
+
+async def handle_media(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """接收媒體"""
+    msg = update.effective_message
+    user = update.effective_user
+    lang = get_user_lang(user.id, user.language_code)
+
+    media_file_id = None
+    media_type = "none"
+
+    if msg.video:
+        media_file_id = msg.video.file_id
+        media_type = "video"
+    elif msg.voice:
+        media_file_id = msg.voice.file_id
+        media_type = "voice"
+    elif msg.audio:
+        media_file_id = msg.audio.file_id
+        media_type = "audio"
+    elif msg.photo:
+        media_file_id = msg.photo[-1].file_id
+        media_type = "photo"
+
+    context.user_data["noise_file_id"] = media_file_id
+    context.user_data["noise_media_type"] = media_type
+
+    await msg.reply_text(t("ask_step3", lang=lang), parse_mode="Markdown")
+    return ASK_DESC
+
+async def skip_media(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """跳過媒體上傳"""
+    user = update.effective_user
+    lang = get_user_lang(user.id, user.language_code)
+    context.user_data["noise_file_id"] = None
+    context.user_data["noise_media_type"] = "none"
+
+    await update.effective_message.reply_text(t("ask_skipped", lang=lang), parse_mode="Markdown")
+    return ASK_DESC
+
+async def handle_desc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """接收描述並生成工單"""
+    user = update.effective_user
+    lang = get_user_lang(user.id, user.language_code)
+    desc = update.effective_message.text
+    part = context.user_data.get("noise_part", "未知部位")
+    media_file_id = context.user_data.get("noise_file_id")
+    media_type = context.user_data.get("noise_media_type", "none")
+
+    ticket_id = create_noise_ticket(
+        user_id=user.id,
+        username=user.username or user.first_name,
+        part=part,
+        media_file_id=media_file_id,
+        media_type=media_type,
+        desc=desc
+    )
+
+    if ADMIN_ID:
+        try:
+            admin_caption = (
+                f"🩺 **【車友異音門診新工單 #{ticket_id}】**\n\n"
+                f"👤 **車友**：{user.first_name} (@{user.username or '無'})\n"
+                f"🆔 **車友ID**：`{user.id}` (語言: `{lang}`)\n"
+                f"🏷️ **故障部位**：{part}\n"
+                f"📝 **實況描述**：{desc}\n\n"
+                f"💡 **台長請直接【回覆/Reply】本消息**，輸入診斷分析，Bot 將自動推送給車友！"
+            )
+
+            sent_admin_msg = None
+            if media_file_id:
+                if media_type == "video":
+                    sent_admin_msg = await context.bot.send_video(chat_id=ADMIN_ID, video=media_file_id, caption=admin_caption, parse_mode="Markdown")
+                elif media_type in ("voice", "audio"):
+                    sent_admin_msg = await context.bot.send_voice(chat_id=ADMIN_ID, voice=media_file_id, caption=admin_caption, parse_mode="Markdown")
+                elif media_type == "photo":
+                    sent_admin_msg = await context.bot.send_photo(chat_id=ADMIN_ID, photo=media_file_id, caption=admin_caption, parse_mode="Markdown")
+
+            if not sent_admin_msg:
+                sent_admin_msg = await context.bot.send_message(chat_id=ADMIN_ID, text=admin_caption, parse_mode="Markdown")
+
+            if sent_admin_msg:
+                set_ticket_admin_msg(ticket_id, sent_admin_msg.message_id)
+
+        except Exception as e:
+            logger.error(f"轉發異音工單失敗: {e}")
+
+    await update.effective_message.reply_text(
+        t("ask_submitted", lang=lang, ticket_id=ticket_id),
+        parse_mode="Markdown"
+    )
+
     context.user_data.clear()
     return ConversationHandler.END
 
-async def cancel_creation(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    user_id = update.effective_user.id
-    await update.message.reply_text(_(user_id, "create_ride_cancel"))
+async def cancel_ask(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """取消投稿"""
+    user = update.effective_user
+    lang = get_user_lang(user.id, user.language_code)
     context.user_data.clear()
+    await update.effective_message.reply_text(t("ask_canceled", lang=lang))
     return ConversationHandler.END
 
-async def format_ride_card(ride_id, lang_user_id):
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("SELECT r.title, r.ride_time, r.route, r.description, u.strava_firstname FROM rides r JOIN users u ON r.creator_user_id = u.telegram_user_id WHERE r.ride_id = ?", (ride_id,))
-    ride_info = cursor.fetchone()
-    cursor.execute("SELECT u.strava_firstname FROM ride_participants rp JOIN users u ON rp.telegram_user_id = u.telegram_user_id WHERE rp.ride_id = ?", (ride_id,))
-    participants = cursor.fetchall()
-    conn.close()
-    if not ride_info: return _(lang_user_id, "ride_card_invalid")
-    title, ride_time_ts, route, desc, creator_name = ride_info
-    ride_time_str = datetime.fromtimestamp(ride_time_ts).strftime('%Y-%m-%d %H:%M')
-    participant_names = [p[0] for p in participants if p[0]]
-    
-    card = [
-        f"🚴 **{title}** 🚴‍♀️",
-        "--------------------",
-        _(lang_user_id, "ride_card_time").format(time=ride_time_str),
-        _(lang_user_id, "ride_card_route").format(route=route),
-        _(lang_user_id, "ride_card_desc").format(desc=desc),
-        _(lang_user_id, "ride_card_creator").format(name=creator_name),
-        _(lang_user_id, "ride_card_participants").format(
-            count=len(participant_names),
-            names=', '.join(participant_names) if participant_names else _(lang_user_id, "ride_card_no_participants")
-        )
-    ]
-    return "\n".join(card)
+noise_conversation_handler = ConversationHandler(
+    entry_points=[
+        CommandHandler("ask", start_ask),
+        CommandHandler("noise", start_ask),
+        CallbackQueryHandler(start_ask, pattern="^entry_ask_noise$")
+    ],
+    states={
+        ASK_PART: [
+            CallbackQueryHandler(select_part_callback, pattern="^ask_part_")
+        ],
+        ASK_MEDIA: [
+            MessageHandler(filters.VIDEO | filters.VOICE | filters.AUDIO | filters.PHOTO, handle_media),
+            CommandHandler("skip", skip_media)
+        ],
+        ASK_DESC: [
+            MessageHandler(filters.TEXT & ~filters.COMMAND, handle_desc)
+        ]
+    },
+    fallbacks=[
+        CommandHandler("cancel", cancel_ask)
+    ],
+    allow_reentry=True
+)

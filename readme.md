@@ -1,124 +1,144 @@
-# 🚴 VeloBot
+# 🚴 VeloBot 2.0 - Road Bike Mechanic Toolkit & Channel Hub
 
-VeloBot is a powerful, multi-language Telegram bot designed for cycling communities. It integrates with **Strava**, **YouTube**, and **Weather services** to provide a seamless social and training experience for riders worldwide.
+> A tailored Telegram bot for road bike assembly and maintenance YouTube channels, bike shops, and cycling communities.  
+> Transform from a simple broadcast speaker into a **Pocket Mechanic Toolkit + Audience Conversion Hub**.  
+> **Languages Supported: Traditional Chinese (繁體中文) & English**
 
-[![License](https://img.shields.io/github/license/TrojanFish/VeloBot?color=blue)](LICENSE)
-[![GitHub Stars](https://img.shields.io/github/stars/TrojanFish/VeloBot)](https://github.com/TrojanFish/VeloBot/stargazers)
-[![Language](https://img.shields.io/badge/Language-Python-green)](https://www.python.org/)
-
-[English](README.md) | [简体中文](README_zh.md)
+[繁體中文說明文件 (README_zh.md)](README_zh.md)
 
 ---
 
 ## ✨ Key Features
 
-### 🚴 Strava Deep Integration
-- **Activity Tracking**: Automatically push new rides to Telegram groups or private chats.
-- **Privacy Support**: Full support for private activities and activities in privacy zones (using `activity:read_all` scope).
-- **Scheduled Reports**:
-  - **Weekly Report**: Every Monday at 09:00 UTC summarizing last week's performance with a **Suffer Score** trend chart.
-  - **Monthly Report**: Every 1st of the month for long-term progress tracking.
-  - **Yearly Report**: Every January 1st to celebrate your annual cycling milestones.
-- **Group Leaderboards**: Weekly honor roll for Distance, Climbing, and Effort (Time).
-- **Achievements**: Unlock medals for milestones like 100km rides, massive climbing, or speed records.
-- **Gear Maintenance**: Track mileage for bike components (chains, tires, etc.) and get notified when maintenance is due.
+### 1. 🌐 Bilingual by Design (繁體中文 / English)
+- **Automatic Language Detection**: Detects user's Telegram client language automatically or switch anytime via `/lang` or menu buttons.
+- **Professional Terminology**: Standard road bike mechanic terminology in both Traditional Chinese (Taiwan & HK conventions) and English.
 
-### 📺 Content & Tools
-- **YouTube Notifications**: Real-time monitoring of YouTube channels and automatic video sharing.
-- **Group Ride Management**: Interactive ride cards for organizing group rides with "Join/Leave" functionality.
-- **Weather & Routing**:
-  - Cycling-specific weather forecasts based on city name or real-time GPS location.
-  - Quick links to route discovery platforms (Komoot, Google Maps).
+### 2. 🎬 YouTube Deep Linking & Creator Fast-Binding
+- **One Video, One Tool Kit**: Automatically broadcasts new YouTube videos to your Telegram channel with Deep Link buttons (`?start=vid_xxxx`).
+- **Private Chat Lookup**: Subscribers click the button to receive featured build tools, torque values, and avoid-pitfall tips directly in private chat.
+- **Zero-Console Binding**: When a new video is posted, Bot DMs the channel host. The host simply **Replies to the Telegram notification on mobile** with tool and torque notes. The Bot automatically binds it and pushes it to waiting subscribers!
 
-### 🌍 Global Ready
-- **Multi-language Support**: English, Simplified Chinese, Traditional Chinese, Spanish, German, French, and Italian.
-- **Unit Conversion**: Easily switch between **Metric** (km, m) and **Imperial** (mi, ft) systems.
+### 3. 🔧 Pocket Mechanic Toolkit (Pure Inline Keyboard, No Typing)
+- `/torque`: Standard torque specs for cockpit, seatpost, drivetrain, BB, disc brakes, cassette, and derailleurs with friction paste & threadlocker safety notes.
+- `/bb`: Bottom bracket matching wizard (BSA, BB86, T47 Internal, PF30 for Shimano 24mm, SRAM DUB 28.99mm, Rotor 30mm) with spacer setup and tool guide.
+- `/calc` & `/chain`: Built-in calculators for chain links (e.g. `/chain 50 34 410`) and tubeless sealant guide.
+
+### 4. 🛡️ Hardcore Cycling Group Captcha
+- Automatically mutes new members upon joining the discussion group.
+- Presents a 3-choice road bike tech trivia question (pedal thread directions, Shimano brake mineral oil vs DOT, etc.) with a 120-second timer.
+- 100% blocks spam bots while building a hardcore technical community culture.
+
+### 5. 🩺 "Noise Clinic" & Video Submissions (/ask)
+- Subscribers can submit 10–15s symptom videos or audios with description.
+- **Zero VPS Disk Usage**: Extracts Telegram cloud `file_id` and forwards media directly to host's DM.
+- Host replies to the forwarded message in TG to push diagnosis back to the rider. Great source for upcoming video topics!
+
+### 6. 🚲 Bike Maintenance Tracker (/mybike)
+- Tracks time-based irreversible degradation (tubeless sealant drying after 90 days, chain hot wax cycles, annual hydraulic brake bleeding).
+- Daily 09:00 AM check with 1-click "Done Today" button to reset the timer.
+- Daily 03:30 AM automatic SQLite database offsite backup sent directly to the host's Telegram chat.
 
 ---
 
-## 🚀 Deployment Guide
+## 🎮 Command Reference
 
-VeloBot is containerized with **Docker** for robust and consistent deployment.
+| Command | Description | Context |
+| :--- | :--- | :--- |
+| `/start` | Launch bot and show visual menu (supports Deep Link args) | Private |
+| `/torque` | Instant road bike torque specs (Cockpit/BB/Brakes/Derailleurs) | Private / Group |
+| `/bb` | Bottom bracket & crank spindle compatibility wizard | Private / Group |
+| `/calc` | Bike assembly calculators (Chain link, Tubeless sealant) | Private / Group |
+| `/chain` | Fast chain length calculation (e.g. `/chain 50 34 410`) | Private / Group |
+| `/mybike` | Personal periodic maintenance tracker & alerts | Private |
+| `/ask` | Noise clinic & troubleshooting media submission | Private |
+| `/lang` | Switch bot language (繁體中文 / English) | Private |
+| `/help` | View help and documentation | Private / Group |
+
+---
+
+## 🛠️ Project Architecture
+
+```text
+VeloBot-main/
+├── docker-compose.yml       # Minimal container configuration (no open inbound ports, Long Polling)
+├── Dockerfile               # Lightweight Python image
+├── requirements.txt         # Core dependencies (python-telegram-bot, feedparser, apscheduler)
+├── .env.example             # Environment variable template
+├── main.py                  # Entry point, bilingual menu registration, schedulers
+├── data/                    # Host persistent directory
+│   ├── bot_data.db          # SQLite database (with user language tracking)
+│   └── specs_dict.json      # Bilingual road bike specs dictionary (hot reloadable)
+└── src/
+    ├── config.py            # Environment configuration
+    ├── database.py          # Database operations
+    ├── locales.py           # Bilingual translation dictionary
+    ├── utils.py             # Chain calculation & spec loader
+    ├── bot/
+    │   ├── handlers.py      # Command handlers & host reply interceptor
+    │   ├── callbacks.py     # Inline keyboard cascading menus
+    │   ├── conversations.py # Noise clinic submission conversation flow
+    │   ├── captcha.py       # Group hardcore trivia captcha
+    │   └── tasks.py         # Schedulers (YouTube, maintenance alert, backup)
+    └── services/
+        └── youtube.py       # YouTube RSS listener & enhanced broadcasting
+```
+
+---
+
+## 🚀 Quick Deployment (VPS + Docker)
 
 ### 1. Prerequisites
-- Docker and Docker Compose.
-- **Telegram Bot Token**: Get it from [@BotFather](https://t.me/botfather).
-- **Strava API Credentials**: Register an application at [Strava Developers](https://www.strava.com/settings/api).
-  - *Authorization Callback Domain*: Set this to your server's domain or IP (e.g., `bot.example.com`).
+- An overseas VPS (capable of connecting to Telegram API and YouTube RSS).
+- A Telegram Bot Token from [@BotFather](https://t.me/BotFather).
+- Your personal Telegram numeric ID from [@userinfobot](https://t.me/userinfobot).
 
-### 2. Setup Instructions
+### 2. Telegram Group & Channel Permissions
+1. **Broadcast Channel**: Add the Bot as an **Administrator** with "Post Messages" permission.
+2. **Discussion Group**: Add the Bot as an **Administrator** with:
+   - **Restrict Members** (for muting new members during captcha)
+   - **Delete Messages** (for auto-cleaning captcha messages)
+
+### 3. Environment Configuration
 ```bash
-# Clone the repository
-git clone https://github.com/TrojanFish/VeloBot.git
-cd VeloBot
-
-# Configure environment variables
 cp .env.example .env
-# Edit .env and enter your credentials
+nano .env
 ```
 
-### 3. Start the Bot
+**.env Variables:**
+```dotenv
+TELEGRAM_BOT_TOKEN=123456789:ABCDEF_your_bot_token
+CHANNEL_ID=@YourRoadBikeChannel
+GROUP_ID=-1001234567890
+ADMIN_ID=987654321
+YOUTUBE_CHANNEL_ID=UCxxxxxxxxxxxxxxxxxxxxxx
+CHECK_INTERVAL_MINUTES=10
+```
+
+### 4. Start Container
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
+```
+
+### 5. Inspect Logs
+```bash
+docker compose logs -f --tail=50
 ```
 
 ---
 
-## 🛠️ Configuration (.env)
+## 💡 Channel Host Workflow Guide
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `TELEGRAM_BOT_TOKEN` | Token from BotFather | `123456:ABC-DEF...` |
-| `TELEGRAM_CHAT_ID` | Group ID for public notifications | `-100123456789` |
-| `STRAVA_CLIENT_ID` | Strava API Client ID | `12345` |
-| `STRAVA_CLIENT_SECRET` | Strava API Client Secret | `abc123def456...` |
-| `BOT_SERVER_URL` | Base URL for OAuth callback | `https://bot.yoursite.com` |
-| `YOUTUBE_CHANNEL_ID` | Channel ID to monitor | `UC_xxxxxxxx` |
-
----
-
-## 🎮 Commands Reference
-
-### General
-- `/start` - Initialize the bot and view welcome message.
-- `/menu` - Open the interactive visual dashboard.
-- `/help` - List all commands and usage.
-- `/language` - Switch interface language.
-- `/units` - Toggle between Metric and Imperial units.
-
-### Strava
-- `/link_strava` - Link your Strava account (Requires re-linking if privacy permissions change).
-- `/report` - Manually trigger your personal weekly report.
-- `/leaderboard` - View group weekly rankings.
-- `/sync_strava` - Manually sync recent activities and gear details.
-- `/toggle_strava_privacy` - Choose if your activities are posted publicly to the group or sent privately.
-
-### Utility
-- `/weather [city]` - Check riding weather.
-- `/route [location]` - Generate route planning links.
-- `/create_ride` - Start a step-by-step group ride organization.
+1. **How to bind video tool kits?**
+   - When a new video is published, Bot automatically sends you a private Telegram notification.
+   - Simply **Reply to that message** on your phone with tools, torques, or tips. Bot will immediately bind them to the video and notify all waiting subscribers!
+2. **How to reply to Noise Clinic tickets?**
+   - When a rider submits a 10–15s symptom video via `/ask`, Bot forwards it to your private chat.
+   - Simply **Reply to that forwarded message** with your diagnosis. Bot will route the answer back to the rider!
+3. **How to update specs without rebuilding?**
+   - Edit `./data/specs_dict.json` directly on the host machine. Changes take effect instantly without restarting Docker!
 
 ---
-
-## 📁 Project Architecture
-```text
-VeloBot/
-├── main.py              # Bot entry point and scheduler
-├── src/
-│   ├── bot/             # Telegram handlers, tasks, and callbacks
-│   │   ├── handlers.py  # Command logic
-│   │   └── tasks.py     # Background sync & periodic reports
-│   ├── services/        # Third-party API integrations (Strava, YT, Weather)
-│   ├── web/             # Flask server for Strava OAuth
-│   └── locales.py       # Translation strings
-├── data/                # Persistent SQLite database & cache
-└── docker-compose.yml   # Container orchestration
-```
-
-## 🔒 Security & Performance
-- **Non-root Execution**: Runs as `botuser` in Docker for security.
-- **Asynchronous Processing**: Powered by `python-telegram-bot`'s async framework.
-- **Data Persistence**: Uses SQLite with volume mapping to local `./data` folder.
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+Licensed under the [MIT License](LICENSE).

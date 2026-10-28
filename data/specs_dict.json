@@ -1,0 +1,284 @@
+{
+  "zh_hant": {
+    "torque": {
+      "cockpit": {
+        "name": "🚲 龍頭、車把與座管系統",
+        "items": [
+          "• **龍頭前叉上管鎖緊螺栓**：4–5 N·m（雙釘需交替分次鎖緊，碳纖維前叉舵管務必塗抹止滑膏，嚴禁超扭，內部膨脹吊芯預緊約 6–8 N·m）",
+          "• **龍頭前蓋（把橫鎖緊）**：4–5 N·m（四釘對角線十字交叉鎖緊，保持上下/左右縫隙均勻，碳把橫塗抹止滑膏）",
+          "• **一體把底部碼表架固定螺栓**：2–3 N·m（螺紋極淺易滑牙，建議塗微量中強度螺絲膠）",
+          "• **座管束環 / 隱藏式楔形膨脹塊**：4–6 N·m（以車架或座管標稱上限為準，碳纖維座管務必塗抹止滑膏，切勿使用普通黃油）",
+          "• **座墊夾頭鎖緊螺栓**：單螺栓通常 9–12 N·m；前後雙螺栓通常 5–7 N·m"
+        ]
+      },
+      "drivetrain": {
+        "name": "⚙️ 大盤、中軸、曲柄與踏板",
+        "items": [
+          "• **Shimano 曲柄左臂夾緊螺栓**：12–14 N·m（雙螺栓必須交替分次鎖緊，鎖緊前確認防脫安全插片已壓入位）",
+          "• **Shimano 曲柄側向預壓塑膠蓋**：0.7–1.5 N·m（僅用專用梅花工具指力旋緊消除軸向游隙，嚴禁死鎖加重軸承阻力）",
+          "• **SRAM DUB 曲柄自拔主螺栓**：54 N·m（鎖緊扭力極大，螺紋與墊圈接觸面務必塗抹高壓潤滑脂，預壓環最後消除游隙）",
+          "• **公路車踏板安裝**：35–40 N·m（螺紋塗抹防卡膏或抗磨黃油；注意：右腳為正牙順時針鎖緊，左腳為反牙逆時針鎖緊）",
+          "• **SRAM 爪盤直裝螺栓 (Direct Mount)**：8 釘 T25 為 4 N·m；3 釘 T25 為 8–9 N·m（帶螺絲膠）"
+        ]
+      },
+      "brakes_wheels": {
+        "name": "💿 碟煞、飛輪與輪組系統",
+        "items": [
+          "• **中央鎖死碟盤鎖緊環**：40 N·m（內齒使用飛輪套筒，外齒使用外掛中軸套筒，螺紋塗微量黃油防咬死）",
+          "• **六孔碟盤固定螺絲**：5–6 N·m（對角星形分次鎖緊，務必塗抹中強度樂泰 242/243 螺絲膠）",
+          "• **卡式飛輪鎖緊蓋**：40 N·m（使用專用飛輪套筒鎖緊，確認最小片齒圈已完全吻合卡槽）",
+          "• **平裝式 (Flat Mount) 碟煞卡鉗螺栓**：6–8 N·m（車架螺紋多為鋁合金，嚴禁超扭，需塗中強度螺絲膠）",
+          "• **公路車貫通軸 / 桶軸桿 (Thru Axle)**：9–13.5 N·m（通常標稱 10 N·m，軸身與螺紋塗微量潤滑脂防異音）"
+        ]
+      },
+      "derailleurs": {
+        "name": "🔄 變速器與勾爪系統",
+        "items": [
+          "• **車架後變勾爪固定小螺絲**：2–3 N·m（螺紋極細，務必塗抹中強度螺絲膠）",
+          "• **後變速器主固定螺栓**：8–10 N·m（螺紋塗抹潤滑脂，確認止動墊片貼合勾爪台階）",
+          "• **直裝式前變速器固定螺栓**：5–7 N·m（碳纖維防爆片放平，前變支撐頂絲需確實頂住車架加固鐵片）",
+          "• **煞車變速一體把手抱箍**：6–8 N·m（碳纖維把橫塗抹止滑膏，手把受撞擊時應允許微幅位移防斷把）"
+        ]
+      }
+    },
+    "bb_matcher": {
+      "BSA": {
+        "name": "BSA 英規螺紋五通（殼體寬 68mm，螺紋直徑 1.37英吋）",
+        "SHIMANO_24": "✅ **適配中軸型號**：Shimano SM-BBR60 / BB-R9100 或第三方外掛 BSA-24\n🔧 **五通寬度**：68mm\n⚙️ **墊圈配置**：公路車 68mm 規格兩側均**無需**五通外襯墊圈\n🔨 **所需工具**：Shimano TL-FC32 / TL-FC25 / TL-FC24 外掛中軸 16 槽套筒\n💡 **技師注意**：驅動側為反牙（順時針鬆，逆時针緊），非驅動側為正牙。",
+        "SRAM_DUB": "✅ **適配中軸型號**：SRAM DUB BSA 68 Road\n🔧 **五通寬度**：68mm\n⚙️ **墊圈配置**：標準公路車通常在右側（驅動側）曲柄軸心套入 1 枚 **4.5mm** 外軸心墊圈\n🔨 **所需工具**：SRAM DUB 專用戶外 12 槽 / 24 槽大口徑中軸套筒\n💡 **技師注意**：螺紋塗抹重載黃油，左右中軸鎖緊扭力 35–40 N·m。",
+        "ROTOR_30": "✅ **適配中軸型號**：BSA30 外掛中軸（如 Rotor BSA30、Wheels Mfg BSA30）\n🔧 **五通寬度**：68mm\n⚙️ **墊圈配置**：依 30mm 軸心總長度搭配專用階梯墊圈\n🔨 **所需工具**：外徑 48.5mm / 16 槽大號中軸套筒（區別於常規 44mm Shimano 工具）"
+      },
+      "BB86": {
+        "name": "BB86 壓入式五通（殼體寬 86.5mm，五通內徑 41mm，常見於 Giant、Canyon等）",
+        "SHIMANO_24": "✅ **適配中軸型號**：BB86 壓入式中軸（Shimano SM-BB72-41B / SM-BB92-41B）\n🔧 **五通規格**：寬 86.5mm，內徑 41mm\n⚙️ **墊圈配置**：中軸兩端直接壓入五通到底，公路 24mm 軸心無需任何額外墊圈\n🔨 **所需工具**：壓入式中軸壓入工具（帶 24mm 導向塊）+ 拆卸敲擊棒/特工\n💡 **技師注意**：壓入時外殼塗抹微量黃油防擠壓異音，嚴禁敲打軸承內圈！",
+        "SRAM_DUB": "✅ **適配中軸型號**：SRAM DUB PressFit Road 86.5 (PF41-DUB)\n🔧 **五通規格**：寬 86.5mm，內徑 41mm\n⚙️ **墊圈配置**：驅動側（右側）需安裝 **3mm** 軸心外墊圈\n⚠️ **技師警告**：五通內徑僅 41mm，塞入 28.99mm 軸心後，滾珠空間極其狹小！壽命通常短於 24mm 中軸，建議定期清理泥沙或選用優質互鎖中軸。",
+        "ROTOR_30": "✅ **適配中軸型號**：4130 壓入式中軸\n⚠️ **技師警告**：41mm 孔徑容納 30mm 軸心會導致培林滾珠直徑極小，耐久度較低，重度抽車易出現異音或微小晃動。"
+      },
+      "T47_IN": {
+        "name": "T47 內藏式螺紋五通（殼體寬 85.5/86.5mm，M47×1.0 螺紋，常見於 Trek、Factor等）",
+        "SHIMANO_24": "✅ **適配中軸型號**：T47 Internal 24mm（如 Wheels Mfg、Token、Tripeak）\n🔧 **五通規格**：螺紋外徑約 47mm，杯體完全隱入五通內部\n⚙️ **墊圈配置**：Trek 85.5mm 規格通常搭配專屬內襯墊圈或原廠間隙微調環\n🔨 **所需工具**：T47 內置多槽專屬中軸套筒\n💡 **技師注意**：五通內走線管務必使用保護套管隔開，防止軸心旋轉摩擦管線！",
+        "SRAM_DUB": "✅ **適配中軸型號**：SRAM DUB T47 (Internal 85.5 / 86.5 Road)\n🔧 **五通寬度**：85.5mm 或 86.5mm\n⚙️ **墊圈配置**：驅動側通常搭配 2.5mm 或 3.0mm 軸心外墊圈（依車架五通淨寬微調）\n🔨 **所需工具**：T47 內置專用 12 槽/16 槽套筒\n💡 **技師注意**：螺紋務必塗滿特種潤滑脂或防卡膏，鎖緊扭力 35–40 N·m。"
+      },
+      "PF30": {
+        "name": "PF30 壓入式五通（殼體寬 68mm，五通內徑 46mm，常見於 Cannondale、Specialized等）",
+        "SHIMANO_24": "✅ **適配中軸型號**：PF30 轉 24mm 對鎖中軸（Wheels Mfg / Token Ninja / Wishbone）\n🔧 **五通規格**：寬 68mm，內徑 46mm\n⚙️ **墊圈配置**：強烈推薦使用左右“螺紋對鎖式 (Thread-together)”中軸，徹底根治壓入式游隙異音！\n🔨 **所需工具**：雙側對鎖專用扳手或壓入工具。",
+        "SRAM_DUB": "✅ **適配中軸型號**：SRAM DUB PF30 Road 68mm\n🔧 **五通規格**：寬 68mm，內徑 46mm\n⚙️ **墊圈配置**：驅動側需安裝 **4.5mm** 軸心外墊圈\n🔨 **所需工具**：壓入工具搭配 29mm DUB 壓塊。"
+      }
+    },
+    "calculator": {
+      "chain_formula": {
+        "name": "公路車雙盤標準鏈條節數計算（Rigout 嚴格算法）",
+        "formula": "節數 L = 2 × (C / 12.7) + (F / 2) + (R / 2) + 1",
+        "note": "其中 C = 車架後下叉長度(mm)，F = 大盤最大盤齒數，R = 飛輪最大齒數。計算結果若為單數需加 1 湊成偶數節。"
+      },
+      "tubeless_sealant": {
+        "25c": "推薦注入量：30–35 ml",
+        "28c": "推薦注入量：35–40 ml",
+        "30c": "推薦注入量：45–50 ml",
+        "32c": "推薦注入量：55–60 ml",
+        "note": "夏季高溫蒸發較快建議多補 5–10ml；補胎液壽命通常為 2–4 個月，到期請及時檢查補充以防乾涸失效！"
+      }
+    },
+    "captcha_questions": [
+      {
+        "q": "拆卸公路車【右側（驅動側）】踏板時，扳手應該向哪個方向旋轉鬆開？",
+        "options": ["逆時針方向（向車尾方向板）", "順時針方向（向車頭方向板）", "隨便敲兩下就開了"],
+        "answer_index": 0
+      },
+      {
+        "q": "拆卸公路車【左側（非驅動側）】踏板時，扳手應該向哪個方向旋轉鬆開？",
+        "options": ["順時針方向（向車尾方向板，反牙）", "逆時針方向（向車頭方向板）", "向下踩踏板"],
+        "answer_index": 0
+      },
+      {
+        "q": "Shimano R8170 / R9270 這一代油壓碟煞系統必須使用哪種煞車油？",
+        "options": ["專用礦物油（Mineral Oil，通常為粉紅色）", "DOT 5.1 煞車油", "縫紉機油或機油"],
+        "answer_index": 0
+      },
+      {
+        "q": "SRAM AXS eTap 油壓碟煞卡鉗換油時，使用的是哪種煞車制動液？",
+        "options": ["DOT 5.1 制動液", "礦物油 (Mineral Oil)", "水箱精或防凍液"],
+        "answer_index": 0
+      },
+      {
+        "q": "組裝全碳纖維把橫、座管時，接觸面應塗抹什麼以防滑並降低所需鎖緊扭力？",
+        "options": ["碳纖維止滑膏 (Carbon Friction Paste)", "高黏度鈣基黃油", "樂泰 271 高強度紅膠"],
+        "answer_index": 0
+      },
+      {
+        "q": "Shimano 24mm 軸心曲柄左臂上的兩顆夾緊螺栓，正確的緊固方式是？",
+        "options": ["兩顆螺栓交替分次鎖緊至 12–14 N·m", "先將其中一顆一次性鎖到底", "完全憑手感鎖緊不用管扭力"],
+        "answer_index": 0
+      },
+      {
+        "q": "中央鎖死碟盤鎖緊環的標準推薦扭力通常是多少？",
+        "options": ["40 N·m", "5 N·m", "100 N·m"],
+        "answer_index": 0
+      },
+      {
+        "q": "無內胎（真空胎）公路車，補胎液通常建議多長時間檢查或補注一次？",
+        "options": ["2–3 個月（防乾涸失效）", "3 年一次", "永遠不需要補充"],
+        "answer_index": 0
+      }
+    ],
+    "maintenance_presets": {
+      "tubeless": {
+        "label": "🥛 無內胎補胎液檢查",
+        "cycle_days": 90,
+        "desc": "補胎液易乾涸結塊，滿90天需晃動輪組聽液體聲或拆開補注。"
+      },
+      "chain_wax": {
+        "label": "🕯️ 鏈條熱浸蠟/補蠟保養",
+        "cycle_days": 14,
+        "desc": "蠟膜乾燥潤滑清潔，雨戰後或每兩週需重新浸蠟或補滴固蠟。"
+      },
+      "brake_bleed": {
+        "label": "🩸 油壓碟煞換油與排氣",
+        "cycle_days": 365,
+        "desc": "DOT油吸水變質易產生氣阻，礦物油乳化渾濁，建議每年徹底換油排氣一次。"
+      }
+    }
+  },
+
+  "en": {
+    "torque": {
+      "cockpit": {
+        "name": "🚲 Cockpit & Seatpost System",
+        "items": [
+          "• **Stem Steerer Clamp Bolts**: 4–5 N·m (Alternate tightening, always apply carbon friction paste on carbon steerers; expander plug pre-tightened to 6–8 N·m)",
+          "• **Stem Faceplate Bolts**: 4–5 N·m (Cross/X-pattern tightening, keep upper/lower gaps even; apply friction paste on carbon handlebars)",
+          "• **Integrated Handlebar Out-front Mount**: 2–3 N·m (Very shallow threads, apply light threadlocker, do not over-torque)",
+          "• **Seatpost Clamp / Wedge**: 4–6 N·m (Refer to frame/post markings; always use carbon assembly paste, never standard grease)",
+          "• **Saddle Rail Clamp**: Single bolt: 9–12 N·m; Dual bolts (front/rear): 5–7 N·m"
+        ]
+      },
+      "drivetrain": {
+        "name": "⚙️ Crankset, BB, Pedals & Spindle",
+        "items": [
+          "• **Shimano Left Crank Pinch Bolts**: 12–14 N·m (Alternate tightening incrementally; ensure safety plate is fully engaged before locking)",
+          "• **Shimano Crank Preload End Cap**: 0.7–1.5 N·m (Finger-tighten with tool to remove axial play; do not over-tighten to cause bearing drag)",
+          "• **SRAM DUB Self-Extracting Main Bolt**: 54 N·m (Heavy torque! Apply heavy-duty assembly grease on threads and washer; eliminate play with adjuster ring)",
+          "• **Road Bike Pedals**: 35–40 N·m (Grease threads; Drive-side: clockwise to tighten; Non-drive side: counter-clockwise/reverse thread)",
+          "• **SRAM Direct Mount Chainring**: 8-bolt T25: 4 N·m; 3-bolt T25: 8–9 N·m (with threadlocker)"
+        ]
+      },
+      "brakes_wheels": {
+        "name": "💿 Disc Brakes, Cassette & Wheels",
+        "items": [
+          "• **Centerlock Rotor Lockring**: 40 N·m (Internal spline uses cassette tool; External spline uses BB tool; lightly grease threads)",
+          "• **6-Bolt Rotor Bolts**: 5–6 N·m (Star pattern tightening; always apply Loctite 242/243 blue threadlocker)",
+          "• **Cassette Lockring**: 40 N·m (Ensure smallest 11T/12T cog splines are fully engaged before torquing)",
+          "• **Flat Mount Disc Brake Caliper Bolts**: 6–8 N·m (Frame threads are alloy, never over-torque; apply medium threadlocker)",
+          "• **Road Thru-Axles**: 9–13.5 N·m (Typically 10 N·m; apply thin layer of grease on threads and shaft)"
+        ]
+      },
+      "derailleurs": {
+        "name": "🔄 Derailleurs & Hanger",
+        "items": [
+          "• **Rear Derailleur Hanger Fixing Bolt**: 2–3 N·m (Fine thread, apply medium threadlocker)",
+          "• **Rear Derailleur Mounting Bolt**: 8–10 N·m (Grease thread; ensure b-screw tab aligns with hanger notch)",
+          "• **Braze-on Front Derailleur Bolt**: 5–7 N·m (Ensure backing plate sits flat and support screw contacts frame protector)",
+          "• **STI Brake/Shift Lever Clamp**: 6–8 N·m (Use carbon paste; should slip slightly under hard crash impact to protect handlebar)"
+        ]
+      }
+    },
+    "bb_matcher": {
+      "BSA": {
+        "name": "BSA Threaded (Shell 68mm, 1.37\" x 24 TPI)",
+        "SHIMANO_24": "✅ **Compatible BB**: Shimano SM-BBR60 / BB-R9100 or BSA-24 external\n🔧 **Shell Width**: 68mm\n⚙️ **Spacer Setup**: Standard road 68mm needs **NO** external shell spacers\n🔨 **Tool**: Shimano TL-FC32 / TL-FC25 16-notch socket\n💡 **Note**: Drive side is reverse thread (turn clockwise to loosen).",
+        "SRAM_DUB": "✅ **Compatible BB**: SRAM DUB BSA 68 Road\n🔧 **Shell Width**: 68mm\n⚙️ **Spacer Setup**: Typically install **1x 4.5mm** outer spacer on the drive-side spindle\n🔨 **Tool**: SRAM DUB 12/24-notch socket\n💡 **Note**: Grease threads thoroughly; torque to 35–40 N·m.",
+        "ROTOR_30": "✅ **Compatible BB**: BSA30 External BB (Rotor BSA30, Wheels Mfg BSA30)\n🔧 **Shell Width**: 68mm\n⚙️ **Spacer Setup**: Match stepped spacers according to 30mm spindle effective length\n🔨 **Tool**: 48.5mm / 16-notch oversize BB socket"
+      },
+      "BB86": {
+        "name": "BB86 PressFit (Shell 86.5mm, ID 41mm, Giant/Canyon/etc.)",
+        "SHIMANO_24": "✅ **Compatible BB**: BB86 PressFit (Shimano SM-BB72-41B / SM-BB92-41B)\n🔧 **Shell**: 86.5mm width, 41mm ID\n⚙️ **Spacer Setup**: Press in cups flush; road 24mm spindle requires no extra spacers\n🔨 **Tool**: Press tool with 24mm guides + bearing puller/punch tool\n💡 **Note**: Lightly grease outer shell to prevent creaks; never press on bearing inner races!",
+        "SRAM_DUB": "✅ **Compatible BB**: SRAM DUB PressFit Road 86.5 (PF41-DUB)\n🔧 **Shell**: 86.5mm width, 41mm ID\n⚙️ **Spacer Setup**: Drive-side requires **3mm** outer spindle spacer\n⚠️ **Mechanic Warning**: 41mm shell ID leaves very little room for 28.99mm spindle, resulting in small bearing balls. Shorter lifespan than 24mm; keep clean and inspect regularly.",
+        "ROTOR_30": "✅ **Compatible BB**: 4130 PressFit BB\n⚠️ **Mechanic Warning**: 30mm spindle in 41mm shell forces extremely small balls; lower bearing durability under heavy sprinting."
+      },
+      "T47_IN": {
+        "name": "T47 Internal Threaded (Shell 85.5/86.5mm, M47x1.0, Trek/Factor/etc.)",
+        "SHIMANO_24": "✅ **Compatible BB**: T47 Internal 24mm (Wheels Mfg, Token, Tripeak)\n🔧 **Shell**: ~47mm thread diameter, cups fit flush inside the BB shell\n⚙️ **Spacer Setup**: Trek 85.5mm typically uses internal sleeve or micro-adjusters\n🔨 **Tool**: T47 internal multi-notch tool\n💡 **Note**: Use protective sleeve over internal cables to avoid friction with spinning spindle!",
+        "SRAM_DUB": "✅ **Compatible BB**: SRAM DUB T47 (Internal 85.5 / 86.5 Road)\n🔧 **Shell**: 85.5mm or 86.5mm width\n⚙️ **Spacer Setup**: Drive side usually takes 2.5mm or 3.0mm outer spacer\n🔨 **Tool**: T47 internal 12/16-notch socket\n💡 **Note**: Grease threads thoroughly; tighten to 35–40 N·m.",
+        "ROTOR_30": "✅ **Compatible BB**: T47 Internal 30mm\n🔧 **Shell**: 85.5mm / 86.5mm\n🔨 **Tool**: T47 internal tool"
+      },
+      "PF30": {
+        "name": "PF30 PressFit (Shell 68mm, ID 46mm, Cannondale/Specialized/etc.)",
+        "SHIMANO_24": "✅ **Compatible BB**: PF30 to 24mm Thread-together BB (Wheels Mfg / Token Ninja / Wishbone)\n🔧 **Shell**: 68mm width, 46mm ID\n⚙️ **Recommendation**: Highly recommend thread-together BB to permanently solve PF30 creaking!\n🔨 **Tool**: Dual thread-together BB wrenches.",
+        "SRAM_DUB": "✅ **Compatible BB**: SRAM DUB PF30 Road 68mm\n🔧 **Shell**: 68mm width, 46mm ID\n⚙️ **Spacer Setup**: Drive side requires **4.5mm** outer spacer\n🔨 **Tool**: Press tool with 29mm DUB drift adapters."
+      }
+    },
+    "calculator": {
+      "chain_formula": {
+        "name": "Road Double Chain Length Calculation (Rigout Formula)",
+        "formula": "Links L = 2 x (C / 12.7) + (F / 2) + (R / 2) + 1",
+        "note": "C = Chainstay length (mm), F = Big chainring teeth, R = Max cassette cog teeth. Always round up to an even number."
+      },
+      "tubeless_sealant": {
+        "25c": "Recommended: 30–35 ml",
+        "28c": "Recommended: 35–40 ml",
+        "30c": "Recommended: 45–50 ml",
+        "32c": "Recommended: 55–60 ml",
+        "note": "Hot summers cause faster evaporation (+5-10ml suggested). Sealant lasts 2–4 months; check regularly to prevent drying out!"
+      }
+    },
+    "captcha_questions": [
+      {
+        "q": "When removing the [Right / Drive-side] pedal on a road bike, which direction should you turn the wrench?",
+        "options": ["Counter-clockwise (toward the rear wheel)", "Clockwise (toward the front wheel)", "Hit it with a hammer"],
+        "answer_index": 0
+      },
+      {
+        "q": "When removing the [Left / Non-drive-side] pedal on a road bike, which direction should you turn the wrench?",
+        "options": ["Clockwise (toward the rear wheel, reverse thread)", "Counter-clockwise (toward the front)", "Push down on the pedal"],
+        "answer_index": 0
+      },
+      {
+        "q": "Which brake fluid MUST be used in Shimano R8170 / R9270 hydraulic disc brakes?",
+        "options": ["Mineral Oil (typically pink/red)", "DOT 5.1 Brake Fluid", "Motor Oil or WD-40"],
+        "answer_index": 0
+      },
+      {
+        "q": "Which brake fluid is used in SRAM AXS eTap road hydraulic disc brakes?",
+        "options": ["DOT 5.1 Brake Fluid", "Mineral Oil", "Antifreeze coolant"],
+        "answer_index": 0
+      },
+      {
+        "q": "What should be applied to carbon handlebars and seatposts to prevent slipping and reduce required torque?",
+        "options": ["Carbon Friction Paste", "High-viscosity calcium grease", "Loctite 271 Red High-strength"],
+        "answer_index": 0
+      },
+      {
+        "q": "What is the proper method to tighten the two left crank arm pinch bolts on a Shimano crank?",
+        "options": ["Alternate incrementally between both bolts to 12–14 N·m", "Torque one bolt completely first", "Tighten randomly by feel"],
+        "answer_index": 0
+      },
+      {
+        "q": "What is the standard recommended torque for a centerlock rotor lockring?",
+        "options": ["40 N·m", "5 N·m", "100 N·m"],
+        "answer_index": 0
+      },
+      {
+        "q": "How often should tubeless sealant in road bike tires typically be checked or topped up?",
+        "options": ["Every 2–3 months (prevents drying out)", "Once every 3 years", "Never needs replenishment"],
+        "answer_index": 0
+      }
+    ],
+    "maintenance_presets": {
+      "tubeless": {
+        "label": "🥛 Tubeless Sealant Check",
+        "cycle_days": 90,
+        "desc": "Sealant dries up over time. Check or replenish every 90 days."
+      },
+      "chain_wax": {
+        "label": "🕯️ Chain Hot Wax / Drip Wax",
+        "cycle_days": 14,
+        "desc": "Clean & dry lubrication. Re-wax every 2 weeks or after wet rides."
+      },
+      "brake_bleed": {
+        "label": "🩸 Hydraulic Brake Bleed & Fluid Flush",
+        "cycle_days": 365,
+        "desc": "DOT fluid absorbs moisture and mineral oil degrades. Annual flush recommended."
+      }
+    }
+  }
+}

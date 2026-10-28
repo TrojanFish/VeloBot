@@ -3,17 +3,14 @@ services:
     build: .
     container_name: velobot
     restart: unless-stopped
-    ports:
-      - "5000:5000"
     volumes:
       - ./data:/app/data
     env_file:
       - .env
-    # Ensure the database directory exists and has correct permissions
-    user: "1000:1000"
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:5000/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+    environment:
+      - TZ=Asia/Shanghai
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

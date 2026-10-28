@@ -1,35 +1,31 @@
 import logging
-import threading
-from telegram.ext import Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
+import datetime
+try:
+    from zoneinfo import ZoneInfo
+except ImportError:
+    from pytz import timezone as ZoneInfo
 from telegram import BotCommand
+from telegram.ext import (
+    Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters
+)
 
-from src.config import TELEGRAM_BOT_TOKEN
+from src.config import TELEGRAM_BOT_TOKEN, ADMIN_ID, CHECK_INTERVAL_MINUTES
 from src.database import init_db
-from src.locales import LOCALIZED_COMMANDS
-from src.web.routes import run_flask_app, telegram_app_for_flask
-from src.services.youtube import check_youtube_videos
-from src.services.rss_manager import check_rss_feeds
-from src.bot.tasks import check_strava_activities, send_periodic_reports, check_weather_alerts, check_goal_progress
 from src.bot.handlers import (
-    start, help_command, link_strava, toggle_strava_privacy, 
-    get_last_activity, get_last_video, get_report, get_leaderboard,
-    my_rides, my_achievements, weather, route, language_command,
-    welcome, location_handler, maintenance_command, units_command, set_unit,
-    add_rss, list_rss, remove_rss, menu_command, sync_strava_command,
-    set_ftp, set_max_hr, ai_coach_handler, voice_handler,
-    set_goal, set_schedule
+    start, language_command, torque_command, bb_command, calc_command,
+    chain_calc_command, mybike_command, help_command, admin_reply_handler
 )
 from src.bot.callbacks import (
-    ride_button_callback, location_button_callback, language_button_callback, menu_callback
+    handle_lang_callback, handle_main_menu_refresh,
+    handle_torque_callback, handle_bb_callback, handle_calc_callback,
+    handle_waitlist_callback, handle_maintenance_callback
 )
-from src.bot.conversations import (
-    create_ride, ride_title, ride_time, ride_route, ride_desc, 
-    cancel_creation, RIDE_TITLE, RIDE_TIME, RIDE_ROUTE, RIDE_DESC
+from src.bot.conversations import noise_conversation_handler
+from src.bot.captcha import new_member_captcha, handle_captcha_callback
+from src.bot.tasks import (
+    check_youtube_task, send_maintenance_reminders, backup_database_to_admin
 )
-from telegram.ext import ConversationHandler
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-# --- 日志配置 ---
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -37,107 +33,119 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 async def post_init(application: Application):
-    for lang_code, commands_dict in LOCALIZED_COMMANDS.items():
-        commands = [BotCommand(cmd, desc) for cmd, desc in commands_dict.items()]
-        # 英文作为默认语言（不指定 language_code）
-        tg_lang_code = None if lang_code == 'en' else lang_code
-        try:
-            await application.bot.set_my_commands(commands, language_code=tg_lang_code)
-            logger.info(f"Successfully set commands for language: {tg_lang_code}")
-        except Exception as e:
-            logger.error(f"Failed to set commands for language '{tg_lang_code}': {e}")
-    
-    logger.info("多语言机器人快捷指令设置流程完毕。")
-    scheduler = AsyncIOScheduler(timezone="UTC")
-    scheduler.add_job(check_youtube_videos, 'interval', minutes=10, args=[application])
-    scheduler.add_job(check_strava_activities, 'interval', minutes=15, args=[application])
-    scheduler.add_job(check_rss_feeds, 'interval', minutes=20, args=[application])
-    # 每天 09:00 检查并推送报表 (周报/月报/年报)
-    scheduler.add_job(send_periodic_reports, 'cron', hour=9, minute=0, args=[application])
-    
-    # 每天 20:00 检查明天的天气预警
-    scheduler.add_job(check_weather_alerts, 'cron', hour=20, minute=0, args=[application])
-    
-    # 每 3 天检查一次月度目标进度
-    scheduler.add_job(check_goal_progress, 'interval', days=3, args=[application])
-    
-    scheduler.start()
-    logger.info("后台调度器已启动。")
+    """機器人啟動初始化：註冊繁體中文與英文選單指令及定時調度任務"""
+    # 繁體中文指令集
+    zh_commands = [
+        BotCommand("torque", "🔧 關鍵部位標準鎖緊扭力速查"),
+        BotCommand("bb", "⚙️ 五通規格與大盤軸心相容指南"),
+        BotCommand("calc", "📐 組裝實用計算器選單"),
+        BotCommand("chain", "📏 鏈條標準節數計算"),
+        BotCommand("mybike", "🚲 個人車輛週期保養管家"),
+        BotCommand("ask", "🩺 異音門診與故障投稿"),
+        BotCommand("lang", "🌐 切換語言 / Switch Language"),
+        BotCommand("help", "📖 使用說明")
+    ]
+
+    # 英文指令集
+    en_commands = [
+        BotCommand("torque", "🔧 Standard torque values lookup"),
+        BotCommand("bb", "⚙️ BB & crank spindle compatibility"),
+        BotCommand("calc", "📐 Bike build calculators"),
+        BotCommand("chain", "📏 Chain link length calculation"),
+        BotCommand("mybike", "🚲 Maintenance tracker & alerts"),
+        BotCommand("ask", "🩺 Noise clinic & symptom submission"),
+        BotCommand("lang", "🌐 Switch Language / 切換語言"),
+        BotCommand("help", "📖 Help & documentation")
+    ]
+
+    try:
+        # 註冊預設與英文選單
+        await application.bot.set_my_commands(en_commands)
+        await application.bot.set_my_commands(en_commands, language_code="en")
+        # 註冊繁體中文選單（覆蓋常見繁中代碼）
+        for lang_code in ["zh-hant", "zh-tw", "zh-hk", "zh-mo"]:
+            await application.bot.set_my_commands(zh_commands, language_code=lang_code)
+        logger.info("雙語快捷指令選單註冊完畢。")
+    except Exception as e:
+        logger.error(f"快捷指令選單註冊失敗: {e}")
+
+    # 定時任務
+    job_queue = application.job_queue
+    if job_queue:
+        shanghai_tz = ZoneInfo("Asia/Shanghai")
+
+        # 定時輪詢 YouTube
+        job_queue.run_repeating(
+            check_youtube_task,
+            interval=CHECK_INTERVAL_MINUTES * 60,
+            first=15
+        )
+        logger.info(f"YouTube 輪詢任務已加載（每 {CHECK_INTERVAL_MINUTES} 分鐘一次）。")
+
+        # 每日早上 09:00 推播保養提醒
+        remind_time = datetime.time(hour=9, minute=0, tzinfo=shanghai_tz)
+        job_queue.run_daily(send_maintenance_reminders, time=remind_time)
+        logger.info("每日 09:00 保養提醒任務已加載。")
+
+        # 每日凌晨 03:30 自動向台長發送資料庫備份
+        backup_time = datetime.time(hour=3, minute=30, tzinfo=shanghai_tz)
+        job_queue.run_daily(backup_database_to_admin, time=backup_time)
+        logger.info("每日 03:30 資料庫備份任務已加載。")
 
 def main():
     if not TELEGRAM_BOT_TOKEN:
-        logger.critical("项目启动失败：未找到 TELEGRAM_BOT_TOKEN。请检查 .env 文件。")
+        logger.critical("未找到 TELEGRAM_BOT_TOKEN，請檢查 .env 檔案。")
         return
 
     init_db()
-    
-    application = Application.builder().token(TELEGRAM_BOT_TOKEN).post_init(post_init).build()
-    
-    # 共享 application 实例给 Flask 路由使用
-    import src.web.routes as web_routes
-    web_routes.telegram_app_for_flask = application
 
-    # 注册约伴对话处理器
-    conv_handler = ConversationHandler(
-        entry_points=[CommandHandler('create_ride', create_ride)],
-        states={
-            RIDE_TITLE: [MessageHandler(filters.TEXT & ~filters.COMMAND, ride_title)],
-            RIDE_TIME: [MessageHandler(filters.TEXT & ~filters.COMMAND, ride_time)],
-            RIDE_ROUTE: [MessageHandler(filters.TEXT & ~filters.COMMAND, ride_route)],
-            RIDE_DESC: [MessageHandler(filters.TEXT & ~filters.COMMAND, ride_desc)],
-        },
-        fallbacks=[CommandHandler('cancel', cancel_creation)],
+    application = (
+        Application.builder()
+        .token(TELEGRAM_BOT_TOKEN)
+        .post_init(post_init)
+        .build()
     )
-    
-    # 注册所有处理器
-    application.add_handler(conv_handler)
-    application.add_handler(CallbackQueryHandler(ride_button_callback, pattern='^join_ride_|^leave_ride_'))
-    application.add_handler(CallbackQueryHandler(location_button_callback, pattern='^loc_'))
-    application.add_handler(CallbackQueryHandler(language_button_callback, pattern='^set_lang_'))
-    application.add_handler(CallbackQueryHandler(set_unit, pattern='^set_unit_'))
-    application.add_handler(CallbackQueryHandler(menu_callback, pattern='^menu_|^cmd_'))
 
+    # 1. 註冊異音門診對話狀態機 (/ask)
+    application.add_handler(noise_conversation_handler)
+
+    # 2. 註冊核心指令
     application.add_handler(CommandHandler("start", start))
-    application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(CommandHandler("link_strava", link_strava))
-    application.add_handler(CommandHandler("toggle_strava_privacy", toggle_strava_privacy))
-    application.add_handler(CommandHandler("get_last_activity", get_last_activity))
-    application.add_handler(CommandHandler("get_last_video", get_last_video))
-    application.add_handler(CommandHandler("report", get_report))
-    application.add_handler(CommandHandler("leaderboard", get_leaderboard))
-    application.add_handler(CommandHandler("my_rides", my_rides))
-    application.add_handler(CommandHandler("my_achievements", my_achievements))
-    application.add_handler(CommandHandler("weather", weather))
-    application.add_handler(CommandHandler("route", route))
+    application.add_handler(CommandHandler("torque", torque_command))
+    application.add_handler(CommandHandler("bb", bb_command))
+    application.add_handler(CommandHandler("calc", calc_command))
+    application.add_handler(CommandHandler("chain", chain_calc_command))
+    application.add_handler(CommandHandler("mybike", mybike_command))
+    application.add_handler(CommandHandler("lang", language_command))
     application.add_handler(CommandHandler("language", language_command))
-    application.add_handler(CommandHandler("sync_strava", sync_strava_command))
-    application.add_handler(CommandHandler("set_ftp", set_ftp))
-    application.add_handler(CommandHandler("set_max_hr", set_max_hr))
-    application.add_handler(CommandHandler("set_goal", set_goal))
-    application.add_handler(CommandHandler("set_schedule", set_schedule))
-    application.add_handler(CommandHandler("maintenance", maintenance_command))
-    application.add_handler(CommandHandler("units", units_command))
-    application.add_handler(CommandHandler("add_rss", add_rss))
-    application.add_handler(CommandHandler("list_rss", list_rss))
-    application.add_handler(CommandHandler("remove_rss", remove_rss))
-    application.add_handler(CommandHandler("menu", menu_command))
-    application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, welcome))
-    application.add_handler(MessageHandler(filters.LOCATION, location_handler))
-    
-    # AI 教练回应逻辑 (回复机器人消息 或 私聊中提问)
-    application.add_handler(MessageHandler(filters.TEXT & (filters.REPLY | filters.ChatType.PRIVATE) & ~filters.COMMAND, ai_coach_handler))
-    
-    # 语音识别逻辑
-    application.add_handler(MessageHandler(filters.VOICE, voice_handler))
-    
-    # 在后台线程中启动 Flask
-    flask_thread = threading.Thread(target=run_flask_app, daemon=True)
-    flask_thread.start()
-    
-    logger.info("Flask Web 服务器已在后台启动。")
-    logger.info("机器人启动成功，开始监控...")
-    
-    application.run_polling()
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("menu", start))
+
+    # 3. 註冊內聯鍵盤回調
+    application.add_handler(CallbackQueryHandler(handle_lang_callback, pattern="^lang_"))
+    application.add_handler(CallbackQueryHandler(handle_main_menu_refresh, pattern="^main_menu_refresh$"))
+    application.add_handler(CallbackQueryHandler(handle_torque_callback, pattern="^torque_"))
+    application.add_handler(CallbackQueryHandler(handle_bb_callback, pattern="^bb_"))
+    application.add_handler(CallbackQueryHandler(handle_calc_callback, pattern="^calc_"))
+    application.add_handler(CallbackQueryHandler(handle_waitlist_callback, pattern="^waitlist_add_"))
+    application.add_handler(CallbackQueryHandler(handle_maintenance_callback, pattern="^maint_done_"))
+    application.add_handler(CallbackQueryHandler(mybike_command, pattern="^maint_view$"))
+    application.add_handler(CallbackQueryHandler(handle_captcha_callback, pattern="^cpt:"))
+
+    # 4. 討論群入群硬核防刷驗證
+    application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, new_member_captcha))
+
+    # 5. 台長專屬免後台【回覆/Reply】攔截器
+    if ADMIN_ID:
+        application.add_handler(
+            MessageHandler(
+                filters.TEXT & filters.REPLY & filters.User(user_id=ADMIN_ID),
+                admin_reply_handler
+            )
+        )
+
+    logger.info("VeloBot 2.0 雙語版啟動成功，開始 Long Polling 監聽...")
+    application.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":
     main()

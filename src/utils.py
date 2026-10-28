@@ -1,52 +1,35 @@
-import sqlite3
+import os
+import json
 import logging
-from src.config import DB_FILE
-from src.locales import LOCALIZATION, LOCALIZED_ACHIEVEMENTS
+from src.config import SPECS_FILE
 
 logger = logging.getLogger(__name__)
 
-def get_user_config(user_id: int) -> dict:
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
-    cursor.execute("INSERT OR IGNORE INTO users (telegram_user_id) VALUES (?)", (user_id,))
-    conn.commit()
-    cursor.execute("SELECT language, units FROM users WHERE telegram_user_id = ?", (user_id,))
-    result = cursor.fetchone()
-    conn.close()
-    return {
-        'lang': result[0] if result and result[0] else 'en',
-        'units': result[1] if result and result[1] else 'metric'
-    }
+_specs_cache = None
 
-def get_user_lang(user_id: int) -> str:
-    return get_user_config(user_id)['lang']
+def get_specs(lang: str = "zh_hant") -> dict:
+    """讀取指定語言版本的參數字典 (支援熱重載)"""
+    global _specs_cache
+    if not os.path.exists(SPECS_FILE):
+        logger.error(f"參數字典檔案不存在: {SPECS_FILE}")
+        return {}
+    try:
+        with open(SPECS_FILE, "r", encoding="utf-8") as f:
+            _specs_cache = json.load(f)
+            # 支援 zh_hant 與 en 兩大分支
+            lang_key = "en" if lang == "en" else "zh_hant"
+            return _specs_cache.get(lang_key, _specs_cache.get("zh_hant", {}))
+    except Exception as e:
+        logger.error(f"讀取參數字典失敗: {e}")
+        return (_specs_cache.get(lang) if _specs_cache else {}) or {}
 
-def get_user_units(user_id: int) -> str:
-    return get_user_config(user_id)['units']
-
-def _(user_id: int, key: str) -> str:
-    lang = get_user_lang(user_id)
-    return LOCALIZATION.get(lang, LOCALIZATION['en']).get(key, key)
-
-def get_achievement_text(user_id: int, achievement_id: str) -> dict:
-    lang = get_user_lang(user_id)
-    return LOCALIZED_ACHIEVEMENTS.get(lang, LOCALIZED_ACHIEVEMENTS['en']).get(achievement_id)
-
-def format_duration(seconds):
-    h, m, s = int(seconds // 3600), int((seconds % 3600) // 60), int(seconds % 60)
-    return f"{h}h {m}m {s}s" if h > 0 else f"{m}m {s}s"
-
-def convert_dist(dist_km: float, units: str) -> str:
-    if units == 'imperial':
-        return f"{dist_km * 0.621371:.2f} mi"
-    return f"{dist_km:.2f} km"
-
-def convert_elev(elev_m: float, units: str) -> str:
-    if units == 'imperial':
-        return f"{elev_m * 3.28084:.0f} ft"
-    return f"{elev_m:.0f} m"
-
-def convert_speed(speed_kmh: float, units: str) -> str:
-    if units == 'imperial':
-        return f"{speed_kmh * 0.621371:.1f} mph"
-    return f"{speed_kmh:.1f} km/h"
+def calculate_chain_length(chainstay_mm: float, big_ring_teeth: int, max_cog_teeth: int) -> int:
+    """
+    計算公路車雙盤標準鏈條節數（Rigout 公式，偶數節）
+    L = 2 * (C / 12.7) + (F / 2) + (R / 2) + 1
+    """
+    raw_length = 2 * (chainstay_mm / 12.7) + (big_ring_teeth / 2.0) + (max_cog_teeth / 2.0) + 1.0
+    rounded = round(raw_length)
+    if rounded % 2 != 0:
+        rounded += 1
+    return int(rounded)
