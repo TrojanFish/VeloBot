@@ -3,17 +3,27 @@ import logging
 from telegram import Update, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
-from src.config import GROUP_ID
+from src.config import GROUP_ID, ENABLE_CAPTCHA
 from src.locales import t
 from src.utils import get_specs
-from src.database import get_user_lang
+from src.database import get_user_lang, get_system_setting
 
 logger = logging.getLogger(__name__)
 
 PENDING_VERIFICATIONS = {}
 
+def is_captcha_enabled() -> bool:
+    """檢查入群驗證是否開啟（支援 DB 動態設定與 .env 配置）"""
+    db_val = get_system_setting("captcha_enabled")
+    if db_val is not None:
+        return db_val.lower() in ("true", "1", "yes", "on")
+    return ENABLE_CAPTCHA
+
 async def new_member_captcha(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """新成員入群觸發硬核常識問答驗證（支援繁中與英文）"""
+    if not is_captcha_enabled():
+        return
+
     message = update.message
     if not message or not message.new_chat_members:
         return

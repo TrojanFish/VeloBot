@@ -10,9 +10,11 @@ from src.database import (
     get_user_lang, set_user_lang,
     get_video_by_id, get_video_by_admin_msg, update_video_kit,
     pop_kit_waiters, get_user_maintenance,
-    get_ticket_by_admin_msg, update_ticket_status
+    get_ticket_by_admin_msg, update_ticket_status,
+    set_system_setting
 )
 from src.bot.conversations import start_ask
+from src.bot.captcha import is_captcha_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -328,6 +330,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "• /chain - Fast chain link calculation (e.g. `/chain 50 34 410`)\n"
             "• /mybike - Periodic maintenance log & reminder (sealant, wax, brake fluid)\n"
             "• /ask - Noise clinic & troubleshooting submission\n"
+            "• /captcha - Group captcha toggle for admins (/captcha on|off)\n"
             "• /lang - Switch language (繁體中文 / English)\n"
             "• /help - View this help guide\n"
         )
@@ -343,10 +346,68 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "• /chain - 快速計算鏈條標準節數（如 `/chain 50 34 410`）\n"
             "• /mybike - 個人週期保養到期提醒（無內胎補胎液、浸蠟、煞車油）\n"
             "• /ask - 異音與疑難雜症門診（提交影音讓台長親自診斷）\n"
+            "• /captcha - 入群常識驗證開關（管理員專屬，`/captcha on` 或 `/captcha off`）\n"
             "• /lang - 切換機器人語言 (繁體中文 / English)\n"
             "• /help - 查看本使用指引\n"
         )
     await update.effective_message.reply_text(text, parse_mode="Markdown")
+
+async def captcha_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/captcha 入群驗證開關控制（僅限管理員或台長）"""
+    user = update.effective_user
+    chat = update.effective_chat
+    lang = get_user_lang(user.id, user.language_code)
+
+    is_admin = False
+    if ADMIN_ID and user.id == ADMIN_ID:
+        is_admin = True
+    elif chat.type in ("group", "supergroup"):
+        try:
+            member = await chat.get_member(user.id)
+            if member.status in ("creator", "administrator"):
+                is_admin = True
+        except Exception as e:
+            logger.warning(f"檢查管理員權限失敗: {e}")
+
+    if not is_admin:
+        msg = "⚠️ This command is restricted to administrators." if lang == "en" else "⚠️ 此指令僅限群組管理員或台長使用。"
+        await update.effective_message.reply_text(msg)
+        return
+
+    args = context.args
+    if not args:
+        enabled = is_captcha_enabled()
+        if lang == "en":
+            status = "🟢 Enabled (ON)" if enabled else "🔴 Disabled (OFF)"
+            text = (
+                f"🛡️ **Group Captcha Verification**: {status}\n\n"
+                f"Commands to toggle:\n"
+                f"• `/captcha off` - Turn OFF group captcha\n"
+                f"• `/captcha on` - Turn ON group captcha"
+            )
+        else:
+            status = "🟢 開啟中 (ON)" if enabled else "🔴 已關閉 (OFF)"
+            text = (
+                f"🛡️ **入群常識驗證當前狀態**：{status}\n\n"
+                f"可用切換指令：\n"
+                f"• `/captcha off` - **關閉**入群驗證（新成員直接進群無需答題）\n"
+                f"• `/captcha on` - **開啟**入群驗證（新成員需 3 選 1 答題解鎖）"
+            )
+        await update.effective_message.reply_text(text, parse_mode="Markdown")
+        return
+
+    action = args[0].lower()
+    if action in ("off", "close", "disable", "0", "關閉", "关"):
+        set_system_setting("captcha_enabled", "false")
+        msg = "✅ Group captcha verification has been **DISABLED**! New members will not be challenged." if lang == "en" else "✅ 入群常識驗證已**關閉**！新成員進群將不再被禁言或出題。"
+        await update.effective_message.reply_text(msg, parse_mode="Markdown")
+    elif action in ("on", "open", "enable", "1", "開啟", "开"):
+        set_system_setting("captcha_enabled", "true")
+        msg = "✅ Group captcha verification has been **ENABLED**! New members must answer trivia within 120s." if lang == "en" else "✅ 入群常識驗證已**開啟**！新成員進群需在 120 秒內完成 3 選 1 答題解鎖。"
+        await update.effective_message.reply_text(msg, parse_mode="Markdown")
+    else:
+        hint = "Usage: `/captcha on` or `/captcha off`" if lang == "en" else "用法：`/captcha on` 或 `/captcha off`"
+        await update.effective_message.reply_text(hint, parse_mode="Markdown")
 
 # ==================== 管理員長按 Reply 專屬工作流 ====================
 

@@ -103,6 +103,15 @@ def init_db():
         )
     ''')
 
+    # 5. 系統全局動態配置表 (如驗證開關等)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS system_settings (
+            key TEXT PRIMARY KEY,
+            value TEXT,
+            updated_at TEXT
+        )
+    ''')
+
     conn.commit()
     conn.close()
     logger.info("VeloBot 2.0 數據庫初始化完成。")
@@ -255,3 +264,29 @@ def update_ticket_status(ticket_id: int, status: str):
     with get_db_connection() as conn:
         conn.execute("UPDATE noise_tickets SET status = ? WHERE ticket_id = ?", (status, ticket_id))
         conn.commit()
+
+# ==================== 系統動態設定操作 ====================
+
+def get_system_setting(key: str, default: str = None) -> str:
+    """獲取系統動態設定"""
+    try:
+        with get_db_connection() as conn:
+            row = conn.execute("SELECT value FROM system_settings WHERE key = ?", (key,)).fetchone()
+            return row["value"] if row else default
+    except Exception as e:
+        logger.error(f"獲取系統設定 {key} 失敗: {e}")
+        return default
+
+def set_system_setting(key: str, value: str):
+    """保存或更新系統動態設定"""
+    try:
+        now_str = datetime.now().isoformat()
+        with get_db_connection() as conn:
+            conn.execute(
+                "INSERT INTO system_settings (key, value, updated_at) VALUES (?, ?, ?) "
+                "ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at",
+                (key, value, now_str)
+            )
+            conn.commit()
+    except Exception as e:
+        logger.error(f"保存系統設定 {key} 失敗: {e}")

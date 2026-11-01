@@ -12,6 +12,8 @@ ADMIN_ID = os.getenv("ADMIN_ID")
 if ADMIN_ID and ADMIN_ID.isdigit():
     ADMIN_ID = int(ADMIN_ID)
 
+ENABLE_CAPTCHA = os.getenv("ENABLE_CAPTCHA", "true").lower() in ("true", "1", "yes")
+
 # --- YouTube 配置 ---
 YOUTUBE_CHANNEL_ID = os.getenv("YOUTUBE_CHANNEL_ID", "")
 YOUTUBE_RSS_URL = f"https://www.youtube.com/feeds/videos.xml?channel_id={YOUTUBE_CHANNEL_ID}"

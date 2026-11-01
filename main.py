@@ -18,7 +18,7 @@ from src.config import TELEGRAM_BOT_TOKEN, ADMIN_ID, CHECK_INTERVAL_MINUTES
 from src.database import init_db
 from src.bot.handlers import (
     start, language_command, torque_command, bb_command, pain_command, roi_command, psi_command, calc_command,
-    chain_calc_command, mybike_command, help_command, admin_reply_handler
+    chain_calc_command, mybike_command, help_command, admin_reply_handler, captcha_command
 )
 from src.bot.callbacks import (
     handle_lang_callback, handle_main_menu_refresh,
@@ -134,6 +134,7 @@ def main():
     application.add_handler(CommandHandler("mybike", mybike_command))
     application.add_handler(CommandHandler("lang", language_command))
     application.add_handler(CommandHandler("language", language_command))
+    application.add_handler(CommandHandler("captcha", captcha_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("menu", start))
 

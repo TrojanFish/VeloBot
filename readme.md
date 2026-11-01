@@ -35,6 +35,7 @@
 - Automatically mutes new members upon joining the discussion group.
 - Presents a 3-choice road bike tech trivia question (pedal thread directions, Shimano brake mineral oil vs DOT, etc.) with a 120-second timer.
 - 100% blocks spam bots while building a hardcore technical community culture.
+- **Admin Control**: Toggle verification on or off anytime using `/captcha on` or `/captcha off`, or via `ENABLE_CAPTCHA=false` in `.env`.
 
 ### 6. 🩺 "Noise Clinic" & Video Submissions (/ask)
 - Subscribers can submit 10–15s symptom videos or audios with description.
@@ -62,6 +63,7 @@
 | `/chain` | Fast chain length calculation (e.g. `/chain 50 34 410`) | Private / Group |
 | `/mybike` | Personal periodic maintenance tracker & alerts | Private |
 | `/ask` | Noise clinic & troubleshooting media submission | Private |
+| `/captcha` | Toggle group captcha verification (`/captcha on|off`, admin only) | Private / Group |
 | `/lang` | Switch bot language (繁體中文 / English) | Private |
 | `/help` | View help and documentation | Private / Group |
 
