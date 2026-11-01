@@ -176,7 +176,23 @@ TRANSLATIONS = {
         "captcha_correct": "🎉 回答正確！公路車技師認證通過！",
         "captcha_passed_msg": "✅ [{name}](tg://user?id={user_id}) 驗證通過，歡迎加入技術討論！",
         "captcha_wrong": "❌ 回答錯誤！公路車技師認證未通過。",
-        "captcha_not_you": "⚠️ 這不是屬於你的驗證題，請勿亂點！"
+        "captcha_not_you": "⚠️ 這不是屬於你的驗證題，請勿亂點！",
+
+        # 強制關注頻道才能發言 (Mode A)
+        "forcesub_prompt": (
+            "👋 你好 [{name}](tg://user?id={user_id})！歡迎來到車友討論群 🚴‍♂️\n\n"
+            "📢 本群為頻道專屬討論群，**需先關注我們的官方頻道才能發言**！\n\n"
+            "👇 請先點擊下方按鈕關注頻道，關注後點擊「我已關注」即可立刻解鎖發言！"
+        ),
+        "forcesub_speak_warn": (
+            "⚠️ [{name}](tg://user?id={user_id})，你需先關注我們的官方頻道才能在群內發言！\n"
+            "請點擊下方按鈕關注頻道並完成解禁："
+        ),
+        "forcesub_btn_channel": "📢 關注官方頻道 / Join Channel",
+        "forcesub_btn_verify": "✅ 我已關注，解除禁言",
+        "forcesub_success": "🎉 驗證成功！已為你解除禁言，歡迎參與技術交流！",
+        "forcesub_not_yet": "⚠️ 尚未檢測到關注！請先點擊上方按鈕關注頻道，再點擊此處解除禁言。",
+        "forcesub_not_you": "⚠️ 這不是屬於你的驗證按鈕！"
     },
 
     "en": {
@@ -352,7 +368,23 @@ TRANSLATIONS = {
         "captcha_correct": "🎉 Correct! Welcome aboard!",
         "captcha_passed_msg": "✅ [{name}](tg://user?id={user_id}) verified! Welcome to the technical discussion!",
         "captcha_wrong": "❌ Incorrect answer! Verification failed.",
-        "captcha_not_you": "⚠️ This question is not for you!"
+        "captcha_not_you": "⚠️ This question is not for you!",
+
+        # Force Subscribe (Mode A)
+        "forcesub_prompt": (
+            "👋 Hello [{name}](tg://user?id={user_id})! Welcome to the group 🚴‍♂️\n\n"
+            "📢 This is our official discussion group. **You must subscribe to our channel to chat here**!\n\n"
+            "👇 Click the button below to join the channel, then tap 'I have joined' to unmute!"
+        ),
+        "forcesub_speak_warn": (
+            "⚠️ [{name}](tg://user?id={user_id}), you must subscribe to our channel to send messages here!\n"
+            "Please click below to join and verify:"
+        ),
+        "forcesub_btn_channel": "📢 Join Channel / 關注頻道",
+        "forcesub_btn_verify": "✅ I have joined, unmute me",
+        "forcesub_success": "🎉 Verified! You have been unmuted. Welcome!",
+        "forcesub_not_yet": "⚠️ Channel subscription not detected yet! Please join the channel first.",
+        "forcesub_not_you": "⚠️ This verification button is not for you!"
     }
 }
 

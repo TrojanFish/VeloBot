@@ -31,11 +31,11 @@
 - Diagnoses across **4 trigger scenarios** (static fit mismatch within 15 mins, endurance fatigue after 2+ hours, climbing torque overload, aggressive aero drop limit).
 - 2 clicks generate an instant "Fit Prescription Card": root causes, mechanical cockpit/cleat adjustments, riding posture fixes, and targeted stretches.
 
-### 5. 🛡️ Hardcore Cycling Group Captcha
-- Automatically mutes new members upon joining the discussion group.
-- Presents a 3-choice road bike tech trivia question (pedal thread directions, Shimano brake mineral oil vs DOT, etc.) with a 120-second timer.
-- 100% blocks spam bots while building a hardcore technical community culture.
-- **Admin Control**: Toggle verification on or off anytime using `/captcha on` or `/captcha off`, or via `ENABLE_CAPTCHA=false` in `.env`.
+### 5. 📢 Force Subscribe Channel Before Speaking (Mode A)
+- **Audience Conversion Loop**: When a user joins or attempts to send a message in the discussion group, the Bot calls the official Telegram API to verify if they have subscribed to the official broadcast channel.
+- **Instant Gatekeeping**: Non-subscribers who post messages have their messages immediately deleted and are temporarily muted. A clean notification card appears with a direct channel link and an "I Have Subscribed" verification button.
+- **Instant 1-Click Verification**: Once the user subscribes and clicks "I Have Subscribed", the Bot verifies in real-time, removes the mute restriction, and self-destructs the prompt card after 5 seconds to keep the group tidy.
+- **Admin Control**: Group administrators or the creator can dynamically toggle this requirement anytime using `/forcesub off` or `/forcesub on` (or `/captcha on|off`), or via `ENABLE_CAPTCHA=false` in `.env`.
 
 ### 6. 🩺 "Noise Clinic" & Video Submissions (/ask)
 - Subscribers can submit 10–15s symptom videos or audios with description.
@@ -63,7 +63,7 @@
 | `/chain` | Fast chain length calculation (e.g. `/chain 50 34 410`) | Private / Group |
 | `/mybike` | Personal periodic maintenance tracker & alerts | Private |
 | `/ask` | Noise clinic & troubleshooting media submission | Private |
-| `/captcha` | Toggle group captcha verification (`/captcha on|off`, admin only) | Private / Group |
+| `/forcesub` | Toggle force channel subscription (`/forcesub on|off`, alias `/captcha`, admin only) | Private / Group |
 | `/lang` | Switch bot language (繁體中文 / English) | Private |
 | `/help` | View help and documentation | Private / Group |
 
@@ -92,7 +92,7 @@ VeloBot-main/
     │   ├── handlers.py      # Command handlers & host reply interceptor
     │   ├── callbacks.py     # Inline keyboard cascading menus & dynamic cards
     │   ├── conversations.py # Noise clinic submission conversation flow
-    │   ├── captcha.py       # Group hardcore trivia captcha
+    │   ├── captcha.py       # Force subscribe channel guard (Mode A) with TTL cache
     │   └── tasks.py         # Schedulers (YouTube, maintenance alert, backup)
     └── services/
         ├── tire_calc.py     # Scientific differential tire pressure engine

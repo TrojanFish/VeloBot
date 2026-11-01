@@ -26,7 +26,7 @@ from src.bot.callbacks import (
     handle_calc_callback, handle_waitlist_callback, handle_maintenance_callback
 )
 from src.bot.conversations import noise_conversation_handler
-from src.bot.captcha import new_member_captcha, handle_captcha_callback
+from src.bot.captcha import new_member_guard, group_message_guard, handle_forcesub_callback
 from src.bot.tasks import (
     check_youtube_task, send_maintenance_reminders, backup_database_to_admin
 )
@@ -134,6 +134,7 @@ def main():
     application.add_handler(CommandHandler("mybike", mybike_command))
     application.add_handler(CommandHandler("lang", language_command))
     application.add_handler(CommandHandler("language", language_command))
+    application.add_handler(CommandHandler("forcesub", captcha_command))
     application.add_handler(CommandHandler("captcha", captcha_command))
     application.add_handler(CommandHandler("help", help_command))
     application.add_handler(CommandHandler("menu", start))
@@ -150,10 +151,11 @@ def main():
     application.add_handler(CallbackQueryHandler(handle_waitlist_callback, pattern="^waitlist_add_"))
     application.add_handler(CallbackQueryHandler(handle_maintenance_callback, pattern="^maint_done_"))
     application.add_handler(CallbackQueryHandler(mybike_command, pattern="^maint_view$"))
-    application.add_handler(CallbackQueryHandler(handle_captcha_callback, pattern="^cpt:"))
+    application.add_handler(CallbackQueryHandler(handle_forcesub_callback, pattern="^fsb:"))
 
-    # 4. 討論群入群硬核防刷驗證
-    application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, new_member_captcha))
+    # 4. 討論群關注頻道才能發言（模式 A：純關注模式）
+    application.add_handler(MessageHandler(filters.StatusUpdate.NEW_CHAT_MEMBERS, new_member_guard))
+    application.add_handler(MessageHandler(filters.ChatType.GROUPS & (~filters.COMMAND) & (~filters.StatusUpdate.ALL), group_message_guard))
 
     # 5. 台長專屬免後台【回覆/Reply】攔截器
     if ADMIN_ID:

@@ -1,27 +1,74 @@
+import time
 import random
 import logging
 from telegram import Update, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
-from src.config import GROUP_ID, ENABLE_CAPTCHA
+from src.config import GROUP_ID, CHANNEL_ID, ADMIN_ID, ENABLE_CAPTCHA
 from src.locales import t
 from src.utils import get_specs
 from src.database import get_user_lang, get_system_setting
 
 logger = logging.getLogger(__name__)
 
-PENDING_VERIFICATIONS = {}
+# 緩存已驗證關注的成員（避免每個發言都頻繁調用 API 觸發頻控 429）
+# 結構：{user_id: expire_timestamp}
+VERIFIED_SUBSCRIBERS = {}
+_channel_url_cache = None
 
-def is_captcha_enabled() -> bool:
-    """檢查入群驗證是否開啟（支援 DB 動態設定與 .env 配置）"""
-    db_val = get_system_setting("captcha_enabled")
+def is_forcesub_enabled() -> bool:
+    """檢查強制關注頻道功能是否開啟（預設開啟）"""
+    db_val = get_system_setting("forcesub_enabled")
     if db_val is not None:
         return db_val.lower() in ("true", "1", "yes", "on")
+    db_captcha = get_system_setting("captcha_enabled")
+    if db_captcha is not None:
+        return db_captcha.lower() in ("true", "1", "yes", "on")
     return ENABLE_CAPTCHA
 
-async def new_member_captcha(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """新成員入群觸發硬核常識問答驗證（支援繁中與英文）"""
-    if not is_captcha_enabled():
+async def get_channel_url(bot) -> str:
+    """動態獲取或解析頻道的直達鏈接（自帶緩存）"""
+    global _channel_url_cache
+    if _channel_url_cache:
+        return _channel_url_cache
+
+    if not CHANNEL_ID:
+        return "https://t.me"
+
+    try:
+        chat = await bot.get_chat(CHANNEL_ID)
+        if chat.username:
+            _channel_url_cache = f"https://t.me/{chat.username}"
+        elif chat.invite_link:
+            _channel_url_cache = chat.invite_link
+        else:
+            _channel_url_cache = await bot.export_chat_invite_link(CHANNEL_ID)
+        return _channel_url_cache
+    except Exception as e:
+        logger.warning(f"獲取頻道鏈接失敗: {e}")
+        if str(CHANNEL_ID).startswith("@"):
+            return f"https://t.me/{str(CHANNEL_ID)[1:]}"
+        return "https://t.me"
+
+async def is_user_subscribed(bot, user_id: int) -> bool:
+    """調用 Telegram 官方 API 檢驗用戶是否已關注指定頻道"""
+    if not CHANNEL_ID:
+        return True
+
+    try:
+        member = await bot.get_chat_member(chat_id=CHANNEL_ID, user_id=user_id)
+        # 只要在頻道中且不是 left 或 kicked 就算已關注
+        return member.status in ("creator", "administrator", "member", "restricted")
+    except Exception as e:
+        logger.warning(f"檢驗用戶 {user_id} 頻道關注狀態時異常 (可能 Bot 未加入頻道或未給管理員權限): {e}")
+        # 故障保護：若 Bot 自身無權限查詢，避免誤鎖所有正常發言
+        return True
+
+# ==================== 模式 A：純關注頻道驗證與攔截 ====================
+
+async def new_member_guard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """新成員入群事件處理：未關注頻道者立刻禁言並彈出引流關注卡片"""
+    if not is_forcesub_enabled():
         return
 
     message = update.message
@@ -40,118 +87,152 @@ async def new_member_captcha(update: Update, context: ContextTypes.DEFAULT_TYPE)
         user_name = new_user.first_name or "Rider"
         lang = get_user_lang(user_id, new_user.language_code)
 
-        # 1. 禁言
+        # 1. 檢查是否已經關注了頻道
+        is_subbed = await is_user_subscribed(context.bot, user_id)
+        if is_subbed:
+            VERIFIED_SUBSCRIBERS[user_id] = time.time() + 3600
+            logger.info(f"新成員 {user_name} ({user_id}) 入群時已關注頻道，免除禁言！")
+            continue
+
+        # 2. 未關注：先禁言
         try:
             await context.bot.restrict_chat_member(
                 chat_id=chat_id,
                 user_id=user_id,
                 permissions=ChatPermissions(can_send_messages=False)
             )
+            logger.info(f"新成員 {user_name} ({user_id}) 未關注頻道，已實施入群禁言。")
         except Exception as e:
             logger.error(f"限制用戶 {user_id} 權限失敗: {e}")
 
-        # 2. 獲取題目
-        specs = get_specs(lang)
-        questions = specs.get("captcha_questions", [])
-        if not questions:
-            continue
-
-        q_idx = random.randint(0, len(questions) - 1)
-        q_data = questions[q_idx]
-
-        # 3. 構造 3 選 1 按鈕
-        keyboard = []
-        for opt_idx, opt_text in enumerate(q_data["options"]):
-            cb_data = f"cpt:{user_id}:{q_idx}:{opt_idx}:{lang}"
-            keyboard.append([InlineKeyboardButton(opt_text, callback_data=cb_data)])
+        # 3. 發送引流關注卡片
+        channel_url = await get_channel_url(context.bot)
+        keyboard = [
+            [InlineKeyboardButton(t("forcesub_btn_channel", lang), url=channel_url)],
+            [InlineKeyboardButton(t("forcesub_btn_verify", lang), callback_data=f"fsb:{user_id}:{lang}")]
+        ]
 
         prompt_text = t(
-            "captcha_prompt",
+            "forcesub_prompt",
             lang=lang,
             name=user_name,
-            user_id=user_id,
-            question=q_data["q"]
+            user_id=user_id
         )
 
         try:
-            sent_msg = await context.bot.send_message(
+            await context.bot.send_message(
                 chat_id=chat_id,
                 text=prompt_text,
                 parse_mode="Markdown",
-                reply_markup=InlineKeyboardMarkup(keyboard)
+                reply_markup=InlineKeyboardMarkup(keyboard),
+                disable_web_page_preview=True
             )
-
-            job_name = f"captcha_timeout_{chat_id}_{user_id}"
-            if context.job_queue:
-                context.job_queue.run_once(
-                    captcha_timeout_callback,
-                    when=120,
-                    data={"chat_id": chat_id, "user_id": user_id, "message_id": sent_msg.message_id},
-                    name=job_name
-                )
-
-            PENDING_VERIFICATIONS[user_id] = {
-                "chat_id": chat_id,
-                "message_id": sent_msg.message_id,
-                "job_name": job_name
-            }
         except Exception as e:
-            logger.error(f"發送入群驗證消息失敗: {e}")
+            logger.error(f"發送關注引流消息失敗: {e}")
 
-async def captcha_timeout_callback(context: ContextTypes.DEFAULT_TYPE):
-    """超時未作答踢出"""
-    job_data = context.job.data
-    chat_id = job_data["chat_id"]
-    user_id = job_data["user_id"]
-    msg_id = job_data["message_id"]
+async def group_message_guard(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """群內常規消息監聽攔截：未關注頻道者發送的消息秒刪並提示關注"""
+    if not is_forcesub_enabled():
+        return
 
-    PENDING_VERIFICATIONS.pop(user_id, None)
+    message = update.effective_message
+    if not message or not message.text:
+        return
 
+    chat = update.effective_chat
+    if not chat or chat.type not in ("group", "supergroup"):
+        return
+
+    if GROUP_ID and str(chat.id) != str(GROUP_ID):
+        return
+
+    user = update.effective_user
+    if not user or user.is_bot:
+        return
+
+    # 管理員和台長直接放行
+    if ADMIN_ID and user.id == ADMIN_ID:
+        return
+
+    # 檢查本地緩存（命中緩存則 0 API 開銷秒放行）
+    now = time.time()
+    if user.id in VERIFIED_SUBSCRIBERS and VERIFIED_SUBSCRIBERS[user.id] > now:
+        return
+
+    # 檢查是否為群管理員（管理員豁免）
     try:
-        await context.bot.ban_chat_member(chat_id=chat_id, user_id=user_id)
-        await context.bot.unban_chat_member(chat_id=chat_id, user_id=user_id)
-        logger.info(f"用戶 {user_id} 驗證超時已被移出群組 {chat_id}")
-    except Exception as e:
-        logger.error(f"超時移出用戶 {user_id} 失敗: {e}")
-
-    try:
-        await context.bot.delete_message(chat_id=chat_id, message_id=msg_id)
+        member = await chat.get_member(user.id)
+        if member.status in ("creator", "administrator"):
+            VERIFIED_SUBSCRIBERS[user.id] = now + 86400
+            return
     except Exception:
         pass
 
-async def handle_captcha_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """處理答題點選"""
+    # 查驗頻道關注狀態
+    is_subbed = await is_user_subscribed(context.bot, user.id)
+    if is_subbed:
+        VERIFIED_SUBSCRIBERS[user.id] = now + 3600
+        return
+
+    # 尚未關注頻道：秒刪發言 + 禁言 + 彈出提示卡片
+    try:
+        await message.delete()
+    except Exception:
+        pass
+
+    try:
+        await context.bot.restrict_chat_member(
+            chat_id=chat.id,
+            user_id=user.id,
+            permissions=ChatPermissions(can_send_messages=False)
+        )
+    except Exception:
+        pass
+
+    channel_url = await get_channel_url(context.bot)
+    lang = get_user_lang(user.id, user.language_code)
+    keyboard = [
+        [InlineKeyboardButton(t("forcesub_btn_channel", lang), url=channel_url)],
+        [InlineKeyboardButton(t("forcesub_btn_verify", lang), callback_data=f"fsb:{user.id}:{lang}")]
+    ]
+
+    try:
+        warn_msg = await chat.send_message(
+            text=t("forcesub_speak_warn", lang, name=user.first_name or "Rider", user_id=user.id),
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard),
+            disable_web_page_preview=True
+        )
+        # 15 秒後自動清理提示消息，保持群內整潔
+        if context.job_queue:
+            context.job_queue.run_once(
+                lambda ctx: ctx.bot.delete_message(chat_id=warn_msg.chat_id, message_id=warn_msg.message_id),
+                when=15
+            )
+    except Exception as e:
+        logger.warning(f"發送發言攔截卡片失敗: {e}")
+
+async def handle_forcesub_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """處理車友點擊【✅ 我已關注，解除禁言】核驗按鈕"""
     query = update.callback_query
-    data = query.data # cpt:{user_id}:{q_idx}:{opt_idx}:{lang}
+    data = query.data  # fsb:{user_id}:{lang}
     parts = data.split(":")
-    if len(parts) < 4:
+    if len(parts) < 3:
         return
 
     target_user_id = int(parts[1])
-    q_idx = int(parts[2])
-    chosen_opt_idx = int(parts[3])
-    lang = parts[4] if len(parts) > 4 else "zh_hant"
+    lang = parts[2] if len(parts) > 2 else "zh_hant"
 
+    # 防代點
     if query.from_user.id != target_user_id:
-        await query.answer(t("captcha_not_you", lang=lang), show_alert=True)
+        await query.answer(t("forcesub_not_you", lang=lang), show_alert=True)
         return
 
-    specs = get_specs(lang)
-    questions = specs.get("captcha_questions", [])
-    if q_idx >= len(questions):
-        await query.answer("Expired / 驗證已過期", show_alert=True)
-        return
-
-    correct_idx = questions[q_idx].get("answer_index", 0)
+    # 再次核實頻道關注
+    is_subbed = await is_user_subscribed(context.bot, target_user_id)
     chat_id = update.effective_chat.id
 
-    info = PENDING_VERIFICATIONS.pop(target_user_id, None)
-    if info and context.job_queue:
-        current_jobs = context.job_queue.get_jobs_by_name(info["job_name"])
-        for job in current_jobs:
-            job.schedule_removal()
-
-    if chosen_opt_idx == correct_idx:
+    if is_subbed:
         try:
             await context.bot.restrict_chat_member(
                 chat_id=chat_id,
@@ -163,10 +244,12 @@ async def handle_captcha_callback(update: Update, context: ContextTypes.DEFAULT_
                     can_add_web_page_previews=True
                 )
             )
-            await query.answer(t("captcha_correct", lang=lang), show_alert=False)
-            pass_text = t("captcha_passed_msg", lang=lang, name=query.from_user.first_name, user_id=target_user_id)
+            VERIFIED_SUBSCRIBERS[target_user_id] = time.time() + 3600
+            await query.answer(t("forcesub_success", lang=lang), show_alert=False)
+            pass_text = f"✅ [{query.from_user.first_name}](tg://user?id={target_user_id}) " + t("forcesub_success", lang=lang)
             await query.edit_message_text(pass_text, parse_mode="Markdown")
 
+            # 5 秒後銷毀通過提示
             if context.job_queue:
                 context.job_queue.run_once(
                     lambda ctx: ctx.bot.delete_message(chat_id=chat_id, message_id=query.message.message_id),
@@ -175,10 +258,5 @@ async def handle_captcha_callback(update: Update, context: ContextTypes.DEFAULT_
         except Exception as e:
             logger.error(f"解禁用戶 {target_user_id} 失敗: {e}")
     else:
-        await query.answer(t("captcha_wrong", lang=lang), show_alert=True)
-        try:
-            await context.bot.ban_chat_member(chat_id=chat_id, user_id=target_user_id)
-            await context.bot.unban_chat_member(chat_id=chat_id, user_id=target_user_id)
-            await query.message.delete()
-        except Exception as e:
-            logger.error(f"踢出答錯用戶 {target_user_id} 失敗: {e}")
+        # 尚未檢測到關注
+        await query.answer(t("forcesub_not_yet", lang=lang), show_alert=True)

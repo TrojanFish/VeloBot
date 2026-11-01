@@ -14,7 +14,7 @@ from src.database import (
     set_system_setting
 )
 from src.bot.conversations import start_ask
-from src.bot.captcha import is_captcha_enabled
+from src.bot.captcha import is_forcesub_enabled
 
 logger = logging.getLogger(__name__)
 
@@ -330,7 +330,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "• /chain - Fast chain link calculation (e.g. `/chain 50 34 410`)\n"
             "• /mybike - Periodic maintenance log & reminder (sealant, wax, brake fluid)\n"
             "• /ask - Noise clinic & troubleshooting submission\n"
-            "• /captcha - Group captcha toggle for admins (/captcha on|off)\n"
+            "• /forcesub - Require channel subscription to chat (/forcesub on|off)\n"
             "• /lang - Switch language (繁體中文 / English)\n"
             "• /help - View this help guide\n"
         )
@@ -346,14 +346,14 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
             "• /chain - 快速計算鏈條標準節數（如 `/chain 50 34 410`）\n"
             "• /mybike - 個人週期保養到期提醒（無內胎補胎液、浸蠟、煞車油）\n"
             "• /ask - 異音與疑難雜症門診（提交影音讓台長親自診斷）\n"
-            "• /captcha - 入群常識驗證開關（管理員專屬，`/captcha on` 或 `/captcha off`）\n"
+            "• /forcesub - 關注頻道才能在群內發言開關（管理員專屬，`/forcesub on` 或 `/forcesub off`）\n"
             "• /lang - 切換機器人語言 (繁體中文 / English)\n"
             "• /help - 查看本使用指引\n"
         )
     await update.effective_message.reply_text(text, parse_mode="Markdown")
 
 async def captcha_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """/captcha 入群驗證開關控制（僅限管理員或台長）"""
+    """/forcesub 或 /captcha 關注頻道才能發言開關（僅限管理員或台長）"""
     user = update.effective_user
     chat = update.effective_chat
     lang = get_user_lang(user.id, user.language_code)
@@ -376,37 +376,39 @@ async def captcha_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     args = context.args
     if not args:
-        enabled = is_captcha_enabled()
+        enabled = is_forcesub_enabled()
         if lang == "en":
             status = "🟢 Enabled (ON)" if enabled else "🔴 Disabled (OFF)"
             text = (
-                f"🛡️ **Group Captcha Verification**: {status}\n\n"
+                f"🛡️ **Channel Subscription to Chat**: {status}\n\n"
                 f"Commands to toggle:\n"
-                f"• `/captcha off` - Turn OFF group captcha\n"
-                f"• `/captcha on` - Turn ON group captcha"
+                f"• `/forcesub off` - Disable channel subscription requirement\n"
+                f"• `/forcesub on` - Enable channel subscription requirement"
             )
         else:
             status = "🟢 開啟中 (ON)" if enabled else "🔴 已關閉 (OFF)"
             text = (
-                f"🛡️ **入群常識驗證當前狀態**：{status}\n\n"
+                f"🛡️ **關注官方頻道才能發言當前狀態**：{status}\n\n"
                 f"可用切換指令：\n"
-                f"• `/captcha off` - **關閉**入群驗證（新成員直接進群無需答題）\n"
-                f"• `/captcha on` - **開啟**入群驗證（新成員需 3 選 1 答題解鎖）"
+                f"• `/forcesub off` - **關閉**關注要求（所有人可自由發言）\n"
+                f"• `/forcesub on` - **開啟**關注要求（需先關注官方頻道才能發言）"
             )
         await update.effective_message.reply_text(text, parse_mode="Markdown")
         return
 
     action = args[0].lower()
     if action in ("off", "close", "disable", "0", "關閉", "关"):
+        set_system_setting("forcesub_enabled", "false")
         set_system_setting("captcha_enabled", "false")
-        msg = "✅ Group captcha verification has been **DISABLED**! New members will not be challenged." if lang == "en" else "✅ 入群常識驗證已**關閉**！新成員進群將不再被禁言或出題。"
+        msg = "✅ Channel subscription requirement has been **DISABLED**! Anyone can chat freely." if lang == "en" else "✅ 關注頻道發言要求已**關閉**！所有群員可自由在群內發言。"
         await update.effective_message.reply_text(msg, parse_mode="Markdown")
     elif action in ("on", "open", "enable", "1", "開啟", "开"):
+        set_system_setting("forcesub_enabled", "true")
         set_system_setting("captcha_enabled", "true")
-        msg = "✅ Group captcha verification has been **ENABLED**! New members must answer trivia within 120s." if lang == "en" else "✅ 入群常識驗證已**開啟**！新成員進群需在 120 秒內完成 3 選 1 答題解鎖。"
+        msg = "✅ Channel subscription requirement has been **ENABLED**! Members must join channel to speak." if lang == "en" else "✅ 關注頻道發言要求已**開啟**！未關注官方頻道的成員發言將被秒刪並引流關注。"
         await update.effective_message.reply_text(msg, parse_mode="Markdown")
     else:
-        hint = "Usage: `/captcha on` or `/captcha off`" if lang == "en" else "用法：`/captcha on` 或 `/captcha off`"
+        hint = "Usage: `/forcesub on` or `/forcesub off`" if lang == "en" else "用法：`/forcesub on` 或 `/forcesub off`"
         await update.effective_message.reply_text(hint, parse_mode="Markdown")
 
 # ==================== 管理員長按 Reply 專屬工作流 ====================
