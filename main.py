@@ -5,7 +5,7 @@ try:
     from zoneinfo import ZoneInfo
 except ImportError:
     from pytz import timezone as ZoneInfo
-from telegram import BotCommand, BotCommandScopeDefault, BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats
+from telegram import BotCommand, BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats
 from telegram.warnings import PTBUserWarning
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
@@ -186,7 +186,7 @@ def main():
 
     application.add_error_handler(global_error_handler)
 
-    logger.info("VeloBot 2.0 雙語版啟動成功，開始 Long Polling 監聽...")
+    logger.info("YoloCycling Bot 雙語版啟動成功，開始 Long Polling 監聽...")
     application.run_polling(drop_pending_updates=True)
 
 if __name__ == "__main__":

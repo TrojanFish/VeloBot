@@ -134,10 +134,11 @@ def get_user_lang(user_id: int, tg_lang_code: str = None) -> str:
             if row and row['language']:
                 return row['language']
 
+            # 修復：使用 INSERT OR IGNORE 而非 ON CONFLICT DO UPDATE，
+            # 避免覆蓋用戶已通過 /lang 手動設定的語言偏好
             conn.execute('''
-                INSERT INTO users (user_id, language, created_at)
+                INSERT OR IGNORE INTO users (user_id, language, created_at)
                 VALUES (?, ?, datetime('now'))
-                ON CONFLICT(user_id) DO UPDATE SET language = excluded.language
             ''', (user_id, default_lang))
             conn.commit()
     except Exception as e:

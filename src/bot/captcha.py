@@ -1,20 +1,27 @@
 import time
-import random
 import logging
 from telegram import Update, ChatPermissions, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
 from src.config import GROUP_ID, CHANNEL_ID, ADMIN_ID, ENABLE_CAPTCHA
 from src.locales import t
-from src.utils import get_specs
 from src.database import get_user_lang, get_system_setting
 
 logger = logging.getLogger(__name__)
 
 # 緩存已驗證關注的成員（避免每個發言都頻繁調用 API 觸發頻控 429）
-# 結構：{user_id: expire_timestamp}
-VERIFIED_SUBSCRIBERS = {}
+# 結構：{user_id: expire_timestamp}，定期清理過期條目以防記憶體洩漏
+VERIFIED_SUBSCRIBERS: dict[int, float] = {}
 _channel_url_cache = None
+
+# ==================== 快取清理工具 ====================
+
+def _evict_expired_cache():
+    """清除 VERIFIED_SUBSCRIBERS 中所有已過期的條目，防止記憶體無限膨脹"""
+    now = time.time()
+    expired = [uid for uid, exp in VERIFIED_SUBSCRIBERS.items() if exp <= now]
+    for uid in expired:
+        del VERIFIED_SUBSCRIBERS[uid]
 
 def is_forcesub_enabled() -> bool:
     """檢查強制關注頻道功能是否開啟（預設開啟）"""
@@ -67,7 +74,7 @@ async def is_user_subscribed(bot, user_id: int) -> bool:
 # ==================== 模式 A：純關注頻道驗證與攔截 ====================
 
 async def new_member_guard(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """新成員入群事件處理：未關注頻道者立刻禁言並彈出引流關注卡片"""
+    """新成員入群事件處理：未關注頻道者立刻禁言並彈出引流關注卡片（10 分鐘後自動銷毀）"""
     if not is_forcesub_enabled():
         return
 
@@ -78,6 +85,9 @@ async def new_member_guard(update: Update, context: ContextTypes.DEFAULT_TYPE):
     chat_id = update.effective_chat.id
     if GROUP_ID and str(chat_id) != str(GROUP_ID):
         return
+
+    # 機會性清理過期快取條目（每次新成員進群時觸發，低開銷）
+    _evict_expired_cache()
 
     for new_user in message.new_chat_members:
         if new_user.is_bot:
@@ -120,23 +130,36 @@ async def new_member_guard(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
 
         try:
-            await context.bot.send_message(
+            sent = await context.bot.send_message(
                 chat_id=chat_id,
                 text=prompt_text,
                 parse_mode="Markdown",
                 reply_markup=InlineKeyboardMarkup(keyboard),
                 disable_web_page_preview=True
             )
+            # 10 分鐘後自動清理引流卡片，防止卡片長期積壓刷屏
+            if context.job_queue:
+                _chat_id = sent.chat_id
+                _msg_id = sent.message_id
+
+                async def _delete_join_card(ctx):
+                    try:
+                        await ctx.bot.delete_message(chat_id=_chat_id, message_id=_msg_id)
+                    except Exception:
+                        pass
+
+                context.job_queue.run_once(_delete_join_card, when=600)
         except Exception as e:
             logger.error(f"發送關注引流消息失敗: {e}")
 
 async def group_message_guard(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """群內常規消息監聽攔截：未關注頻道者發送的消息秒刪並提示關注"""
+    """群內常規消息監聽攔截：未關注頻道者發送的任何消息秒刪並提示關注"""
     if not is_forcesub_enabled():
         return
 
     message = update.effective_message
-    if not message or not message.text:
+    # 修復 Bug 1：原先只攔截 message.text，圖片/貼圖/語音可繞過。現在只要有消息即核驗。
+    if not message:
         return
 
     chat = update.effective_chat
@@ -203,12 +226,19 @@ async def group_message_guard(update: Update, context: ContextTypes.DEFAULT_TYPE
             reply_markup=InlineKeyboardMarkup(keyboard),
             disable_web_page_preview=True
         )
+        # 修復 Bug 2：lambda 無法 await 異步方法，改為標準 async job 函數
         # 15 秒後自動清理提示消息，保持群內整潔
         if context.job_queue:
-            context.job_queue.run_once(
-                lambda ctx: ctx.bot.delete_message(chat_id=warn_msg.chat_id, message_id=warn_msg.message_id),
-                when=15
-            )
+            _chat_id = warn_msg.chat_id
+            _msg_id = warn_msg.message_id
+
+            async def _delete_warn_card(ctx):
+                try:
+                    await ctx.bot.delete_message(chat_id=_chat_id, message_id=_msg_id)
+                except Exception:
+                    pass
+
+            context.job_queue.run_once(_delete_warn_card, when=15)
     except Exception as e:
         logger.warning(f"發送發言攔截卡片失敗: {e}")
 
@@ -249,12 +279,19 @@ async def handle_forcesub_callback(update: Update, context: ContextTypes.DEFAULT
             pass_text = f"✅ [{query.from_user.first_name}](tg://user?id={target_user_id}) " + t("forcesub_success", lang=lang)
             await query.edit_message_text(pass_text, parse_mode="Markdown")
 
+            # 修復 Bug 2：lambda 無法 await 異步方法，改為標準 async job 函數
             # 5 秒後銷毀通過提示
             if context.job_queue:
-                context.job_queue.run_once(
-                    lambda ctx: ctx.bot.delete_message(chat_id=chat_id, message_id=query.message.message_id),
-                    when=5
-                )
+                _chat_id = chat_id
+                _msg_id = query.message.message_id
+
+                async def _delete_pass_card(ctx):
+                    try:
+                        await ctx.bot.delete_message(chat_id=_chat_id, message_id=_msg_id)
+                    except Exception:
+                        pass
+
+                context.job_queue.run_once(_delete_pass_card, when=5)
         except Exception as e:
             logger.error(f"解禁用戶 {target_user_id} 失敗: {e}")
     else:
