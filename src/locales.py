@@ -20,6 +20,27 @@ TRANSLATIONS = {
             "• /lang - 切換語言 (繁體中文 / English)\n\n"
             "頻道新影片上映時，頻道消息底部將附帶直達按鈕，為你推送一影片一專屬工具清單！"
         ),
+        "toolkit_title": (
+            "🚴 **VeloBot 公路車技師群組工具箱**\n\n"
+            "歡迎使用車友專屬工具箱！點選下方按鈕即可直接查詢或計算，**無需手動輸入指令**：\n\n"
+            "• 🔧 **鎖緊扭力**：龍頭/車把/座管/大盤/碟煞標準鎖緊力矩\n"
+            "• ⚙️ **五通相容**：BB86/T47/BSA 等規格與大盤軸心適配\n"
+            "• 🩺 **疼痛自查**：膝蓋/腰背/手麻 Bike Fitting 調校處方籤\n"
+            "• 🚀 **改裝省瓦**：輪組/一體把/TPU 內胎風洞數據與性價比\n"
+            "• 🎯 **科學胎壓**：Berto & Silca 前後輪科學差異化胎壓推算\n"
+            "• 📐 **組裝計算**：鏈條標準節數計算與補胎液推薦注入量\n"
+            "• 🚲 **保養管家**：補胎液/鏈條/煞車油週期保養打卡記錄\n\n"
+            "📌 *提示：管理員可將此訊息【置頂】，方便全體車友隨時點選！*"
+        ),
+        "btn_grid_torque": "🔧 扭力速查",
+        "btn_grid_bb": "⚙️ 五通相容",
+        "btn_grid_pain": "🩺 疼痛自查",
+        "btn_grid_roi": "🚀 改裝省瓦",
+        "btn_grid_psi": "🎯 科學胎壓",
+        "btn_grid_calc": "📐 組裝計算",
+        "btn_grid_mybike": "🚲 保養管家",
+        "btn_grid_channel": "📢 官方頻道",
+        "btn_grid_lang": "🌐 語言切換",
         "btn_torque": "🔧 扭力速查",
         "btn_bb": "⚙️ 五通匹配器",
         "btn_pain": "🩺 疼痛自查",
@@ -212,6 +233,27 @@ TRANSLATIONS = {
             "• /lang - Switch language (繁體中文 / English)\n\n"
             "Whenever a new video is published, interactive buttons will deliver the exact tool list and torque values straight to your chat!"
         ),
+        "toolkit_title": (
+            "🚴 **VeloBot Road Bike Mechanic Toolkit**\n\n"
+            "Welcome to the community toolkit! Tap the buttons below to look up specs and calculate values directly **without typing commands**:\n\n"
+            "• 🔧 **Torque Specs**: Cockpit, BB, brakes, cassette, derailleurs\n"
+            "• ⚙️ **BB Matching**: BB86/T47/BSA shell and crank spindle compatibility\n"
+            "• 🩺 **Pain Checker**: Knee, lower back, hands & saddle Bike Fit Rx\n"
+            "• 🚀 **Upgrade ROI**: Wheels, cockpit, TPU tubes watt savings\n"
+            "• 🎯 **Tire Pressure**: Scientific front/rear differential tire pressure\n"
+            "• 📐 **Calculators**: Chain link length formula & sealant guide\n"
+            "• 🚲 **Maintenance**: Periodic sealant/wax/bleed tracker\n\n"
+            "📌 *Tip: Group admins can [Pin] this message to the top of the group for easy access!*"
+        ),
+        "btn_grid_torque": "🔧 Torque",
+        "btn_grid_bb": "⚙️ BB Specs",
+        "btn_grid_pain": "🩺 Pain Rx",
+        "btn_grid_roi": "🚀 Upgrade",
+        "btn_grid_psi": "🎯 Tire PSI",
+        "btn_grid_calc": "📐 Calculator",
+        "btn_grid_mybike": "🚲 Service",
+        "btn_grid_channel": "📢 Channel",
+        "btn_grid_lang": "🌐 Language",
         "btn_torque": "🔧 Torque Lookup",
         "btn_bb": "⚙️ BB Matcher",
         "btn_pain": "🩺 Pain Checker",

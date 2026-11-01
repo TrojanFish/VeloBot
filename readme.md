@@ -20,6 +20,7 @@
 - **Zero-Console Binding**: When a new video is posted, Bot DMs the channel host. The host simply **Replies to the Telegram notification on mobile** with tool and torque notes. The Bot automatically binds it and pushes it to waiting subscribers!
 
 ### 3. 🔧 Pocket Mechanic Toolkit (Pure Inline Keyboard, No Typing)
+- `/menu` or `/tools`: **Visual 9-Grid Toolkit Dashboard**! Group members can tap buttons to query torque, BB, pain Rx, ROI, PSI, and chain formulas directly. **Admins can pin this card to the top of the group**, eliminating tedious manual commands.
 - `/torque`: Standard torque specs for cockpit, seatpost, drivetrain, BB, disc brakes, cassette, and derailleurs with friction paste & threadlocker safety notes.
 - `/bb`: Bottom bracket matching wizard (BSA, BB86, T47 Internal, PF30 for Shimano 24mm, SRAM DUB 28.99mm, Rotor 30mm) with spacer setup and tool guide.
 - `/roi`: Upgrade Watt Savings & ROI Calculator, evaluating speedsuits, 50mm/60mm carbon wheels, aero cockpits, TPU tubes, hot melt waxed chains, and OSPW pulley systems with wind-tunnel watt savings, 40km time saved, and cost-per-watt ratings.
@@ -53,6 +54,8 @@
 
 | Command | Description | Context |
 | :--- | :--- | :--- |
+| `/menu` | Launch visual 9-grid mechanic toolkit (No typing, pinnable in groups) | Private / Group |
+| `/tools` | Fast access to mechanic toolkit (alias for `/menu`) | Private / Group |
 | `/start` | Launch bot and show visual menu (supports Deep Link args) | Private |
 | `/torque` | Instant road bike torque specs (Cockpit/BB/Brakes/Derailleurs) | Private / Group |
 | `/bb` | Bottom bracket & crank spindle compatibility wizard | Private / Group |

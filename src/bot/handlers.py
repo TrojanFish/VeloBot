@@ -15,6 +15,7 @@ from src.database import (
 )
 from src.bot.conversations import start_ask
 from src.bot.captcha import is_forcesub_enabled
+from src.bot.callbacks import build_toolkit_keyboard
 
 logger = logging.getLogger(__name__)
 
@@ -72,34 +73,25 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await start_ask(update, context)
             return
 
-    # 2. 常規歡迎選單
-    welcome_text = t("welcome", lang=lang, name=user.first_name)
-    keyboard = [
-        [
-            InlineKeyboardButton(t("btn_torque", lang=lang), callback_data="torque_menu"),
-            InlineKeyboardButton(t("btn_bb", lang=lang), callback_data="bb_menu")
-        ],
-        [
-            InlineKeyboardButton(t("btn_pain", lang=lang), callback_data="pain_menu"),
-            InlineKeyboardButton(t("btn_roi", lang=lang), callback_data="roi_menu")
-        ],
-        [
-            InlineKeyboardButton(t("btn_psi", lang=lang), callback_data="psi_menu"),
-            InlineKeyboardButton(t("btn_calc", lang=lang), callback_data="calc_menu")
-        ],
-        [
-            InlineKeyboardButton(t("btn_mybike", lang=lang), callback_data="maint_view"),
-            InlineKeyboardButton(t("btn_ask", lang=lang), callback_data="entry_ask_noise")
-        ],
-        [
-            InlineKeyboardButton(t("btn_lang", lang=lang), callback_data="lang_select_menu")
-        ]
-    ]
-
+    # 2. 常規歡迎選單（九宮格視覺化工具箱）
+    welcome_text = t("toolkit_title", lang=lang)
+    markup = await build_toolkit_keyboard(context.bot, lang)
     await update.effective_message.reply_text(
         welcome_text,
         parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard)
+        reply_markup=markup
+    )
+
+async def menu_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """/menu, /tools, /toolbox 呼出九宮格視覺化工具箱"""
+    user = update.effective_user
+    lang = get_user_lang(user.id, user.language_code)
+    text = t("toolkit_title", lang=lang)
+    markup = await build_toolkit_keyboard(context.bot, lang)
+    await update.effective_message.reply_text(
+        text,
+        parse_mode="Markdown",
+        reply_markup=markup
     )
 
 async def roi_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -307,12 +299,21 @@ async def mybike_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
         else:
             text += t("mybike_unrecorded", lang=lang, label=v["label"], cycle=v["cycle_days"])
         keyboard.append([InlineKeyboardButton(t("mybike_btn_done", lang=lang, label=v["label"]), callback_data=f"maint_done_{k}")])
+    keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
 
-    await update.effective_message.reply_text(
-        text,
-        parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard)
-    )
+    if update.callback_query:
+        await update.callback_query.answer()
+        await update.callback_query.edit_message_text(
+            text,
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+    else:
+        await update.effective_message.reply_text(
+            text,
+            parse_mode="Markdown",
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """/help 幫助指南"""
@@ -321,6 +322,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if lang == "en":
         text = (
             "📖 **Road Bike Mechanic Toolkit Help**\n\n"
+            "• /menu (or /tools) - Open visual 9-grid mechanic toolkit (No typing needed!)\n"
             "• /torque - Standard torque values for cockpit, BB, brakes, derailleurs\n"
             "• /bb - Frame shell and crank spindle compatibility wizard\n"
             "• /pain - Cycling pain self-check & Bike Fitting prescription\n"
@@ -337,6 +339,7 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     else:
         text = (
             "📖 **公路車技師口袋工具箱指令表**\n\n"
+            "• /menu (或 /tools) - 呼出九宮格可視化技師工具箱（免手動打字，可置頂）\n"
             "• /torque - 關鍵部位標準鎖緊扭力速查（龍頭、車把、座管、中軸、碟煞、變速等）\n"
             "• /bb - 五通規格與大盤軸心相容匹配指南（墊圈配置與拆裝工具）\n"
             "• /pain - 騎行疼痛自查與 Bike Fitting 處方籤（膝蓋/腰背/手麻/坐墊等）\n"

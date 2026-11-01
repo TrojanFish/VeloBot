@@ -5,7 +5,7 @@ try:
     from zoneinfo import ZoneInfo
 except ImportError:
     from pytz import timezone as ZoneInfo
-from telegram import BotCommand
+from telegram import BotCommand, BotCommandScopeDefault, BotCommandScopeAllPrivateChats, BotCommandScopeAllGroupChats
 from telegram.warnings import PTBUserWarning
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler, MessageHandler, filters, ContextTypes
@@ -17,7 +17,7 @@ warnings.filterwarnings("ignore", category=PTBUserWarning)
 from src.config import TELEGRAM_BOT_TOKEN, ADMIN_ID, CHECK_INTERVAL_MINUTES
 from src.database import init_db
 from src.bot.handlers import (
-    start, language_command, torque_command, bb_command, pain_command, roi_command, psi_command, calc_command,
+    start, menu_command, language_command, torque_command, bb_command, pain_command, roi_command, psi_command, calc_command,
     chain_calc_command, mybike_command, help_command, admin_reply_handler, captcha_command
 )
 from src.bot.callbacks import (
@@ -41,6 +41,8 @@ async def post_init(application: Application):
     """機器人啟動初始化：註冊繁體中文與英文選單指令及定時調度任務"""
     # 繁體中文指令集
     zh_commands = [
+        BotCommand("menu", "🧰 開啟九宮格技師工具箱（免打字）"),
+        BotCommand("tools", "🔧 常用工具速查面板"),
         BotCommand("torque", "🔧 關鍵部位標準鎖緊扭力速查"),
         BotCommand("bb", "⚙️ 五通規格與大盤軸心相容指南"),
         BotCommand("pain", "🩺 騎行疼痛自查與 Fitting 處方籤"),
@@ -50,12 +52,15 @@ async def post_init(application: Application):
         BotCommand("chain", "📏 鏈條標準節數計算"),
         BotCommand("mybike", "🚲 個人車輛週期保養管家"),
         BotCommand("ask", "🩺 異音門診與故障投稿"),
+        BotCommand("forcesub", "📢 關注頻道發言開關（管理員）"),
         BotCommand("lang", "🌐 切換語言 / Switch Language"),
         BotCommand("help", "📖 使用說明")
     ]
 
     # 英文指令集
     en_commands = [
+        BotCommand("menu", "🧰 Visual 9-grid mechanic toolkit"),
+        BotCommand("tools", "🔧 Quick mechanic tools panel"),
         BotCommand("torque", "🔧 Standard torque values lookup"),
         BotCommand("bb", "⚙️ BB & crank spindle compatibility"),
         BotCommand("pain", "🩺 Cycling pain checker & Bike Fit rx"),
@@ -65,18 +70,27 @@ async def post_init(application: Application):
         BotCommand("chain", "📏 Chain link length calculation"),
         BotCommand("mybike", "🚲 Maintenance tracker & alerts"),
         BotCommand("ask", "🩺 Noise clinic & symptom submission"),
+        BotCommand("forcesub", "📢 Force channel subscribe toggle (Admin)"),
         BotCommand("lang", "🌐 Switch Language / 切換語言"),
         BotCommand("help", "📖 Help & documentation")
     ]
 
     try:
-        # 1. 預設選單（預設繁體中文，無語言限制）
+        # 1. 預設選單
         await application.bot.set_my_commands(zh_commands)
-        # 2. 中文使用者 (zh)
         await application.bot.set_my_commands(zh_commands, language_code="zh")
-        # 3. 英文使用者 (en)
         await application.bot.set_my_commands(en_commands, language_code="en")
-        logger.info("雙語快捷指令選單註冊完畢。")
+
+        # 2. 群組專用選單 (群內點擊 '/' 即時彈出)
+        await application.bot.set_my_commands(zh_commands, scope=BotCommandScopeAllGroupChats())
+        await application.bot.set_my_commands(zh_commands, scope=BotCommandScopeAllGroupChats(), language_code="zh")
+        await application.bot.set_my_commands(en_commands, scope=BotCommandScopeAllGroupChats(), language_code="en")
+
+        # 3. 私聊專用選單
+        await application.bot.set_my_commands(zh_commands, scope=BotCommandScopeAllPrivateChats())
+        await application.bot.set_my_commands(zh_commands, scope=BotCommandScopeAllPrivateChats(), language_code="zh")
+        await application.bot.set_my_commands(en_commands, scope=BotCommandScopeAllPrivateChats(), language_code="en")
+        logger.info("全平台與群組雙語快捷指令選單註冊完畢。")
     except Exception as e:
         logger.error(f"快捷指令選單註冊失敗: {e}")
 
@@ -137,7 +151,7 @@ def main():
     application.add_handler(CommandHandler("forcesub", captcha_command))
     application.add_handler(CommandHandler("captcha", captcha_command))
     application.add_handler(CommandHandler("help", help_command))
-    application.add_handler(CommandHandler("menu", start))
+    application.add_handler(CommandHandler(["menu", "tools", "toolbox"], menu_command))
 
     # 3. 註冊內聯鍵盤回調
     application.add_handler(CallbackQueryHandler(handle_lang_callback, pattern="^lang_"))

@@ -9,8 +9,31 @@ from src.database import (
     get_user_lang, set_user_lang,
     add_kit_waiter, record_maintenance_done, get_user_maintenance
 )
+from src.bot.captcha import get_channel_url
 
 logger = logging.getLogger(__name__)
+
+async def build_toolkit_keyboard(bot, lang: str) -> InlineKeyboardMarkup:
+    """構建 3x3 九宮格可視化工具箱內聯鍵盤"""
+    channel_url = await get_channel_url(bot)
+    keyboard = [
+        [
+            InlineKeyboardButton(t("btn_grid_torque", lang=lang), callback_data="torque_menu"),
+            InlineKeyboardButton(t("btn_grid_bb", lang=lang), callback_data="bb_menu"),
+            InlineKeyboardButton(t("btn_grid_pain", lang=lang), callback_data="pain_menu")
+        ],
+        [
+            InlineKeyboardButton(t("btn_grid_roi", lang=lang), callback_data="roi_menu"),
+            InlineKeyboardButton(t("btn_grid_psi", lang=lang), callback_data="psi_menu"),
+            InlineKeyboardButton(t("btn_grid_calc", lang=lang), callback_data="calc_menu")
+        ],
+        [
+            InlineKeyboardButton(t("btn_grid_mybike", lang=lang), callback_data="maint_view"),
+            InlineKeyboardButton(t("btn_grid_channel", lang=lang), url=channel_url),
+            InlineKeyboardButton(t("btn_grid_lang", lang=lang), callback_data="lang_select_menu")
+        ]
+    ]
+    return InlineKeyboardMarkup(keyboard)
 
 async def handle_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """處理語言切換"""
@@ -41,67 +64,28 @@ async def handle_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         set_user_lang(user.id, new_lang)
         confirm_text = t("lang_switched", lang=new_lang)
 
-        # 刷新主選單
-        keyboard = [
-            [
-                InlineKeyboardButton(t("btn_torque", lang=new_lang), callback_data="torque_menu"),
-                InlineKeyboardButton(t("btn_bb", lang=new_lang), callback_data="bb_menu")
-            ],
-            [
-                InlineKeyboardButton(t("btn_pain", lang=new_lang), callback_data="pain_menu"),
-                InlineKeyboardButton(t("btn_roi", lang=new_lang), callback_data="roi_menu")
-            ],
-            [
-                InlineKeyboardButton(t("btn_psi", lang=new_lang), callback_data="psi_menu"),
-                InlineKeyboardButton(t("btn_calc", lang=new_lang), callback_data="calc_menu")
-            ],
-            [
-                InlineKeyboardButton(t("btn_mybike", lang=new_lang), callback_data="maint_view"),
-                InlineKeyboardButton(t("btn_ask", lang=new_lang), callback_data="entry_ask_noise")
-            ],
-            [
-                InlineKeyboardButton(t("btn_lang", lang=new_lang), callback_data="lang_select_menu")
-            ]
-        ]
-        welcome_text = t("welcome", lang=new_lang, name=user.first_name)
+        # 刷新九宮格主工具箱
+        text = f"{confirm_text}\n\n{t('toolkit_title', lang=new_lang)}"
+        markup = await build_toolkit_keyboard(context.bot, new_lang)
         await query.edit_message_text(
-            f"{confirm_text}\n\n{welcome_text}",
+            text,
             parse_mode="Markdown",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            reply_markup=markup
         )
 
 async def handle_main_menu_refresh(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """返回並刷新主選單"""
+    """返回並刷新九宮格主工具箱"""
     query = update.callback_query
     await query.answer()
     user = query.from_user
     lang = get_user_lang(user.id, user.language_code)
 
-    keyboard = [
-        [
-            InlineKeyboardButton(t("btn_torque", lang=lang), callback_data="torque_menu"),
-            InlineKeyboardButton(t("btn_bb", lang=lang), callback_data="bb_menu")
-        ],
-        [
-            InlineKeyboardButton(t("btn_pain", lang=lang), callback_data="pain_menu"),
-            InlineKeyboardButton(t("btn_roi", lang=lang), callback_data="roi_menu")
-        ],
-        [
-            InlineKeyboardButton(t("btn_psi", lang=lang), callback_data="psi_menu"),
-            InlineKeyboardButton(t("btn_calc", lang=lang), callback_data="calc_menu")
-        ],
-        [
-            InlineKeyboardButton(t("btn_mybike", lang=lang), callback_data="maint_view"),
-            InlineKeyboardButton(t("btn_ask", lang=lang), callback_data="entry_ask_noise")
-        ],
-        [
-            InlineKeyboardButton(t("btn_lang", lang=lang), callback_data="lang_select_menu")
-        ]
-    ]
+    text = t("toolkit_title", lang=lang)
+    markup = await build_toolkit_keyboard(context.bot, lang)
     await query.edit_message_text(
-        t("welcome", lang=lang, name=user.first_name),
+        text,
         parse_mode="Markdown",
-        reply_markup=InlineKeyboardMarkup(keyboard)
+        reply_markup=markup
     )
 
 async def handle_torque_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
