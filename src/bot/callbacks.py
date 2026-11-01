@@ -1,4 +1,5 @@
 import logging
+import html
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.error import BadRequest
 from telegram.ext import ContextTypes
@@ -29,6 +30,33 @@ async def safe_edit_message_text(query, *args, **kwargs) -> bool:
     except Exception as e:
         logger.error(f"edit_message_text 發生未預期異常: {e}")
         return False
+
+async def render_menu_step(query, text: str, keyboard: list, parse_mode: str = "Markdown", is_root: bool = False):
+    """
+    智能選單渲染：
+    - 若在群聊中點擊九宮格根目錄按鈕 (is_root=True)：發送專屬 Reply 訊息，絕不覆蓋或破壞群內置頂的九宮格母卡！
+    - 若在私聊或子選單點擊：原地安全編輯訊息 (safe_edit_message_text)，保證流暢無刷屏。
+    """
+    user = query.from_user
+    chat = query.message.chat if query.message else None
+    is_group = chat and chat.type in ("group", "supergroup")
+
+    if is_group and is_root:
+        clean_name = user.first_name.replace('[', '').replace(']', '').replace('*', '').replace('_', '')
+        user_mention = f"👤 [{clean_name}](tg://user?id={user.id})"
+        prefix = f"{user_mention}\n\n" if parse_mode == "Markdown" else f"👤 <b>{html.escape(user.first_name)}</b>\n\n"
+        await query.message.reply_text(
+            prefix + text,
+            parse_mode=parse_mode,
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
+    else:
+        await safe_edit_message_text(
+            query,
+            text,
+            parse_mode=parse_mode,
+            reply_markup=InlineKeyboardMarkup(keyboard)
+        )
 
 async def build_toolkit_keyboard(bot, lang: str) -> InlineKeyboardMarkup:
     """構建 3x3 九宮格可視化工具箱內聯鍵盤"""
@@ -128,10 +156,12 @@ async def handle_torque_callback(update: Update, context: ContextTypes.DEFAULT_T
                 InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")
             ]
         ]
-        await safe_edit_message_text(query, 
+        await render_menu_step(
+            query,
             t("torque_title", lang=lang),
+            keyboard,
             parse_mode="Markdown",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            is_root=True
         )
         return
 
@@ -177,10 +207,12 @@ async def handle_bb_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         keyboard = [[InlineKeyboardButton(name, callback_data=cb)] for name, cb in frames]
         keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
 
-        await safe_edit_message_text(query, 
+        await render_menu_step(
+            query,
             t("bb_title", lang=lang),
+            keyboard,
             parse_mode="Markdown",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            is_root=True
         )
         return
 
@@ -239,10 +271,12 @@ async def handle_calc_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             [InlineKeyboardButton(t("calc_btn_tubeless", lang=lang), callback_data="calc_tubeless")],
             [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
         ]
-        await safe_edit_message_text(query, 
+        await render_menu_step(
+            query,
             t("calc_title", lang=lang),
+            keyboard,
             parse_mode="Markdown",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            is_root=True
         )
         return
 
@@ -348,10 +382,12 @@ async def handle_pain_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             keyboard.append(row)
         keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
 
-        await safe_edit_message_text(query, 
+        await render_menu_step(
+            query,
             t("pain_intro", lang=lang),
+            keyboard,
             parse_mode="Markdown",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            is_root=True
         )
         return
 
@@ -462,10 +498,12 @@ async def handle_roi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard.append(row)
         keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
 
-        await safe_edit_message_text(query, 
+        await render_menu_step(
+            query,
             t("roi_intro", lang=lang),
+            keyboard,
             parse_mode="Markdown",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            is_root=True
         )
         return
 
@@ -550,10 +588,12 @@ async def handle_psi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
             ],
             [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
         ]
-        await safe_edit_message_text(query, 
+        await render_menu_step(
+            query,
             t("psi_intro", lang=lang),
+            keyboard,
             parse_mode="Markdown",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            is_root=True
         )
         return
 

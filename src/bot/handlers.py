@@ -16,7 +16,7 @@ from src.database import (
 )
 from src.bot.conversations import start_ask
 from src.bot.captcha import is_forcesub_enabled
-from src.bot.callbacks import build_toolkit_keyboard, safe_edit_message_text
+from src.bot.callbacks import build_toolkit_keyboard, safe_edit_message_text, render_menu_step
 
 logger = logging.getLogger(__name__)
 
@@ -320,10 +320,12 @@ async def mybike_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if update.callback_query:
         await update.callback_query.answer()
-        await safe_edit_message_text(update.callback_query, 
+        await render_menu_step(
+            update.callback_query,
             text,
+            keyboard,
             parse_mode="Markdown",
-            reply_markup=InlineKeyboardMarkup(keyboard)
+            is_root=True
         )
     else:
         await update.effective_message.reply_text(

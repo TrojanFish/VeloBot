@@ -5,16 +5,24 @@ from telegram.ext import ContextTypes
 
 from src.config import GROUP_ID, CHANNEL_ID, ADMIN_ID, ENABLE_CAPTCHA
 from src.locales import t
-from src.database import get_user_lang, get_system_setting
+from src.database import (
+    get_user_lang, get_system_setting,
+    load_valid_subscribers, save_subscriber_cache, evict_subscriber_cache
+)
 
 logger = logging.getLogger(__name__)
 
 # 緩存已驗證關注的成員（避免每個發言都頻繁調用 API 觸發頻控 429）
-# 結構：{user_id: expire_timestamp}，定期清理過期條目以防記憶體洩漏
-VERIFIED_SUBSCRIBERS: dict[int, float] = {}
+# 啟動時自 SQLite 自動恢復有效快取，徹底杜絕重啟後的 429 請求風暴
+VERIFIED_SUBSCRIBERS: dict[int, float] = load_valid_subscribers()
 _channel_url_cache = None
 
-# ==================== 快取清理工具 ====================
+# ==================== 快取清理與持久化工具 ====================
+
+def _cache_subscriber(user_id: int, expire_time: float):
+    """將已驗證成員寫入記憶體快取並同步持久化到 SQLite"""
+    VERIFIED_SUBSCRIBERS[user_id] = expire_time
+    save_subscriber_cache(user_id, expire_time)
 
 def _evict_expired_cache():
     """清除 VERIFIED_SUBSCRIBERS 中所有已過期的條目，防止記憶體無限膨脹"""
@@ -22,6 +30,7 @@ def _evict_expired_cache():
     expired = [uid for uid, exp in VERIFIED_SUBSCRIBERS.items() if exp <= now]
     for uid in expired:
         del VERIFIED_SUBSCRIBERS[uid]
+        evict_subscriber_cache(uid)
 
 def is_forcesub_enabled() -> bool:
     """檢查強制關注頻道功能是否開啟（預設開啟）"""
@@ -100,7 +109,7 @@ async def new_member_guard(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # 1. 檢查是否已經關注了頻道
         is_subbed = await is_user_subscribed(context.bot, user_id)
         if is_subbed:
-            VERIFIED_SUBSCRIBERS[user_id] = time.time() + 3600
+            _cache_subscriber(user_id, time.time() + 3600)
             logger.info(f"新成員 {user_name} ({user_id}) 入群時已關注頻道，免除禁言！")
             continue
 
@@ -186,7 +195,7 @@ async def group_message_guard(update: Update, context: ContextTypes.DEFAULT_TYPE
     try:
         member = await chat.get_member(user.id)
         if member.status in ("creator", "administrator"):
-            VERIFIED_SUBSCRIBERS[user.id] = now + 86400
+            _cache_subscriber(user.id, now + 86400)
             return
     except Exception:
         pass
@@ -194,7 +203,7 @@ async def group_message_guard(update: Update, context: ContextTypes.DEFAULT_TYPE
     # 查驗頻道關注狀態
     is_subbed = await is_user_subscribed(context.bot, user.id)
     if is_subbed:
-        VERIFIED_SUBSCRIBERS[user.id] = now + 3600
+        _cache_subscriber(user.id, now + 3600)
         return
 
     # 尚未關注頻道：秒刪發言 + 禁言 + 彈出提示卡片
@@ -274,7 +283,7 @@ async def handle_forcesub_callback(update: Update, context: ContextTypes.DEFAULT
                     can_add_web_page_previews=True
                 )
             )
-            VERIFIED_SUBSCRIBERS[target_user_id] = time.time() + 3600
+            _cache_subscriber(target_user_id, time.time() + 3600)
             await query.answer(t("forcesub_success", lang=lang), show_alert=False)
             pass_text = f"✅ [{query.from_user.first_name}](tg://user?id={target_user_id}) " + t("forcesub_success", lang=lang)
             await query.edit_message_text(pass_text, parse_mode="Markdown")

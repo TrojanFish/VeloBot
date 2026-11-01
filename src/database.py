@@ -121,10 +121,19 @@ def init_db():
         )
     ''')
 
-    # 6. 高頻查詢索引
+    # 6. 關注頻道快取持久化表（防重啟後瞬間觸發 429 API 限流風暴）
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS verified_subscribers (
+            user_id INTEGER PRIMARY KEY,
+            expire_at REAL
+        )
+    ''')
+
+    # 7. 高頻查詢索引
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_videos_admin_msg ON youtube_videos(admin_msg_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_tickets_admin_msg ON noise_tickets(admin_forwarded_msg_id)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_maint_remind ON maintenance_logs(next_remind_date, is_notified)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_subscribers_expire ON verified_subscribers(expire_at)")
 
     conn.commit()
     conn.close()
@@ -322,3 +331,41 @@ def backup_database_to_file(dest_path: str):
             src.backup(dest_conn)
         finally:
             dest_conn.close()
+
+# ==================== 關注快取持久化操作 ====================
+
+def load_valid_subscribers() -> dict:
+    """啟動時載入所有尚未過期的關注者快取，防止重啟後瞬間引發 429 請求風暴"""
+    import time
+    now = time.time()
+    try:
+        with get_db_connection() as conn:
+            conn.execute("DELETE FROM verified_subscribers WHERE expire_at <= ?", (now,))
+            conn.commit()
+            rows = conn.execute("SELECT user_id, expire_at FROM verified_subscribers WHERE expire_at > ?", (now,)).fetchall()
+            return {int(r["user_id"]): float(r["expire_at"]) for r in rows}
+    except Exception as e:
+        logger.error(f"載入關注者持久化快取失敗: {e}")
+        return {}
+
+def save_subscriber_cache(user_id: int, expire_at: float):
+    """持久化保存已關注用戶快取"""
+    try:
+        with get_db_connection() as conn:
+            conn.execute(
+                "INSERT INTO verified_subscribers (user_id, expire_at) VALUES (?, ?) "
+                "ON CONFLICT(user_id) DO UPDATE SET expire_at = excluded.expire_at",
+                (user_id, expire_at)
+            )
+            conn.commit()
+    except Exception as e:
+        logger.error(f"持久化保存關注快取失敗: {e}")
+
+def evict_subscriber_cache(user_id: int):
+    """從資料庫刪除已過期或失效的關注快取"""
+    try:
+        with get_db_connection() as conn:
+            conn.execute("DELETE FROM verified_subscribers WHERE user_id = ?", (user_id,))
+            conn.commit()
+    except Exception as e:
+        logger.error(f"刪除過期關注快取失敗: {e}")
