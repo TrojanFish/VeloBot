@@ -75,8 +75,8 @@ async def backup_database_to_admin(context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_document(
                 chat_id=ADMIN_ID,
                 document=f,
-                filename=f"velobot_backup_{today_str}.db",
-                caption=f"📦 **VeloBot SQLite 資料庫異地容災備份** ({today_str})"
+                filename=f"yolocycling_backup_{today_str}.db",
+                caption=f"📦 **YoloCycling SQLite 資料庫異地容災備份** ({today_str})"
             )
         logger.info("資料庫備份已成功發送給台長。")
     except Exception as e:

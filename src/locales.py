@@ -21,7 +21,7 @@ TRANSLATIONS = {
             "頻道新影片上映時，頻道消息底部將附帶直達按鈕，為你推送一影片一專屬工具清單！"
         ),
         "toolkit_title": (
-            "🚴 **VeloBot 公路車技師群組工具箱**\n\n"
+            "🚴 **YoloCycling 公路車技師群組工具箱**\n\n"
             "歡迎使用車友專屬工具箱！點選下方按鈕即可直接查詢或計算，**無需手動輸入指令**：\n\n"
             "• 🔧 **鎖緊扭力**：龍頭/車把/座管/大盤/碟煞標準鎖緊力矩\n"
             "• ⚙️ **五通相容**：BB86/T47/BSA 等規格與大盤軸心適配\n"
@@ -234,7 +234,7 @@ TRANSLATIONS = {
             "Whenever a new video is published, interactive buttons will deliver the exact tool list and torque values straight to your chat!"
         ),
         "toolkit_title": (
-            "🚴 **VeloBot Road Bike Mechanic Toolkit**\n\n"
+            "🚴 **YoloCycling Road Bike Mechanic Toolkit**\n\n"
             "Welcome to the community toolkit! Tap the buttons below to look up specs and calculate values directly **without typing commands**:\n\n"
             "• 🔧 **Torque Specs**: Cockpit, BB, brakes, cassette, derailleurs\n"
             "• ⚙️ **BB Matching**: BB86/T47/BSA shell and crank spindle compatibility\n"

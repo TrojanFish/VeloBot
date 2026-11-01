@@ -1,4 +1,4 @@
-# 🚴 VeloBot 2.0 - Road Bike Mechanic Toolkit & Channel Hub
+# 🚴 YoloCycling Bot 2.0 - Road Bike Mechanic Toolkit & Channel Hub
 
 > A tailored Telegram bot for road bike assembly and maintenance YouTube channels, bike shops, and cycling communities.  
 > Transform from a simple broadcast speaker into a **Pocket Mechanic Toolkit + Audience Conversion Hub**.  
