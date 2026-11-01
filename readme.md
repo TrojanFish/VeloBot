@@ -78,7 +78,7 @@
 VeloBot-main/
 ├── docker-compose.yml       # Minimal container configuration (no open inbound ports, Long Polling)
 ├── Dockerfile               # Lightweight Python image
-├── requirements.txt         # Core dependencies (python-telegram-bot, feedparser, apscheduler)
+├── requirements.txt         # Core dependencies (python-telegram-bot, feedparser, httpx)
 ├── .env.example             # Environment variable template
 ├── main.py                  # Entry point, bilingual menu registration, schedulers
 ├── data/                    # Host persistent directory

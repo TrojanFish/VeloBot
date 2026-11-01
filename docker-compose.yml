@@ -1,7 +1,7 @@
 services:
   bot:
     build: .
-    container_name: velobot
+    container_name: yolocycling
     restart: unless-stopped
     volumes:
       - ./data:/app/data

@@ -79,7 +79,7 @@
 VeloBot-main/
 ├── docker-compose.yml       # 極簡容器編排（零外部端口暴露，長輪詢運行）
 ├── Dockerfile               # 輕量 Python 映像檔
-├── requirements.txt         # 核心依賴 (python-telegram-bot, feedparser, apscheduler)
+├── requirements.txt         # 核心依賴 (python-telegram-bot, feedparser, httpx)
 ├── .env.example             # 環境變數範本
 ├── main.py                  # 機器人主入口、雙語選單註冊與排程器
 ├── data/                    # 宿主機掛載目錄（資料持久化）

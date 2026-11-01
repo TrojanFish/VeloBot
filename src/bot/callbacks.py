@@ -1,5 +1,6 @@
 import logging
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 from src.locales import t
@@ -12,6 +13,22 @@ from src.database import (
 from src.bot.captcha import get_channel_url
 
 logger = logging.getLogger(__name__)
+
+async def safe_edit_message_text(query, *args, **kwargs) -> bool:
+    """安全編輯內聯按鈕消息，優雅吞掉重複點擊引發的 'Message is not modified' 與 'Message to edit not found'"""
+    try:
+        await query.edit_message_text(*args, **kwargs)
+        return True
+    except BadRequest as e:
+        err_msg = str(e).lower()
+        if "message is not modified" in err_msg or "message to edit not found" in err_msg:
+            logger.debug(f"忽略重複點擊引起的 Telegram BadRequest: {e}")
+            return False
+        logger.warning(f"edit_message_text 發生 BadRequest: {e}")
+        return False
+    except Exception as e:
+        logger.error(f"edit_message_text 發生未預期異常: {e}")
+        return False
 
 async def build_toolkit_keyboard(bot, lang: str) -> InlineKeyboardMarkup:
     """構建 3x3 九宮格可視化工具箱內聯鍵盤"""
@@ -53,7 +70,7 @@ async def handle_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYP
                 InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")
             ]
         ]
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             t("lang_switch_prompt", lang=lang),
             reply_markup=InlineKeyboardMarkup(keyboard)
         )
@@ -67,7 +84,7 @@ async def handle_lang_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         # 刷新九宮格主工具箱
         text = f"{confirm_text}\n\n{t('toolkit_title', lang=new_lang)}"
         markup = await build_toolkit_keyboard(context.bot, new_lang)
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             text,
             parse_mode="Markdown",
             reply_markup=markup
@@ -82,7 +99,7 @@ async def handle_main_menu_refresh(update: Update, context: ContextTypes.DEFAULT
 
     text = t("toolkit_title", lang=lang)
     markup = await build_toolkit_keyboard(context.bot, lang)
-    await query.edit_message_text(
+    await safe_edit_message_text(query, 
         text,
         parse_mode="Markdown",
         reply_markup=markup
@@ -111,7 +128,7 @@ async def handle_torque_callback(update: Update, context: ContextTypes.DEFAULT_T
                 InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")
             ]
         ]
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             t("torque_title", lang=lang),
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
@@ -122,7 +139,7 @@ async def handle_torque_callback(update: Update, context: ContextTypes.DEFAULT_T
         cat_key = data.replace("torque_cat_", "")
         cat_data = specs.get(cat_key)
         if not cat_data:
-            await query.edit_message_text("No data found / 未找到數據")
+            await safe_edit_message_text(query, "No data found / 未找到數據")
             return
 
         text = f"🔧 **{cat_data.get('name')}**\n\n"
@@ -131,7 +148,7 @@ async def handle_torque_callback(update: Update, context: ContextTypes.DEFAULT_T
         text += t("torque_warning", lang=lang)
 
         keyboard = [[InlineKeyboardButton(t("btn_back_list", lang=lang), callback_data="torque_menu")]]
-        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(query, text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def handle_bb_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """處理五通匹配器按鈕"""
@@ -160,7 +177,7 @@ async def handle_bb_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         keyboard = [[InlineKeyboardButton(name, callback_data=cb)] for name, cb in frames]
         keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
 
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             t("bb_title", lang=lang),
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
@@ -171,7 +188,7 @@ async def handle_bb_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
         frame_key = data.replace("bb_frame_", "")
         frame_data = specs.get(frame_key)
         if not frame_data:
-            await query.edit_message_text("No data found")
+            await safe_edit_message_text(query, "No data found")
             return
 
         keyboard = [
@@ -181,7 +198,7 @@ async def handle_bb_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
             [InlineKeyboardButton(t("btn_back_list", lang=lang), callback_data="bb_menu")]
         ]
 
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             t("bb_step2", lang=lang, frame=frame_data.get("name")),
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
@@ -205,7 +222,7 @@ async def handle_bb_callback(update: Update, context: ContextTypes.DEFAULT_TYPE)
             [InlineKeyboardButton("🔄 " + ("Other Spindle" if lang == "en" else "查詢其他軸心"), callback_data=f"bb_frame_{frame_key}")],
             [InlineKeyboardButton(t("btn_back_list", lang=lang), callback_data="bb_menu")]
         ]
-        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(query, text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def handle_calc_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """處理計算器點選"""
@@ -222,7 +239,7 @@ async def handle_calc_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             [InlineKeyboardButton(t("calc_btn_tubeless", lang=lang), callback_data="calc_tubeless")],
             [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
         ]
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             t("calc_title", lang=lang),
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
@@ -248,7 +265,7 @@ async def handle_calc_callback(update: Update, context: ContextTypes.DEFAULT_TYP
                 f"例如：`/chain 50 34 410`"
             )
         keyboard = [[InlineKeyboardButton(t("btn_back_list", lang=lang), callback_data="calc_menu")]]
-        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(query, text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
         return
 
     if data == "calc_tubeless":
@@ -261,7 +278,7 @@ async def handle_calc_callback(update: Update, context: ContextTypes.DEFAULT_TYP
         text += f"{tip_header}{tl_info.get('note', '')}"
 
         keyboard = [[InlineKeyboardButton(t("btn_back_list", lang=lang), callback_data="calc_menu")]]
-        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(query, text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
         return
 
 async def handle_waitlist_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -308,7 +325,7 @@ async def handle_maintenance_callback(update: Update, context: ContextTypes.DEFA
         keyboard.append([InlineKeyboardButton(t("mybike_btn_done", lang=lang, label=v["label"]), callback_data=f"maint_done_{k}")])
     keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
 
-    await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+    await safe_edit_message_text(query, text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def handle_pain_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """處理騎行疼痛自查與 Bike Fitting 處方籤按鈕點選"""
@@ -331,7 +348,7 @@ async def handle_pain_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             keyboard.append(row)
         keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
 
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             t("pain_intro", lang=lang),
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
@@ -351,7 +368,7 @@ async def handle_pain_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             keyboard.append([InlineKeyboardButton(timing_info["title"], callback_data=f"pain_rx_{area_id}_{timing_id}")])
         keyboard.append([InlineKeyboardButton(t("btn_back_list", lang=lang), callback_data="pain_menu")])
 
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             t("pain_step2", lang=lang, area=area_title),
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
@@ -375,7 +392,7 @@ async def handle_pain_callback(update: Update, context: ContextTypes.DEFAULT_TYP
 
         rx = prescriptions.get(area_id, {}).get(timing_id, {})
         if not rx:
-            await query.edit_message_text("No prescription found / 暫無該情境的處方數據")
+            await safe_edit_message_text(query, "No prescription found / 暫無該情境的處方數據")
             return
 
         if lang == "en":
@@ -421,7 +438,7 @@ async def handle_pain_callback(update: Update, context: ContextTypes.DEFAULT_TYP
             [InlineKeyboardButton(t("pain_btn_ask", lang=lang), callback_data="entry_ask_noise")],
             [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
         ]
-        await query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(query, text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
 async def handle_roi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """處理改裝升級省瓦 ROI 內聯回調"""
@@ -445,7 +462,7 @@ async def handle_roi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
             keyboard.append(row)
         keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
 
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             t("roi_intro", lang=lang),
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
@@ -466,7 +483,7 @@ async def handle_roi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         keyboard.append([InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")])
 
         prompt = f"🚀 **{cat_title}**\n\n" + ("Select an item to view data & ROI analysis:" if lang == "en" else "請點選具體升級品項查看風洞省瓦數據與性價比分析：")
-        await query.edit_message_text(prompt, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(query, prompt, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
         return
 
     # 3. 升級品項詳情卡片 (roi_item_<item_id>)
@@ -474,7 +491,7 @@ async def handle_roi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
         item_id = data.replace("roi_item_", "")
         item = next((it for it in items if it.get("id") == item_id), None)
         if not item:
-            await query.edit_message_text("Item not found / 找不到對應升級品項")
+            await safe_edit_message_text(query, "Item not found / 找不到對應升級品項")
             return
 
         cat_id = item.get("category", "aero")
@@ -511,7 +528,7 @@ async def handle_roi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
             [InlineKeyboardButton(t("roi_btn_back", lang=lang), callback_data=f"roi_cat_{cat_id}")],
             [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
         ]
-        await query.edit_message_text(text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(query, text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
         return
 
 async def handle_psi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -533,7 +550,7 @@ async def handle_psi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
             ],
             [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
         ]
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             t("psi_intro", lang=lang),
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
@@ -556,7 +573,7 @@ async def handle_psi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
             ],
             [InlineKeyboardButton(t("btn_back_list", lang=lang), callback_data="psi_menu")]
         ]
-        await query.edit_message_text(
+        await safe_edit_message_text(query, 
             t("psi_step_width", lang=lang, weight=int(weight)),
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
@@ -576,5 +593,5 @@ async def handle_psi_callback(update: Update, context: ContextTypes.DEFAULT_TYPE
             [InlineKeyboardButton("🔄 " + ("Re-calculate" if lang == "en" else "重新計算"), callback_data="psi_menu")],
             [InlineKeyboardButton(t("btn_back_menu", lang=lang), callback_data="main_menu_refresh")]
         ]
-        await query.edit_message_text(card_text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(query, card_text, parse_mode="HTML", reply_markup=InlineKeyboardMarkup(keyboard))
         return

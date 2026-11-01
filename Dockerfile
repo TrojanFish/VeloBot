@@ -22,9 +22,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 创建数据目录
 RUN mkdir -p /app/data
 
-# 复制项目代码
+# 复制项目代码与默认参数字典
 COPY main.py .
 COPY src/ ./src/
+COPY data/*.json ./data/
 
 # 启动命令
 CMD ["python", "-u", "main.py"]

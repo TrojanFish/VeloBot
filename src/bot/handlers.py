@@ -1,4 +1,5 @@
 import logging
+import html
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
@@ -15,7 +16,7 @@ from src.database import (
 )
 from src.bot.conversations import start_ask
 from src.bot.captcha import is_forcesub_enabled
-from src.bot.callbacks import build_toolkit_keyboard
+from src.bot.callbacks import build_toolkit_keyboard, safe_edit_message_text
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +114,7 @@ async def roi_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = t("roi_intro", lang=lang)
     if update.callback_query:
         await update.callback_query.answer()
-        await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(update.callback_query, text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
     else:
         await update.effective_message.reply_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -151,7 +152,7 @@ async def psi_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = t("psi_intro", lang=lang)
     if update.callback_query:
         await update.callback_query.answer()
-        await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(update.callback_query, text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
     else:
         await update.effective_message.reply_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -174,7 +175,7 @@ async def pain_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = t("pain_intro", lang=lang)
     if update.callback_query:
         await update.callback_query.answer()
-        await update.callback_query.edit_message_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        await safe_edit_message_text(update.callback_query, text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
     else:
         await update.effective_message.reply_text(text, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
 
@@ -269,6 +270,22 @@ async def chain_calc_command(update: Update, context: ContextTypes.DEFAULT_TYPE)
         max_cog = int(args[1])
         chainstay = float(args[2])
 
+        # 數值合理性邊界防禦（公路車/全地形車標準規格）
+        if not (30 <= big_ring <= 64):
+            hint = "⚠️ 大盤齒數超出常見範圍（請輸入 30 ~ 64T）" if lang != "en" else "⚠️ Chainring teeth must be between 30 and 64T"
+            await update.effective_message.reply_text(hint)
+            return
+
+        if not (20 <= max_cog <= 54):
+            hint = "⚠️ 飛輪最大齒數超出常見範圍（請輸入 20 ~ 54T）" if lang != "en" else "⚠️ Max cog teeth must be between 20 and 54T"
+            await update.effective_message.reply_text(hint)
+            return
+
+        if not (380 <= chainstay <= 480):
+            hint = "⚠️ 後下叉長度超出常見公路車幾何（請輸入 380 ~ 480 mm）" if lang != "en" else "⚠️ Chainstay length must be between 380 and 480 mm"
+            await update.effective_message.reply_text(hint)
+            return
+
         recommended_links = calculate_chain_length(chainstay, big_ring, max_cog)
 
         text = t(
@@ -303,7 +320,7 @@ async def mybike_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     if update.callback_query:
         await update.callback_query.answer()
-        await update.callback_query.edit_message_text(
+        await safe_edit_message_text(update.callback_query, 
             text,
             parse_mode="Markdown",
             reply_markup=InlineKeyboardMarkup(keyboard)
@@ -454,37 +471,41 @@ async def admin_reply_handler(update: Update, context: ContextTypes.DEFAULT_TYPE
                 logger.error(f"向預約車友 {waiter_id} 補發物料失敗: {e}")
 
         await msg.reply_text(
-            f"🎉 **已成功綁定《{video['title']}》的專屬組裝物料！**\n\n"
+            f"🎉 已成功綁定《{video['title']}》的專屬組裝物料！\n\n"
             f"📢 已自動補發給 {dispatched_count} 位預約等待的車友。"
         )
         return
 
-    # 2. 回覆異音門診工單
+    # 2. 回覆異音門診工單 (全面改用 HTML 轉義，避免特殊字符拋錯)
     ticket = get_ticket_by_admin_msg(replied_msg_id)
     if ticket:
         ticket_id = ticket["ticket_id"]
         target_user_id = ticket["user_id"]
         target_lang = get_user_lang(target_user_id)
 
+        admin_reply_escaped = html.escape(admin_reply_text or "")
+        ticket_part = html.escape(ticket['part_category'] or "")
+        ticket_desc = html.escape(ticket['description'] or "")
+
         if target_lang == "en":
             diag_text = (
-                f"🩺 **[Host Feedback on your Noise Ticket #{ticket_id}]**\n\n"
-                f"🏷️ **Component**: {ticket['part_category']}\n"
-                f"📝 **Description**: {ticket['description']}\n\n"
-                f"👨‍🔧 **Diagnostic Advice**:\n{admin_reply_text}\n\n"
+                f"🩺 <b>[Host Feedback on your Noise Ticket #{ticket_id}]</b>\n\n"
+                f"🏷️ <b>Component</b>: {ticket_part}\n"
+                f"📝 <b>Description</b>: {ticket_desc}\n\n"
+                f"👨‍🔧 <b>Diagnostic Advice</b>:\n{admin_reply_escaped}\n\n"
                 f"Hope this helps with your bike tuning!"
             )
         else:
             diag_text = (
-                f"🩺 **【台長對你的異音工單 #{ticket_id} 進行了診斷回覆】**\n\n"
-                f"🏷️ **涉及部位**：{ticket['part_category']}\n"
-                f"📝 **你的描述**：{ticket['description']}\n\n"
-                f"👨‍🔧 **台長診斷與建議**：\n{admin_reply_text}\n\n"
+                f"🩺 <b>【台長對你的異音工單 #{ticket_id} 進行了診斷回覆】</b>\n\n"
+                f"🏷️ <b>涉及部位</b>：{ticket_part}\n"
+                f"📝 <b>你的描述</b>：{ticket_desc}\n\n"
+                f"👨‍🔧 <b>台長診斷與建議</b>：\n{admin_reply_escaped}\n\n"
                 f"希望對你的調車有所幫助！"
             )
 
         try:
-            await context.bot.send_message(chat_id=target_user_id, text=diag_text, parse_mode="Markdown")
+            await context.bot.send_message(chat_id=target_user_id, text=diag_text, parse_mode="HTML")
             update_ticket_status(ticket_id, "replied")
             await msg.reply_text(f"✅ 已成功將診斷答覆推送給車友 (ID: {target_user_id})！工單已標記為完成。")
         except Exception as e:

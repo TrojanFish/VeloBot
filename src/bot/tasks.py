@@ -4,10 +4,10 @@ from datetime import datetime
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import ContextTypes
 
-from src.config import ADMIN_ID, DB_FILE
+from src.config import ADMIN_ID, DB_FILE, DATA_DIR
 from src.locales import t
 from src.utils import get_specs
-from src.database import get_user_lang, get_due_maintenance, mark_maintenance_notified
+from src.database import get_user_lang, get_due_maintenance, mark_maintenance_notified, backup_database_to_file
 from src.services.youtube import check_youtube_videos
 
 logger = logging.getLogger(__name__)
@@ -60,7 +60,7 @@ async def send_maintenance_reminders(context: ContextTypes.DEFAULT_TYPE):
 async def backup_database_to_admin(context: ContextTypes.DEFAULT_TYPE):
     """
     資料庫異地容災備份（每日凌晨 03:30 執行）
-    自動將 SQLite 資料庫檔案作為文檔發送給台長私信
+    使用 SQLite 在線備份 API 生成原子快照，安全發送給台長私信（防止頁面撕裂與 WAL 丟失）
     """
     if not ADMIN_ID:
         return
@@ -69,15 +69,24 @@ async def backup_database_to_admin(context: ContextTypes.DEFAULT_TYPE):
         logger.warning(f"資料庫備份失敗：未找到檔案 {DB_FILE}")
         return
 
+    temp_backup = os.path.join(DATA_DIR, "temp_backup_snapshot.db")
     try:
         today_str = datetime.now().strftime("%Y-%m-%d")
-        with open(DB_FILE, "rb") as f:
+        # 使用 Online Backup API 導出一致性快照
+        backup_database_to_file(temp_backup)
+        with open(temp_backup, "rb") as f:
             await context.bot.send_document(
                 chat_id=ADMIN_ID,
                 document=f,
                 filename=f"yolocycling_backup_{today_str}.db",
                 caption=f"📦 **YoloCycling SQLite 資料庫異地容災備份** ({today_str})"
             )
-        logger.info("資料庫備份已成功發送給台長。")
+        logger.info("資料庫原子快照備份已成功發送給台長。")
     except Exception as e:
         logger.error(f"發送資料庫備份失敗: {e}")
+    finally:
+        if os.path.exists(temp_backup):
+            try:
+                os.remove(temp_backup)
+            except Exception:
+                pass

@@ -7,9 +7,12 @@ from src.config import DB_FILE, DATA_DIR
 logger = logging.getLogger(__name__)
 
 def get_db_connection():
-    """獲取數據庫連接"""
-    conn = sqlite3.connect(DB_FILE)
+    """獲取數據庫連接並強制配置 WAL 模式、5秒超時與正常同步，徹底杜絕 database is locked"""
+    conn = sqlite3.connect(DB_FILE, timeout=10.0)
     conn.row_factory = sqlite3.Row
+    conn.execute("PRAGMA journal_mode = WAL")
+    conn.execute("PRAGMA busy_timeout = 5000")
+    conn.execute("PRAGMA synchronous = NORMAL")
     return conn
 
 def init_db():
@@ -83,9 +86,15 @@ def init_db():
             last_done_date TEXT,
             next_remind_date TEXT,
             is_notified INTEGER DEFAULT 0,
+            last_notified_date TEXT DEFAULT NULL,
             PRIMARY KEY (user_id, item_type)
         )
     ''')
+    # 檢查並補足 last_notified_date 欄位（平滑升級）
+    cursor.execute("PRAGMA table_info(maintenance_logs)")
+    maint_cols = [c[1] for c in cursor.fetchall()]
+    if 'last_notified_date' not in maint_cols:
+        cursor.execute("ALTER TABLE maintenance_logs ADD COLUMN last_notified_date TEXT DEFAULT NULL")
 
     # 4. 異音門診與故障工單表 (僅存 Telegram file_id)
     cursor.execute('''
@@ -112,9 +121,14 @@ def init_db():
         )
     ''')
 
+    # 6. 高頻查詢索引
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_videos_admin_msg ON youtube_videos(admin_msg_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_tickets_admin_msg ON noise_tickets(admin_forwarded_msg_id)")
+    cursor.execute("CREATE INDEX IF NOT EXISTS idx_maint_remind ON maintenance_logs(next_remind_date, is_notified)")
+
     conn.commit()
     conn.close()
-    logger.info("VeloBot 2.0 數據庫初始化完成。")
+    logger.info("YoloCycling Bot 數據庫初始化完成。")
 
 # ==================== 用戶偏好操作 ====================
 
@@ -212,8 +226,8 @@ def record_maintenance_done(user_id: int, item_type: str, cycle_days: int):
     next_date = (date.today() + timedelta(days=cycle_days)).isoformat()
     with get_db_connection() as conn:
         conn.execute('''
-            INSERT OR REPLACE INTO maintenance_logs (user_id, item_type, last_done_date, next_remind_date, is_notified)
-            VALUES (?, ?, ?, ?, 0)
+            INSERT OR REPLACE INTO maintenance_logs (user_id, item_type, last_done_date, next_remind_date, is_notified, last_notified_date)
+            VALUES (?, ?, ?, ?, 0, NULL)
         ''', (user_id, item_type, today, next_date))
         conn.commit()
 
@@ -225,18 +239,24 @@ def get_user_maintenance(user_id: int):
 def get_due_maintenance():
     today = date.today().isoformat()
     with get_db_connection() as conn:
+        # 1. 首次到期且未提醒 (is_notified = 0)
+        # 2. 逾期超過 7 天仍未打卡者 (每週催促一次，防止忽視一次後徹底啞火)
         rows = conn.execute('''
             SELECT * FROM maintenance_logs 
-            WHERE next_remind_date <= ? AND is_notified = 0
+            WHERE next_remind_date <= ? AND (
+                is_notified = 0 
+                OR (last_notified_date IS NOT NULL AND last_notified_date <= date('now', '-7 days'))
+            )
         ''', (today,)).fetchall()
         return [dict(r) for r in rows]
 
 def mark_maintenance_notified(user_id: int, item_type: str):
+    today = date.today().isoformat()
     with get_db_connection() as conn:
         conn.execute('''
-            UPDATE maintenance_logs SET is_notified = 1
+            UPDATE maintenance_logs SET is_notified = 1, last_notified_date = ?
             WHERE user_id = ? AND item_type = ?
-        ''', (user_id, item_type))
+        ''', (today, user_id, item_type))
         conn.commit()
 
 # ==================== 異音門診工單操作 ====================
@@ -291,3 +311,14 @@ def set_system_setting(key: str, value: str):
             conn.commit()
     except Exception as e:
         logger.error(f"保存系統設定 {key} 失敗: {e}")
+
+# ==================== 安全熱備份導出 ====================
+
+def backup_database_to_file(dest_path: str):
+    """使用 SQLite 官方 Online Backup API 導出一致性熱備份快照，防止頁面撕裂與 WAL 丟失"""
+    with get_db_connection() as src:
+        dest_conn = sqlite3.connect(dest_path)
+        try:
+            src.backup(dest_conn)
+        finally:
+            dest_conn.close()

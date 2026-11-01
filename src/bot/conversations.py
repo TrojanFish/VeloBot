@@ -1,4 +1,5 @@
 import logging
+import html
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ConversationHandler, CommandHandler, MessageHandler, CallbackQueryHandler, filters, ContextTypes
@@ -32,9 +33,31 @@ PART_CHOICES = {
 }
 
 async def start_ask(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """啟動異音門診投稿"""
+    """啟動異音門診投稿（群聊自動引流私聊，防止公群刷屏）"""
     user = update.effective_user
+    chat = update.effective_chat
     lang = get_user_lang(user.id, user.language_code)
+
+    # 1. 群聊環境攔截：引導至 1 對 1 私聊開啟問診，杜絕公群刷屏
+    if chat and chat.type in ("group", "supergroup"):
+        bot_info = await context.bot.get_me()
+        keyboard = [
+            [InlineKeyboardButton("🩺 前往私聊門診 / Open in Private Chat", url=f"https://t.me/{bot_info.username}?start=ask_noise")]
+        ]
+        msg = (
+            "🩺 **異音門診為一對一私聊診療流程**\n\n"
+            "為保護車友隱私與群聊整潔，請點擊下方按鈕前往私聊機器人上傳影音與描述："
+            if lang != "en" else
+            "🩺 **Noise Clinic is a 1-on-1 private diagnostic flow**\n\n"
+            "To keep the group tidy, please tap below to submit videos and descriptions in private chat:"
+        )
+        if update.callback_query:
+            await update.callback_query.answer()
+            await update.callback_query.message.reply_text(msg, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        else:
+            await update.effective_message.reply_text(msg, parse_mode="Markdown", reply_markup=InlineKeyboardMarkup(keyboard))
+        return ConversationHandler.END
+
     choices = PART_CHOICES.get(lang, PART_CHOICES["zh_hant"])
 
     keyboard = []
@@ -128,26 +151,31 @@ async def handle_desc(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
     if ADMIN_ID:
         try:
+            user_display = html.escape(user.first_name or "Rider")
+            username_display = f"@{html.escape(user.username)}" if user.username else "無"
+            part_display = html.escape(part)
+            desc_display = html.escape(desc or "")
+
             admin_caption = (
-                f"🩺 **【車友異音門診新工單 #{ticket_id}】**\n\n"
-                f"👤 **車友**：{user.first_name} (@{user.username or '無'})\n"
-                f"🆔 **車友ID**：`{user.id}` (語言: `{lang}`)\n"
-                f"🏷️ **故障部位**：{part}\n"
-                f"📝 **實況描述**：{desc}\n\n"
-                f"💡 **台長請直接【回覆/Reply】本消息**，輸入診斷分析，Bot 將自動推送給車友！"
+                f"🩺 <b>【車友異音門診新工單 #{ticket_id}】</b>\n\n"
+                f"👤 <b>車友</b>：{user_display} ({username_display})\n"
+                f"🆔 <b>車友ID</b>：<code>{user.id}</code> (語言: <code>{lang}</code>)\n"
+                f"🏷️ <b>故障部位</b>：{part_display}\n"
+                f"📝 <b>實況描述</b>：\n{desc_display}\n\n"
+                f"💡 <b>台長請直接【回覆/Reply】本消息</b>，輸入診斷分析，Bot 將自動推送給車友！"
             )
 
             sent_admin_msg = None
             if media_file_id:
                 if media_type == "video":
-                    sent_admin_msg = await context.bot.send_video(chat_id=ADMIN_ID, video=media_file_id, caption=admin_caption, parse_mode="Markdown")
+                    sent_admin_msg = await context.bot.send_video(chat_id=ADMIN_ID, video=media_file_id, caption=admin_caption, parse_mode="HTML")
                 elif media_type in ("voice", "audio"):
-                    sent_admin_msg = await context.bot.send_voice(chat_id=ADMIN_ID, voice=media_file_id, caption=admin_caption, parse_mode="Markdown")
+                    sent_admin_msg = await context.bot.send_voice(chat_id=ADMIN_ID, voice=media_file_id, caption=admin_caption, parse_mode="HTML")
                 elif media_type == "photo":
-                    sent_admin_msg = await context.bot.send_photo(chat_id=ADMIN_ID, photo=media_file_id, caption=admin_caption, parse_mode="Markdown")
+                    sent_admin_msg = await context.bot.send_photo(chat_id=ADMIN_ID, photo=media_file_id, caption=admin_caption, parse_mode="HTML")
 
             if not sent_admin_msg:
-                sent_admin_msg = await context.bot.send_message(chat_id=ADMIN_ID, text=admin_caption, parse_mode="Markdown")
+                sent_admin_msg = await context.bot.send_message(chat_id=ADMIN_ID, text=admin_caption, parse_mode="HTML")
 
             if sent_admin_msg:
                 set_ticket_admin_msg(ticket_id, sent_admin_msg.message_id)
